@@ -1,25 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Routes, Route } from "react-router-dom"
+import { ChakraProvider } from '@chakra-ui/react'
+import LandingPage from './LandingPage';
+import VideoPage from './VideoPage';
 
-function App() {
+function App () {  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ChakraProvider>
+      <Routes>
+        <Route path="/" index element={<LandingPage />} />
+        <Route path="/video/:videoId" element={< VideoPage />} />
+      </Routes>
+    </ChakraProvider>
   );
-}
-
+};
 export default App;
+
