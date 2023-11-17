@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Button, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark } from '@chakra-ui/react';
+import Header from './Header';
+import { PlayIcon, ForwardIcon, BackwardIcon, PauseIcon, Bars3Icon } from '@heroicons/react/20/solid'
+import { Center, Circle, AbsoluteCenter, IconButton, Icon, HStack, VStack, Box, Button, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark } from '@chakra-ui/react';
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [videoLength, setVideoLength] = useState(null);
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
@@ -97,6 +100,18 @@ const VideoPage = () => {
     }
   };
 
+  const playPauseClick = () => {
+    // Toggle the state on each click
+    setIsPlaying((prevIsPlaying) => !prevIsPlaying);
+
+    // Call the appropriate function based on the current state
+    if (isPlaying) {
+      onPause();
+    } else {
+      onPlay();
+    }
+  };
+
   const muteVideo = () => {
     if (player) {
       player.mute(); // Mute the video
@@ -115,7 +130,6 @@ const VideoPage = () => {
     if (player) {
       player.seekTo(values[0]);
     }
-
     setStartTime(values[0]);
     setEndTime(values[1]);
   };
@@ -180,72 +194,129 @@ const VideoPage = () => {
     }
   };
 
+  const sliderThumbIcon = (props) => { 
+    return (
+    <Icon as={Bars3Icon}/>
+    )
+};
+
   return (
     <Box>
-      <Box id="player"></Box>
-      <Box>
-        <Button onClick={onPlay}>Play</Button>
-        <Button onClick={onPause}>Pause</Button>
-        <Button onClick={onSpeedUp}>Speed Up</Button>
-        <Button onClick={onSlowDown}>Slow Down</Button>
-        <Button onClick={onRewind}>Rewind</Button>
-        <Button onClick={onFastForward}>Fast Forward</Button>
-      </Box>
-      <Box>
-        <Heading as="h2">Loop Start: {formatSecondsToDuration(currentTime)}</Heading>
-        <Heading as="h2">Loop End: {formatSecondsToDuration(endTime)}</Heading>
-      </Box>
-      <Box width={400} margin={50}>
-        {videoLength && (
-          <RangeSlider
-            aria-label={['0', videoLength]}
-            min={0}
-            max={videoLength}
-            defaultValue={[0, videoLength]}
-            onChange={(values) => {
-              onRangeChange(values);
-              setSliderValue(values); // Assuming setSliderValue is a function to update the slider value
-            }}
-            onChangeEnd={onRangeChangeEnd}
-          >
-            <RangeSliderTrack bg='red.100'>
-              <RangeSliderFilledTrack bg='tomato' />
-            </RangeSliderTrack>
-            <RangeSliderMark
-              value={sliderValue[0]}
-              textAlign='center'
-              bg='blue.500'
-              color='white'
-              mt='-10'
-              ml='-5'
-              w='12'
-            >
-              {formatSecondsToDuration(sliderValue[0])}
-            </RangeSliderMark>
-            <RangeSliderMark
-              value={sliderValue[1]}
-              textAlign='center'
-              bg='blue.500'
-              color='white'
-              mt='-10'
-              ml='-5'
-              w='12'
-              bottom='-30px'
-              left='100%'
-            >
-              {formatSecondsToDuration(sliderValue[1])}
-            </RangeSliderMark>
-            <RangeSliderThumb boxSize={6} index={0}>
-              <Box color='tomato' />
-            </RangeSliderThumb>
-            <RangeSliderThumb boxSize={6} index={1}>
-              <Box color='tomato' />
-            </RangeSliderThumb>
-          </RangeSlider>
-        )}
-      </Box>
+      <Header/>
+      <Center>
+        <VStack>
+          // Youtube player
+          <Box id="player" mb='10'></Box>
+          // Playback timeline, loop scrubber
+          <Box width={600} mb='10'>
+            {videoLength && (
+              <RangeSlider
+                aria-label={['0', videoLength]}
+                min={0}
+                max={videoLength}
+                defaultValue={[0, videoLength]}
+                onChange={(values) => {
+                  onRangeChange(values);
+                  setSliderValue(values);
+                }}
+                onChangeEnd={onRangeChangeEnd}>
+                <RangeSliderTrack bg='gray.400'>
+                  <RangeSliderFilledTrack bg='black' />
+                </RangeSliderTrack>
+                <RangeSliderMark
+                  value={sliderValue[0]}
+                  textAlign='center'
+                  bg='black'
+                  color='white'
+                  borderRadius='2'
+                  mt='-10'
+                  ml='-5'
+                  w='12'>
+                  {formatSecondsToDuration(sliderValue[0])}
+                </RangeSliderMark>
+                <RangeSliderMark
+                  value={sliderValue[1]}
+                  textAlign='center'
+                  bg='black'
+                  color='white'
+                  borderRadius='2'
+                  mt='-10'
+                  ml='-5'
+                  w='12'
+                  bottom='-30px'
+                  right='0'
+                >
+                  {formatSecondsToDuration(sliderValue[1])}
+                </RangeSliderMark>
+                <RangeSliderThumb boxSize={6} index={0}>
+                <Box as={sliderThumbIcon} />
+                </RangeSliderThumb>
+                <RangeSliderThumb boxSize={6} index={1}>
+                  <Box as={sliderThumbIcon} />
+                </RangeSliderThumb>
+              </RangeSlider>
+            )}
+          </Box>
+          <HStack>
+            <IconButton
+              size='md'
+              variant='solid'
+              isRound={true}
+              colorScheme='gray'
+              aria-label='Rewind'
+              fontSize='16px'
+              icon={<Icon as={BackwardIcon} size='16'/>}
+              onClick={onRewind}
+            />
+            <IconButton
+              size='lg'
+              variant='solid'
+              isRound={true}
+              colorScheme='gray'
+              aria-label='Play or Pause'
+              fontSize='16px'
+              icon={isPlaying ? <Icon as={PauseIcon} size='20'/> : <Icon as={PlayIcon} size='16'/>}
+              onClick={playPauseClick}
+            />
+            <IconButton
+              size='md'
+              variant='solid'
+              isRound={true}
+              colorScheme='gray'
+              aria-label='Fast Forward'
+              fontSize='16px'
+              icon={<Icon as={ForwardIcon} size='16'/>}
+              onClick={onFastForward}
+            />
+          </HStack>
+          <HStack>
+            <Button onclick={onSlowDown}>
+                0.25x
+            </Button>
+            <Button onclick={onSpeedUp}>
+                0.5x
+            </Button>
+            <Button onclick={onSpeedUp}>
+                0.75x
+            </Button>
+            <Button onclick={onSpeedUp}>
+                1x (Normal)
+            </Button>
+            <Button onclick={onSpeedUp}>
+                1.25x
+            </Button>
+            <Button onclick={onSpeedUp}>
+                1.5x
+            </Button>
+            <Button onclick={onSpeedUp}>
+                2.0x
+            </Button>
+          </HStack>
+        </VStack>
+      </Center>
     </Box>
   );
 };
 
 export default VideoPage;
+
