@@ -54,9 +54,6 @@ const VideoPage = () => {
     const checkProgress = () => {
       if (player) {
         const currentTime = player.getCurrentTime();
-        console.log('Current Time:', currentTime);
-        console.log('End Time:', endTime);
-        console.log('Start Time:', startTime);
         if (currentTime >= endTime) {
           player.seekTo(startTime, true);
         }
@@ -81,8 +78,6 @@ const VideoPage = () => {
         setEndTime(prevEndTime => {
           return prevEndTime === 0 ? totalDuration : prevEndTime;
         });
-
-        console.log('Total Duration (seconds):', totalDuration);
       })
       .catch(error => {
         console.error('Error fetching video details:', error);
@@ -94,8 +89,6 @@ const VideoPage = () => {
   };
 
   const onStateChange = (event) => {
-    console.log('State changed:', event);
-
     if (event.data === window.YT.PlayerState.PLAYING) {
       // The interval is created and cleared in the useEffect
     }
@@ -298,18 +291,15 @@ const VideoPage = () => {
               onClick={onFastForward}
             />
           </HStack>
-          <VStack align='center'>
-            <HStack width={600} justify='center' mb='2'>
-              <Button onClick={onSlowDown} colorScheme='blue' variant='outline'>
-                  Slow Down
-              </Button>
-              <Heading as='h3' size='lg' color='black' align="center" width='100px'>{playbackRate}</Heading>
-              <Button onClick={onSpeedUp} colorScheme='blue' variant='outline'>
-                  Speed Up
-              </Button>
-            </HStack>
-            <Text casing='uppercase' fontSize='sm' color='gray.600'>playback speed</Text>
-          </VStack>
+          <HStack width={600} justify='center' mb='2'>
+            <Button onClick={onSlowDown} colorScheme='blue' variant='outline'>
+                Slow Down
+            </Button>
+            <Heading as='h3' size='lg' color='black' align="center" width='100px'>{playbackRate}</Heading>
+            <Button onClick={onSpeedUp} colorScheme='blue' variant='outline'>
+                Speed Up
+            </Button>
+          </HStack>
         </VStack>
       </Center>
     </Box>
