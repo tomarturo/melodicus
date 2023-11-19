@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from './Header';
-import { PlayIcon, ForwardIcon, BackwardIcon, PauseIcon, Bars3Icon } from '@heroicons/react/20/solid'
-import { Center, Circle, AbsoluteCenter, IconButton, Icon, HStack, VStack, Box, Button, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark } from '@chakra-ui/react';
+import { PlayIcon, ForwardIcon, BackwardIcon, PauseIcon, Bars2Icon } from '@heroicons/react/20/solid'
+import { Center, Text, IconButton, Icon, HStack, VStack, Box, Button, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark } from '@chakra-ui/react';
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
@@ -11,6 +11,7 @@ const VideoPage = () => {
   const [videoLength, setVideoLength] = useState(null);
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState('1x');
   const [sliderValue, setSliderValue] = useState([null, null])
   const { videoId } = useParams();
   const apiKey = 'AIzaSyB8asYxNRmtKE_lhgOKoMcLiWNsbwvCSFs';
@@ -33,7 +34,7 @@ const VideoPage = () => {
         videoId: videoId,
         playerVars: {
           autoplay: 0,
-          controls: 0,
+          controls: 1,
           rel: 0,
           fs: 0,
           showinfo: 0,
@@ -152,6 +153,13 @@ const VideoPage = () => {
     }
   };
 
+  const getPlaybackRate = () => {
+    if (player) {
+      const rate = player.getPlaybackRate();
+      setPlaybackRate(rate.toString() + 'x'); // Convert rate to string before setting state
+    }
+  };
+
   const onPlay = () => {
     if (player) {
       player.playVideo();
@@ -168,6 +176,7 @@ const VideoPage = () => {
     if (player) {
       const rate = player.getPlaybackRate();
       player.setPlaybackRate(rate + 0.25);
+      getPlaybackRate();
     }
   };
 
@@ -176,6 +185,7 @@ const VideoPage = () => {
       const rate = player.getPlaybackRate();
       if (rate > 0.25) {
         player.setPlaybackRate(rate - 0.25);
+        getPlaybackRate();
       }
     }
   };
@@ -196,7 +206,7 @@ const VideoPage = () => {
 
   const sliderThumbIcon = (props) => { 
     return (
-    <Icon as={Bars3Icon}/>
+    <Icon as={Bars2Icon} color='white'/>
     )
 };
 
@@ -208,7 +218,7 @@ const VideoPage = () => {
           // Youtube player
           <Box id="player" mb='10'></Box>
           // Playback timeline, loop scrubber
-          <Box width={600} mb='10'>
+          <Box width={600} mb='8'>
             {videoLength && (
               <RangeSlider
                 aria-label={['0', videoLength]}
@@ -220,15 +230,13 @@ const VideoPage = () => {
                   setSliderValue(values);
                 }}
                 onChangeEnd={onRangeChangeEnd}>
-                <RangeSliderTrack bg='gray.400'>
-                  <RangeSliderFilledTrack bg='black' />
+                <RangeSliderTrack bg='gray.200'>
+                  <RangeSliderFilledTrack bg='blue.500' />
                 </RangeSliderTrack>
                 <RangeSliderMark
                   value={sliderValue[0]}
                   textAlign='center'
-                  bg='black'
-                  color='white'
-                  borderRadius='2'
+                  color='black'
                   mt='-10'
                   ml='-5'
                   w='12'>
@@ -237,81 +245,71 @@ const VideoPage = () => {
                 <RangeSliderMark
                   value={sliderValue[1]}
                   textAlign='center'
-                  bg='black'
-                  color='white'
-                  borderRadius='2'
+                  color='black'
                   mt='-10'
                   ml='-5'
                   w='12'
                   bottom='-30px'
-                  right='0'
                 >
                   {formatSecondsToDuration(sliderValue[1])}
                 </RangeSliderMark>
-                <RangeSliderThumb boxSize={6} index={0}>
+                <RangeSliderThumb boxSize={6} index={0} bg='gray.800'>
                 <Box as={sliderThumbIcon} />
                 </RangeSliderThumb>
-                <RangeSliderThumb boxSize={6} index={1}>
+                <RangeSliderThumb boxSize={6} index={1} bg='gray.800'>
                   <Box as={sliderThumbIcon} />
                 </RangeSliderThumb>
               </RangeSlider>
             )}
           </Box>
-          <HStack>
+          <HStack width={600} mb='8' justify='center'>
             <IconButton
-              size='md'
+              height='56px'
+              width='56px'
               variant='solid'
               isRound={true}
-              colorScheme='gray'
+              colorScheme='blue'
               aria-label='Rewind'
-              fontSize='16px'
-              icon={<Icon as={BackwardIcon} size='16'/>}
+              fontSize='24px'
+              icon={<Icon as={BackwardIcon}/>}
               onClick={onRewind}
             />
             <IconButton
-              size='lg'
+              height='88px'
+              width='88px'
               variant='solid'
               isRound={true}
-              colorScheme='gray'
+              colorScheme='blue'
               aria-label='Play or Pause'
-              fontSize='16px'
-              icon={isPlaying ? <Icon as={PauseIcon} size='20'/> : <Icon as={PlayIcon} size='16'/>}
+              fontSize='48px'
+              icon={isPlaying ? <Icon as={PauseIcon}/> : <Icon as={PlayIcon}/>}
               onClick={playPauseClick}
             />
             <IconButton
-              size='md'
+
+              height='56px'
+              width='56px'
               variant='solid'
               isRound={true}
-              colorScheme='gray'
+              colorScheme='blue'
               aria-label='Fast Forward'
-              fontSize='16px'
-              icon={<Icon as={ForwardIcon} size='16'/>}
+              fontSize='24px'
+              icon={<Icon as={ForwardIcon}/>}
               onClick={onFastForward}
             />
           </HStack>
-          <HStack>
-            <Button onclick={onSlowDown}>
-                0.25x
-            </Button>
-            <Button onclick={onSpeedUp}>
-                0.5x
-            </Button>
-            <Button onclick={onSpeedUp}>
-                0.75x
-            </Button>
-            <Button onclick={onSpeedUp}>
-                1x (Normal)
-            </Button>
-            <Button onclick={onSpeedUp}>
-                1.25x
-            </Button>
-            <Button onclick={onSpeedUp}>
-                1.5x
-            </Button>
-            <Button onclick={onSpeedUp}>
-                2.0x
-            </Button>
-          </HStack>
+          <VStack align='center'>
+            <HStack width={600} justify='center' mb='2'>
+              <Button onClick={onSlowDown} colorScheme='blue' variant='outline'>
+                  Slow Down
+              </Button>
+              <Heading as='h3' size='lg' color='black' align="center" width='100px'>{playbackRate}</Heading>
+              <Button onClick={onSpeedUp} colorScheme='blue' variant='outline'>
+                  Speed Up
+              </Button>
+            </HStack>
+            <Text casing='uppercase' fontSize='sm' color='gray.600'>playback speed</Text>
+          </VStack>
         </VStack>
       </Center>
     </Box>
@@ -319,4 +317,3 @@ const VideoPage = () => {
 };
 
 export default VideoPage;
-

@@ -9,7 +9,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [videoLink, setVideoLink] = useState('');
 
-  const handleButtonClick = (videoLink) => {
+  const handleButtonClick = () => {
     // Extract video ID from the YouTube link
     const videoId = getYoutubeID(videoLink);
 
@@ -23,20 +23,24 @@ const HomePage = () => {
       <Container maxW='3xl' pt='12'>
         <VStack>
           <Flex mb='12' gap={8} direction={'column'}>
-            <Heading as='h1' size='3xl' color='black' align="center">Learn to make music by listening to music</Heading>
-            <Text fontSize='xl' color='black' align="center">The secrets to advancing as a musician are waiting in the songs you love.</Text>
+            <Heading as='h1' size='3xl' color='black' align="center">Learn the songs & licks you love</Heading>
+            <Text fontSize='xl' color='black' align="center">Uninterrupted loops. Controlled playback. Zero distractions.</Text>
           </Flex>
           <InputGroup size='md' mb='4'>
             <Input
               pr='2rem'
               type='text'
               placeholder='Enter link to YouTube video to get started...'
+              value={videoLink}
+              onChange={(e) => setVideoLink(e.target.value)}
             />
-            <InputLeftElement width='4.5rem'>
+            <InputLeftElement>
               <Icon as={LinkIcon}/>
-              </InputLeftElement>
+            </InputLeftElement>
             <InputRightElement width='8rem'>
-            <Button onClick={() => handleButtonClick()}>Start Learning</Button>
+              <Button onClick={handleButtonClick} colorScheme='blue' borderRadiusLeft='0'>
+                Start Learning
+              </Button>
             </InputRightElement>
           </InputGroup>
         </VStack>
