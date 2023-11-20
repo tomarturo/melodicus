@@ -26,23 +26,27 @@ const HomePage = () => {
             <Heading as='h1' size='3xl' color='black' align="center">Learn the songs & licks you love</Heading>
             <Text fontSize='xl' color='black' align="center">Uninterrupted loops. Controlled playback. Zero distractions.</Text>
           </Flex>
-          <InputGroup size='md' mb='4'>
+          <InputGroup size='md' mb='2'>
             <Input
+              bg='gray.100'
               pr='2rem'
               type='text'
-              placeholder='Enter link to YouTube video to get started...'
+              placeholder='Enter a YouTube link'
               value={videoLink}
               onChange={(e) => setVideoLink(e.target.value)}
             />
             <InputLeftElement>
               <Icon as={LinkIcon}/>
             </InputLeftElement>
-            <InputRightElement width='8rem'>
-              <Button onClick={handleButtonClick} colorScheme='blue' borderRadiusLeft='0'>
+            <InputRightElement width='fit-content' display={["none", "block"]}>
+              <Button onClick={handleButtonClick} colorScheme='blue' borderStartRadius='0'>
                 Start Learning
               </Button>
             </InputRightElement>
           </InputGroup>
+          <Button display={['block', 'none']} onClick={handleButtonClick} colorScheme='blue'>
+                Start Learning
+          </Button>
         </VStack>
       </Container>
     </Box>

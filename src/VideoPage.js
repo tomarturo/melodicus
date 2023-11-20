@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from './Header';
 import { PlayIcon, ForwardIcon, BackwardIcon, PauseIcon, Bars2Icon } from '@heroicons/react/20/solid'
-import { Center, Text, IconButton, Icon, HStack, VStack, Box, Button, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark } from '@chakra-ui/react';
+import { IconButton, Icon, HStack, VStack, Box, Button, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
@@ -31,6 +31,7 @@ const VideoPage = () => {
 
     window.onYouTubeIframeAPIReady = () => {
       const ytPlayer = new window.YT.Player('player', {
+        width: '100%',
         videoId: videoId,
         playerVars: {
           autoplay: 0,
@@ -206,12 +207,10 @@ const VideoPage = () => {
   return (
     <Box>
       <Header/>
-      <Center>
-        <VStack>
-          // Youtube player
+      <Container>
+        <VStack mb='8'>
           <Box id="player" mb='10'></Box>
-          // Playback timeline, loop scrubber
-          <Box width={600} mb='8'>
+          <Box width='100%' mb='8'>
             {videoLength && (
               <RangeSlider
                 aria-label={['0', videoLength]}
@@ -291,17 +290,17 @@ const VideoPage = () => {
               onClick={onFastForward}
             />
           </HStack>
-          <HStack width={600} justify='center' mb='2'>
+          <HStack width={600} justify='center'>
             <Button onClick={onSlowDown} colorScheme='blue' variant='outline'>
                 Slow Down
             </Button>
-            <Heading as='h3' size='lg' color='black' align="center" width='100px'>{playbackRate}</Heading>
+            <Heading as='h3' size='lg' color='black' align="center" width={['80px','100px']}>{playbackRate}</Heading>
             <Button onClick={onSpeedUp} colorScheme='blue' variant='outline'>
                 Speed Up
             </Button>
           </HStack>
         </VStack>
-      </Center>
+      </Container>
     </Box>
   );
 };
