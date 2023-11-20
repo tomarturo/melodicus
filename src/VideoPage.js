@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from './Header';
-import { PlayIcon, ForwardIcon, BackwardIcon, PauseIcon, Bars2Icon } from '@heroicons/react/20/solid'
-import { IconButton, Icon, HStack, VStack, Box, Button, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
+import Footer from './Footer';
+import { PlayIcon, ForwardIcon, BackwardIcon, PauseIcon, Bars2Icon, ArrowsRightLeftIcon } from '@heroicons/react/20/solid'
+import { Flex, IconButton, Icon, HStack, VStack, Box, Button, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
@@ -200,108 +201,114 @@ const VideoPage = () => {
 
   const sliderThumbIcon = (props) => { 
     return (
-    <Icon as={Bars2Icon} color='white'/>
+    <Icon as={ArrowsRightLeftIcon} color='blackAlpha.900'/>
     )
 };
 
   return (
-    <Box>
+    <Flex direction='column' minH='100vh'>
       <Header/>
-      <Container>
-        <VStack mb='8'>
-          <Box id="player" mb='10'></Box>
-          <Box width='100%' mb='8'>
-            {videoLength && (
-              <RangeSlider
-                aria-label={['0', videoLength]}
-                min={0}
-                max={videoLength}
-                defaultValue={[0, videoLength]}
-                onChange={(values) => {
-                  onRangeChange(values);
-                  setSliderValue(values);
-                }}
-                onChangeEnd={onRangeChangeEnd}>
-                <RangeSliderTrack bg='gray.200'>
-                  <RangeSliderFilledTrack bg='blue.500' />
-                </RangeSliderTrack>
-                <RangeSliderMark
-                  value={sliderValue[0]}
-                  textAlign='center'
-                  color='black'
-                  mt='-10'
-                  ml='-5'
-                  w='12'>
-                  {formatSecondsToDuration(sliderValue[0])}
-                </RangeSliderMark>
-                <RangeSliderMark
-                  value={sliderValue[1]}
-                  textAlign='center'
-                  color='black'
-                  mt='-10'
-                  ml='-5'
-                  w='12'
-                  bottom='-30px'
-                >
-                  {formatSecondsToDuration(sliderValue[1])}
-                </RangeSliderMark>
-                <RangeSliderThumb boxSize={6} index={0} bg='gray.800'>
-                <Box as={sliderThumbIcon} />
-                </RangeSliderThumb>
-                <RangeSliderThumb boxSize={6} index={1} bg='gray.800'>
+      <Flex direction="column" flex="1">
+        <Container>
+          <VStack mb='8'>
+            <Box id="player" mb='10'></Box>
+            <Box width='100%' mb='8' px='2'>
+              {videoLength && (
+                <RangeSlider
+                  aria-label={['0', videoLength]}
+                  min={0}
+                  max={videoLength}
+                  defaultValue={[0, videoLength]}
+                  onChange={(values) => {
+                    onRangeChange(values);
+                    setSliderValue(values);
+                  }}
+                  onChangeEnd={onRangeChangeEnd}>
+                  <RangeSliderTrack bg='blackAlpha.200'>
+                    <RangeSliderFilledTrack bg='purple.600' />
+                  </RangeSliderTrack>
+                  <RangeSliderMark
+                    value={sliderValue[0]}
+                    textAlign='center'
+                    color='black'
+                    mt='-10'
+                    ml='-5'
+                    w='12'>
+                    {formatSecondsToDuration(sliderValue[0])}
+                  </RangeSliderMark>
+                  <RangeSliderMark
+                    value={sliderValue[1]}
+                    textAlign='center'
+                    color='black'
+                    mt='-10'
+                    ml='-5'
+                    w='12'
+                    bottom='-30px'
+                  >
+                    {formatSecondsToDuration(sliderValue[1])}
+                  </RangeSliderMark>
+                  <RangeSliderThumb boxSize={6} index={0} >
                   <Box as={sliderThumbIcon} />
-                </RangeSliderThumb>
-              </RangeSlider>
-            )}
-          </Box>
-          <HStack width={600} mb='8' justify='center'>
-            <IconButton
-              height='56px'
-              width='56px'
-              variant='solid'
-              isRound={true}
-              colorScheme='blue'
-              aria-label='Rewind'
-              fontSize='24px'
-              icon={<Icon as={BackwardIcon}/>}
-              onClick={onRewind}
-            />
-            <IconButton
-              height='88px'
-              width='88px'
-              variant='solid'
-              isRound={true}
-              colorScheme='blue'
-              aria-label='Play or Pause'
-              fontSize='48px'
-              icon={isPlaying ? <Icon as={PauseIcon}/> : <Icon as={PlayIcon}/>}
-              onClick={playPauseClick}
-            />
-            <IconButton
-
-              height='56px'
-              width='56px'
-              variant='solid'
-              isRound={true}
-              colorScheme='blue'
-              aria-label='Fast Forward'
-              fontSize='24px'
-              icon={<Icon as={ForwardIcon}/>}
-              onClick={onFastForward}
-            />
-          </HStack>
-          <HStack width={600} justify='center'>
-            <Button onClick={onSlowDown} colorScheme='blue' variant='outline'>
-                Slow Down
-            </Button>
-            <Heading as='h3' size='lg' color='black' align="center" width={['80px','100px']}>{playbackRate}</Heading>
-            <Button onClick={onSpeedUp} colorScheme='blue' variant='outline'>
-                Speed Up
-            </Button>
-          </HStack>
-        </VStack>
-      </Container>
-    </Box>
+                  </RangeSliderThumb>
+                  <RangeSliderThumb boxSize={6} index={1}>
+                    <Box as={sliderThumbIcon} />
+                  </RangeSliderThumb>
+                </RangeSlider>
+              )}
+            </Box>
+            <HStack mb='8' justify='center'>
+              <IconButton
+                height='56px'
+                width='56px'
+                colorScheme='purple'
+                bg='purple.600'
+                variant='solid'
+                isRound={true}
+                aria-label='Rewind'
+                fontSize='24px'
+                icon={<Icon as={BackwardIcon} />}
+                onClick={onRewind}
+              />
+              <IconButton
+                height='88px'
+                width='88px'
+                mx='2'
+                variant='solid'
+                colorScheme='purple'
+                bg='purple.600'
+                isRound={true}
+                aria-label='Play or Pause'
+                fontSize='48px'
+                icon={isPlaying ? <Icon as={PauseIcon} /> : <Icon as={PlayIcon} />}
+                onClick={playPauseClick}
+              />
+              <IconButton
+                height='56px'
+                width='56px'
+                variant='solid'
+                isRound={true}
+                colorScheme='purple'
+                bg='purple.600'
+                aria-label='Fast Forward'
+                fontSize='24px'
+                icon={<Icon as={ForwardIcon}/>}
+                onClick={onFastForward}
+              />
+            </HStack>
+            <HStack justify='center'>
+              <Button onClick={onSlowDown} colorScheme='purple' size='sm' variant='outline'>
+                  Slow Down
+              </Button>
+              <Heading as='h3' size='lg' color='gray.600' align="center"  width={['80px','100px']}>{playbackRate}</Heading>
+              <Button onClick={onSpeedUp} colorScheme='purple' size='sm' variant='outline'>
+                  Speed Up
+              </Button>
+            </HStack>
+          </VStack>
+        </Container>
+      </Flex>
+      <Footer/>
+    </Flex>
   );
 };
 
