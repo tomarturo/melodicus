@@ -20,7 +20,7 @@ const Header = () => {
   };
   
 return (
-  <Flex bg='blackAlpha.900' justify='space-between' gap='4' p={['2', '4']} mb={['8', '12']} align='center'>
+  <Flex bg='blackAlpha.900' justify='space-between' gap='4' px={['2', '4']} py='4' mb={['8', '12']} align='center'>
     <Link as={ReactRouterLink} to='/'>
       <Flex align="center" gap='1'>
         <MelodicusIcon h='5' color='whiteAlpha.900'/>
