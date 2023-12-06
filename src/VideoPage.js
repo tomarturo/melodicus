@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
-import { PlayIcon, PauseIcon, ArrowsRightLeftIcon } from '@heroicons/react/20/solid';
-import {ForwardIcon, BackwardIcon} from '@heroicons/react/24/outline';
+import { PlayIcon, PauseIcon } from '@heroicons/react/20/solid';
 import { DragHandleIcon, RepeatIcon } from '@chakra-ui/icons'
 import { Circle, Text, Flex, IconButton, Icon, HStack, VStack, Box, Button, Heading, Slider, SliderTrack, SliderThumb, SliderMark, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
 
@@ -12,13 +11,13 @@ const VideoPage = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoLength, setVideoLength] = useState(null);
-  const [startTimeInput, setStartTimeInput] = useState(0);
-  const [endTimeInput, setEndTimeInput] = useState(0);
-  const [isStartInputActive, setIsStartInputActive] = useState(false);
-  const [isEndInputActive, setIsEndInputActive] = useState(false);
+  const [startTimeHeader, setStartTimeHeader] = useState(0);
+  const [endTimeHeader, setEndTimeHeader] = useState(0);
+  const [isStartTimeHeaderActive, setIsStartTimeHeaderActive] = useState(false);
+  const [isEndTimeHeaderActive, setIsEndTimeHeaderActive] = useState(false);
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState('1x');
+  const [playbackRate, setPlaybackRate] = useState(1.0);
   const [sliderValue, setSliderValue] = useState([null, null])
   const { videoId } = useParams();
   const apiKey = 'AIzaSyB8asYxNRmtKE_lhgOKoMcLiWNsbwvCSFs';
@@ -98,15 +97,14 @@ const VideoPage = () => {
 
   const onStateChange = (event) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
-      // The interval is created and cleared in the useEffect
+        setIsPlaying(true);
+      } else {
+        setIsPlaying(false);
     }
   };
 
   const playPauseClick = () => {
-    // Toggle the state on each click
     setIsPlaying((prevIsPlaying) => !prevIsPlaying);
-
-    // Call the appropriate function based on the current state
     if (isPlaying) {
       onPause();
     } else {
@@ -126,7 +124,7 @@ const VideoPage = () => {
     }
   };
 
-  const onRangeChange = (values) => {
+  const onRangeChange = (values, index) => {
     muteVideo();
     setCurrentTime(values[0]);
     if (player) {
@@ -134,17 +132,23 @@ const VideoPage = () => {
     }
     setStartTime(values[0]);
     setEndTime(values[1]);
-    setStartTimeInput(values[0]);
-    setEndTimeInput(values[1]);
-    setIsStartInputActive(true);
-    setIsEndInputActive(true); 
+    setStartTimeHeader(values[0]);
+    setEndTimeHeader(values[1]);
+    if (index === 0) {
+      setIsStartTimeHeaderActive(true);
+    } else if (index === 1) {
+      setIsEndTimeHeaderActive(true);
+    }
   };
   
-  const onRangeChangeEnd = () => {
+  const onRangeChangeEnd = (index) => {
     unmuteVideo(); // Unmute the video when adjustment is complete
-    setSliderValue([startTimeInput, endTimeInput]);
-    setIsStartInputActive(false);
-    setIsEndInputActive(false);
+    setSliderValue([startTimeHeader, endTimeHeader]);
+    if (index === 0) {
+      setIsStartTimeHeaderActive(false);
+    } else if (index === 1) {
+      setIsEndTimeHeaderActive(false);
+    }
   };
 
   const formatSecondsToDuration = (seconds) => {
@@ -161,10 +165,10 @@ const VideoPage = () => {
     }
   };
 
-  const getPlaybackRate = () => {
+  const onPlaybackRateChange = (value) => {
+    setPlaybackRate(value / 60 + 0.25); // Map Slider value to playback rate (e.g., 60 maps to 1.0)
     if (player) {
-      const rate = player.getPlaybackRate();
-      setPlaybackRate(rate.toString() + 'x'); // Convert rate to string before setting state
+      player.setPlaybackRate(value / 60 + 0.25);
     }
   };
 
@@ -180,52 +184,25 @@ const VideoPage = () => {
     }
   };
 
-  const onSpeedUp = () => {
+  const restartLoop = () => {
     if (player) {
-      const rate = player.getPlaybackRate();
-      player.setPlaybackRate(rate + 0.25);
-      getPlaybackRate();
+      player.seekTo(startTime);
     }
+    console.log("Restart Loop Doofus!")
   };
 
-  const onSlowDown = () => {
-    if (player) {
-      const rate = player.getPlaybackRate();
-      if (rate > 0.25) {
-        player.setPlaybackRate(rate - 0.25);
-        getPlaybackRate();
-      }
-    }
-  };
-
-  const onRewind = () => {
-    if (player) {
-      const currentTime = player.getCurrentTime();
-      player.seekTo(currentTime - 5, true);
-    }
-  };
-
-  const onFastForward = () => {
-    if (player) {
-      const currentTime = player.getCurrentTime();
-      player.seekTo(currentTime + 5, true);
-    }
-  };
-
-  const sliderThumbIcon = (props) => { 
-    return (
-    <Icon as={ArrowsRightLeftIcon} color='purple.600' boxSize='5'/>
-    )
-};
+  console.log('isEndTimeHeaderActive:', isEndTimeHeaderActive);
+  console.log('endTimeHeader:', endTimeHeader);
+  console.log('isStartTimeHeaderActive:', isStartTimeHeaderActive);
 
   return (
-    <Flex direction='column' minH='100vh'>
+    <Flex direction='column' minH='100vh' bg='whiteAlpha.900'>
       <Header/>
       <Flex direction="column" flex="1">
         <Container>
           <VStack mb='8'>
             <Box id="player" mb='6'></Box>
-            <Box width='100%' mb='8' px='2'>
+            <Box width='100%' mb='2' px='2'>
               <HStack mb='8' justify='center' gap='4'>
                 <VStack>
                   <Text as='b' align='left' fontSize='xs' casing='uppercase'>Loop Start</Text>
@@ -235,11 +212,11 @@ const VideoPage = () => {
                     borderRadius='sm'
                     as='h3'
                     size='md'
-                    color={isStartInputActive ? 'white' : 'gray.700'}
-                    bg={isStartInputActive ? 'purple.600' : 'gray.100'}
+                    color={isStartTimeHeaderActive ? 'white' : 'gray.700'}
+                    bg={isStartTimeHeaderActive ? 'purple.600' : 'gray.100'}
                     align="center"
-                    onChange={(e) => setStartTimeInput(e.target.value)}
-                    >{formatSecondsToDuration(startTimeInput)}
+                    onChange={(e) => setStartTimeHeader(e.target.value)}
+                    >{formatSecondsToDuration(startTimeHeader)}
                   </Heading>
                 </VStack>
                 <VStack>
@@ -250,11 +227,11 @@ const VideoPage = () => {
                     borderRadius='sm'
                     as='h3'
                     size='md'
-                    color={isStartInputActive ? 'white' : 'gray.700'}
-                    bg={isStartInputActive ? 'purple.600' : 'gray.100'}
+                    color={isEndTimeHeaderActive ? 'white' : 'gray.700'}
+                    bg={isEndTimeHeaderActive ? 'purple.600' : 'gray.100'}
                     align="center"
-                    onChange={(e) => setEndTimeInput(e.target.value)}
-                    >{formatSecondsToDuration(endTimeInput)}
+                    onChange={(e) => setEndTimeHeader(e.target.value)}
+                    >{formatSecondsToDuration(endTimeHeader)}
                   </Heading>
                 </VStack>
               </HStack>
@@ -264,36 +241,49 @@ const VideoPage = () => {
                   min={0}
                   max={videoLength}
                   defaultValue={[0, videoLength]}
-                  onChange={(values) => {
+                  onChange={(values, index) => {
                     onRangeChange(values);
                     setSliderValue(values);
                   }}
-                  onChangeEnd={onRangeChangeEnd}>
+                  onChangeEnd={(index) => {
+                    console.log('onChangeEnd index:', index);
+                    onRangeChangeEnd(index);
+                  }}
+                  >
                   <RangeSliderTrack bg='gray.100' h={2}>
                     <RangeSliderFilledTrack bg='purple.600' />
                   </RangeSliderTrack>
-                  <RangeSliderThumb boxSize={10} index={0} bg='white' border='2px' borderColor='purple.600'>
+                  <RangeSliderThumb 
+                    boxSize={10} 
+                    index={0} 
+                    bg='white' 
+                    border='1px' 
+                    borderColor='purple.600'
+                    onSelect={() => {
+                      setIsStartTimeHeaderActive(true);
+                      setIsEndTimeHeaderActive(false);
+                    }}
+                    >
                       <DragHandleIcon color='purple.600'/>
                   </RangeSliderThumb>
-                  <RangeSliderThumb boxSize={10} index={1} bg='white' border='2px' borderColor='purple.600'>
+                  <RangeSliderThumb 
+                    boxSize={10} 
+                    index={1} 
+                    bg='white' 
+                    border='1px' 
+                    borderColor='purple.600'
+                    onSelect={() => {
+                      setIsStartTimeHeaderActive(false);
+                      setIsEndTimeHeaderActive(true);
+                      console.log('Thumb selected')
+                    }}
+                    >
                     <DragHandleIcon color='purple.600'/>
                   </RangeSliderThumb>
                 </RangeSlider>
               )}
             </Box>
-            <HStack mb='8' justify='center'>
-              <IconButton
-                height='56px'
-                width='56px'
-                colorScheme='purple'
-                border='0px'
-                variant='outline'
-                isRound={true}
-                aria-label='Rewind'
-                fontSize='32px'
-                icon={<Icon as={BackwardIcon} boxSize={8} />}
-                onClick={onRewind}
-              />
+            <HStack mb='6' justify='center'>
               <IconButton
                 height='88px'
                 width='88px'
@@ -308,25 +298,27 @@ const VideoPage = () => {
                 onClick={playPauseClick}
               />
               <IconButton
-                height='56px'
-                width='56px'
+                height='88px'
+                width='88px'
+                border='0px'
                 variant='outline'
                 colorScheme='purple'
-                border='0px'
-                isRound={true}    
-                aria-label='Fast Forward'
-                fontSize='32px'
-                icon={<Icon as={ForwardIcon} />}
-                onClick={onFastForward}
+                isRound={true}
+                aria-label='Play or Pause'
+                fontSize='48px'
+                icon={<RepeatIcon/>}
+                onClick={restartLoop}
               />
             </HStack>
-            <Text as='b' color='gray.600' align='left' fontSize='xs' casing='uppercase' mb='4'>Playback Speed</Text>
-            <HStack justify='center' width='75%' mb='6' >
-              <Slider defaultValue={60} min={0} max={120} step={20}>
+            <HStack justify='center' width='75%' mb='8' >
+              <Slider defaultValue={60} min={0} max={120} step={20} onChange={onPlaybackRateChange}>
                 <SliderTrack bg='purple.600'>
                   <Box position='relative' right={10} />
                 </SliderTrack>
-                <SliderThumb boxSize={5} border='1px' borderColor='purple.600'/>
+                <SliderThumb 
+                boxSize={5} 
+                border='1px' 
+                borderColor='purple.600'/>
                 <SliderMark value={0} mt='1' fontSize='sm' display='flex' flexDirection='column' alignItems='start'>
                   <Circle w='8px' h='8px' bg='purple.600' mt='-2' mb='3'/>
                   <Text align='left' ml='-2'>.25x</Text>
@@ -357,6 +349,7 @@ const VideoPage = () => {
                 </SliderMark>
               </Slider> 
             </HStack>
+            <Text as='b' color='gray.600' align='left' fontSize='xs' casing='uppercase' mb='4'>Playback Speed</Text>
           </VStack>
         </Container>
       </Flex>
