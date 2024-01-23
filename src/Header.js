@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import getYoutubeID from 'get-youtube-id';
 import { ArrowSmallRightIcon } from '@heroicons/react/20/solid';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom'
-import { IconButton, Input, InputGroup, InputRightElement, InputLeftElement, Icon, VStack, Link, Spacer, Flex, Heading } from '@chakra-ui/react'
+import { IconButton, Input, InputGroup, InputRightElement, InputLeftElement, Image, Icon, VStack, Link, Spacer, Flex, Heading } from '@chakra-ui/react'
 import MelodicusIcon from './MelodicusIcon';
 
 const Header = () => {
@@ -21,10 +21,11 @@ const Header = () => {
   
 return (
   <Flex bg='blackAlpha.900' justify='space-between' gap='4' px={['2', '4']} py='4' mb={['8', '12']} align='center'>
-    <Link as={ReactRouterLink} to='/'>
+    <Link as={ReactRouterLink} to='/'>  
       <Flex align="center" gap='1'>
-        <MelodicusIcon h='6' color='whiteAlpha.900'/>
-        <Heading size={['xs', 'sm']} color='whiteAlpha.900'>Melodicus</Heading>
+        {/* <MelodicusIcon h='6' color='whiteAlpha.900'/> */}
+        <Image src={process.env.PUBLIC_URL + '/logotype white.svg'} w='120px'/>
+        {/* <Heading size={['xs', 'sm']} color='whiteAlpha.900'>Melodicus</Heading> */}
       </Flex>
     </Link>
     {!shouldHidePart && 

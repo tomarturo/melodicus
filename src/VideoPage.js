@@ -4,7 +4,8 @@ import Header from './Header';
 import Footer from './Footer';
 import { PlayIcon, PauseIcon } from '@heroicons/react/20/solid';
 import { DragHandleIcon, RepeatIcon } from '@chakra-ui/icons'
-import { Circle, Text, Flex, IconButton, Icon, HStack, VStack, Box, Button, Heading, Slider, SliderTrack, SliderThumb, SliderMark, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
+import { Text, Flex, IconButton, Icon, HStack, VStack, Box, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
+import PlaybackRateSelector from './PlaybackRateSelector';
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
@@ -17,7 +18,6 @@ const VideoPage = () => {
   const [isEndTimeHeaderActive, setIsEndTimeHeaderActive] = useState(false);
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState(1.0);
   const [sliderValue, setSliderValue] = useState([null, null])
   const { videoId } = useParams();
   const apiKey = 'AIzaSyB8asYxNRmtKE_lhgOKoMcLiWNsbwvCSFs';
@@ -165,13 +165,6 @@ const VideoPage = () => {
     }
   };
 
-  const onPlaybackRateChange = (value) => {
-    setPlaybackRate(value / 60 + 0.25); // Map Slider value to playback rate (e.g., 60 maps to 1.0)
-    if (player) {
-      player.setPlaybackRate(value / 60 + 0.25);
-    }
-  };
-
   const onPlay = () => {
     if (player) {
       player.playVideo();
@@ -310,46 +303,8 @@ const VideoPage = () => {
                 onClick={restartLoop}
               />
             </HStack>
-            <HStack justify='center' width='75%' mb='8' >
-              <Slider defaultValue={60} min={0} max={120} step={20} onChange={onPlaybackRateChange}>
-                <SliderTrack bg='purple.600'>
-                  <Box position='relative' right={10} />
-                </SliderTrack>
-                <SliderThumb 
-                boxSize={5} 
-                border='1px' 
-                borderColor='purple.600'/>
-                <SliderMark value={0} mt='1' fontSize='sm' display='flex' flexDirection='column' alignItems='start'>
-                  <Circle w='8px' h='8px' bg='purple.600' mt='-2' mb='3'/>
-                  <Text align='left' ml='-2'>.25x</Text>
-                </SliderMark>
-                <SliderMark value={20} mt='1' ml='-2.5' fontSize='sm' display='flex' flexDirection='column' alignItems='center'>
-                  <Circle w='8px' h='8px' bg='purple.600' mt='-2' mb='3'/>
-                  <Text>.5x</Text>
-                </SliderMark>
-                <SliderMark value={40} mt='1' ml='-2.5' fontSize='sm' display='flex' flexDirection='column' alignItems='center'>
-                  <Circle w='8px' h='8px' bg='purple.600' mt='-2' mb='3'/>
-                  <Text>.75x</Text>
-                </SliderMark>
-                <SliderMark value={60} mt='1' ml='-2.5' fontSize='sm' display='flex' flexDirection='column' alignItems='center'>
-                  <Circle w='8px' h='8px' bg='purple.600' mt='-2' mb='3'/>
-                  <Text>1.0x</Text>
-                </SliderMark>
-                <SliderMark value={80} mt='1' ml='-2.5' fontSize='sm' display='flex' flexDirection='column' alignItems='center'>
-                  <Circle w='8px' h='8px' bg='purple.600' mt='-2' mb='3'/>
-                  <Text>1.25x</Text>
-                </SliderMark>
-                <SliderMark value={100} mt='1' ml='-2.5' fontSize='sm' display='flex' flexDirection='column' alignItems='center'>
-                  <Circle w='8px' h='8px' bg='purple.600' mt='-2' mb='3'/>
-                  <Text>1.5x</Text>
-                </SliderMark>
-                <SliderMark value={120} mt='1' ml='-1' fontSize='sm'>
-                  <Circle w='8px' h='8px' bg='purple.600' mt='-2' mb='3'/>
-                  <Text>1.75x</Text>
-                </SliderMark>
-              </Slider> 
-            </HStack>
-            <Text as='b' color='gray.600' align='left' fontSize='xs' casing='uppercase' mb='4'>Playback Speed</Text>
+            <Text as='b' align='left' fontSize='xs' casing='uppercase' mb='2'>Playback Speed</Text>
+            <PlaybackRateSelector player={player} />
           </VStack>
         </Container>
       </Flex>
@@ -359,3 +314,72 @@ const VideoPage = () => {
 };
 
 export default VideoPage;
+
+// TODO - REFACTOR WITH INDIVIDUAL COMPONENTS
+// import React, { useState, useEffect } from 'react';
+// import { useParams } from 'react-router-dom';
+// import { Flex, Container, VStack, Text, Heading, Box, IconButton, Icon } from '@chakra-ui/react';
+// import { PlayIcon, PauseIcon, RepeatIcon } from '@heroicons/react/20/solid';
+// import VideoPlayer from './VideoPlayer';
+// import PlaybackControls from './PlaybackControls';
+// import LoopSelector from './LoopSelector';
+// import { convertDurationToSeconds, formatSecondsToDuration } from './Utilities';
+
+// const VideoPage = () => {
+//   const { videoId } = useParams();
+//   const apiKey = 'YOUR_API_KEY_HERE'; // Replace with your YouTube API key
+
+//   const [videoLength, setVideoLength] = useState(null);
+//   const [isPlaying, setIsPlaying] = useState(false);
+//   const [startTime, setStartTime] = useState(0);
+//   const [endTime, setEndTime] = useState(0);
+
+//   useEffect(() => {
+//     // Fetch video details and set videoLength here
+//     // ...
+
+//   }, [videoId, apiKey]);
+
+//   const onPlayPauseClick = () => {
+//     setIsPlaying((prevIsPlaying) => !prevIsPlaying);
+//     // Implement play/pause logic using VideoPlayer component
+//   };
+
+//   const onRestartLoop = () => {
+//     // Implement loop restart logic using VideoPlayer component
+//   };
+
+//   const onRangeChange = (values, index) => {
+//     // Handle loop range selection
+//   };
+
+//   const onRangeChangeEnd = (index) => {
+//     // Handle loop range change completion
+//   };
+
+//   return (
+//     <Flex direction='column' minH='100vh' bg='whiteAlpha.900'>
+//       <Flex direction="column" flex="1">
+//         <Container>
+//           <VStack mb='8'>
+//             <VideoPlayer videoId={videoId} apiKey={apiKey} />
+//             <LoopSelector
+//               videoLength={videoLength}
+//               onRangeChange={onRangeChange}
+//               onRangeChangeEnd={onRangeChangeEnd}
+//             />
+//             <PlaybackControls
+//               isPlaying={isPlaying}
+//               onPlayPauseClick={onPlayPauseClick}
+//               onRestartLoop={onRestartLoop}
+//             />
+//             <Text as='b' align='left' fontSize='xs' casing='uppercase' mb='2'>Playback Speed</Text>
+//             {/* Include your PlaybackRateSelector component here */}
+//           </VStack>
+//         </Container>
+//       </Flex>
+//     </Flex>
+//   );
+// };
+
+// export default VideoPage;
