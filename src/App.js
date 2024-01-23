@@ -4,7 +4,6 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import HomePage from './HomePage';
 import VideoPage from './VideoPage';
 import SearchResults from './SearchResults';
-import Sandbox from './Sandbox';
 import '@fontsource-variable/space-grotesk'
 import '@fontsource-variable/work-sans';
 
