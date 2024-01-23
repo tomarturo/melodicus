@@ -22,7 +22,6 @@ function App () {
         <Route path="/" index element={<HomePage />} />
         <Route path="/video/:videoId" element={< VideoPage />} />
         <Route path="/search/:query" element={<SearchResults />} />
-        <Route path="/sandbox" element={<Sandbox />} />
       </Routes>
     </ChakraProvider>
   );
