@@ -3,7 +3,6 @@ import getYoutubeID from 'get-youtube-id';
 import { ArrowSmallRightIcon } from '@heroicons/react/20/solid';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom'
 import { IconButton, Input, InputGroup, InputRightElement, InputLeftElement, Image, Icon, VStack, Link, Spacer, Flex, Heading } from '@chakra-ui/react'
-import MelodicusIcon from './MelodicusIcon';
 
 const Header = () => {
   const location = useLocation();

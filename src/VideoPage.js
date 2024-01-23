@@ -5,7 +5,6 @@ import Footer from './Footer';
 import { PlayIcon, PauseIcon } from '@heroicons/react/20/solid';
 import { DragHandleIcon, RepeatIcon } from '@chakra-ui/icons'
 import { Text, Flex, IconButton, Icon, HStack, VStack, Box, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
-import PlaybackRateSelector from './PlaybackRateSelector';
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
