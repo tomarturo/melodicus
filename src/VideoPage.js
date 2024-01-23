@@ -303,7 +303,6 @@ const VideoPage = () => {
               />
             </HStack>
             <Text as='b' align='left' fontSize='xs' casing='uppercase' mb='2'>Playback Speed</Text>
-            <PlaybackRateSelector player={player} />
           </VStack>
         </Container>
       </Flex>
