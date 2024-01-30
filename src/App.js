@@ -10,7 +10,7 @@ import '@fontsource-variable/work-sans';
 const theme = extendTheme({
   fonts: {
     heading: `'Space Grotesk Variable', sans-serif`,
-    body: `'Work Sans Variable', sans-serif`,
+    body: `'Space Grotesk Variable', sans-serif`,
   }
 })
 

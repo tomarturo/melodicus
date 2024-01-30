@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { RadioGroup, Radio, Stack, HStack, Box, AbsoluteCenter, Flex } from "@chakra-ui/react";
+import { RadioGroup, Radio, Box, Container, Flex } from "@chakra-ui/react";
 
 function PlaybackRateSelector({ player }) {
     const rates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-    const [selectedRate, setSelectedRate] = useState("1"); // Store as string for RadioGroup compatibility
+    const [selectedRate, setSelectedRate] = useState("1");
 
     const handleRadioChange = (value) => {
         const numericValue = parseFloat(value);
@@ -14,29 +14,33 @@ function PlaybackRateSelector({ player }) {
     }
 
     return (
-        <RadioGroup onChange={handleRadioChange} value={selectedRate} name="rate">
-            <Flex spacing={-3} borderWidth='1px' bordercolor="gray.200" borderRadius="sm" borderRightWidth='0px'>
-                {rates.map((rate) => (
-                    <Box 
-                    borderRightColor="gray.200" 
-                    borderRightWidth="1px" 
-                    bg="gray.50"
-                    py={2}
-                    px={4}>
-                        <Radio 
-                        size='lg'
-                        bg='white' 
-                        colorScheme='purple' 
-                        key={rate.toString()} 
-                        value={rate.toString()}
-                        w='100%'
-                        h='100%'>
+        <Container maxW='fit-content' overflowX='auto' borderWidth='1px' bordercolor="gray.200" borderRadius="full" bg='white' shadow='sm' alignContent='center'>
+            <RadioGroup onChange={handleRadioChange} value={selectedRate} name="rate">
+                <Flex spacing={-3}>
+                    {rates.map((rate) => (
+                        <Box
+                          maxW='100%'
+                          key={rate.toString()}
+                          borderRightColor="gray.200"
+                          borderRightWidth="1px"
+                          py={2}
+                          px={4}
+                          _last={{borderRight:'none'}}>
+                          <Radio
+                            size='md'
+                            colorScheme='blackAlpha'
+                            key={rate.toString()}
+                            value={rate.toString()}
+                            w='100%'
+                            h='100%'
+                            >
                             {rate}x
                         </Radio>
-                    </Box>
-                ))}
-            </Flex>
-        </RadioGroup>
+                        </Box>
+                    ))}
+                </Flex>
+            </RadioGroup>
+        </Container>
     );
 }
 

@@ -1,58 +1,14 @@
-import React, { useState } from 'react';
-import getYoutubeID from 'get-youtube-id';
-import { ArrowSmallRightIcon } from '@heroicons/react/20/solid';
-import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom'
-import { IconButton, Input, InputGroup, InputRightElement, InputLeftElement, Image, Icon, VStack, Link, Spacer, Flex, Heading } from '@chakra-ui/react'
+import React from 'react';
+import { Link as ReactRouterLink} from 'react-router-dom'
+import { Image, Link, Flex} from '@chakra-ui/react'
 
 const Header = () => {
-  const location = useLocation();
-  const hideOnRoute = '/'; 
-  const shouldHidePart = location.pathname === hideOnRoute;
-  const navigate = useNavigate();
-  const [videoLink, setVideoLink] = useState('');
 
-  const handleButtonClick = () => {
-    // Extract video ID from the YouTube link
-    const videoId = getYoutubeID(videoLink);
-    // Navigate to the VideoPage with videoId as a parameter
-    navigate(`/video/${videoId}`);
-  };
-  
-return (
-  <Flex bg='blackAlpha.900' justify='space-between' gap='4' px={['2', '4']} py='4' mb={['8', '12']} align='center'>
+  return (
+  <Flex bg='blackAlpha.900' justify='space-between' gap='4' px={['2', '4']} py='4'  align='center'>
     <Link as={ReactRouterLink} to='/'>  
-      <Flex align="center" gap='1'>
-        {/* <MelodicusIcon h='6' color='whiteAlpha.900'/> */}
-        <Image src={process.env.PUBLIC_URL + '/logotype white.svg'} w='120px'/>
-        {/* <Heading size={['xs', 'sm']} color='whiteAlpha.900'>Melodicus</Heading> */}
-      </Flex>
+      <Image src={process.env.PUBLIC_URL + '/logotype white.svg'} w='120px'/>
     </Link>
-    {!shouldHidePart && 
-    <InputGroup size={['xs','sm']} width={['auto', '300px']}>
-      <Input
-        bg='whiteAlpha.900'
-        type='text'
-        placeholder='Enter YouTube link...'
-        value={videoLink}
-        onChange={(e) => setVideoLink(e.target.value)}
-        borderRadius={['sm', 'md']}
-      />
-      <InputRightElement>
-        <IconButton
-          minW='0'
-          width='32px'
-          height='100%'
-          colorScheme='purple'
-          bg='purple.600'
-          variant='solid'
-          borderEndRadius={['sm', 'md']}
-          borderStartRadius="0"
-          fontSize={24}
-          icon={<Icon as={ArrowSmallRightIcon}/>}
-          onClick={handleButtonClick}
-        />
-      </InputRightElement>
-    </InputGroup>}
   </Flex>
   );
 };

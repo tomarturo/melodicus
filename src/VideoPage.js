@@ -4,7 +4,7 @@ import Header from './Header';
 import Footer from './Footer';
 import { PlayIcon, PauseIcon } from '@heroicons/react/20/solid';
 import { DragHandleIcon, RepeatIcon } from '@chakra-ui/icons'
-import { Text, Flex, IconButton, Icon, HStack, VStack, Box, Heading, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
+import { Button, AbsoluteCenter, Flex, Icon, HStack, VStack, Box, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
 import PlaybackRateSelector from './PlaybackRateSelector';
 
 const VideoPage = () => {
@@ -12,6 +12,7 @@ const VideoPage = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoLength, setVideoLength] = useState(null);
+  const [videoThumbnail, setVideoThumbnail] = useState(null);
   const [startTimeHeader, setStartTimeHeader] = useState(0);
   const [endTimeHeader, setEndTimeHeader] = useState(0);
   const [isStartTimeHeaderActive, setIsStartTimeHeaderActive] = useState(false);
@@ -20,7 +21,7 @@ const VideoPage = () => {
   const [endTime, setEndTime] = useState(0);
   const [sliderValue, setSliderValue] = useState([null, null])
   const { videoId } = useParams();
-  const apiKey = 'AIzaSyB8asYxNRmtKE_lhgOKoMcLiWNsbwvCSFs';
+  const apiKey = 'AIzaSyCz_FUhutA28tmaBM-_EGIuFFfPxuA_irQ';
   const convertDurationToSeconds = (duration) => {
     const matches = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
     const hours = parseInt(matches[1]) || 0;
@@ -37,7 +38,8 @@ const VideoPage = () => {
 
     window.onYouTubeIframeAPIReady = () => {
       const ytPlayer = new window.YT.Player('player', {
-        width: '100%',
+        width: '0',
+        height:'0',
         videoId: videoId,
         playerVars: {
           autoplay: 0,
@@ -75,16 +77,16 @@ const VideoPage = () => {
   }, [player, endTime, startTime]);
 
   useEffect(() => {
-    fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${apiKey}`)
+    fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails,snippet&key=${apiKey}`)
       .then(response => response.json())
       .then(data => {
         const duration = data.items[0]?.contentDetails?.duration;
+        const thumbnailUrl = data.items[0]?.snippet?.thumbnails?.medium?.url;
         const totalDuration = convertDurationToSeconds(duration);
-
+  
         setVideoLength(totalDuration);
-        setEndTime(prevEndTime => {
-          return prevEndTime === 0 ? totalDuration : prevEndTime;
-        });
+        setEndTime(prevEndTime => (prevEndTime === 0 ? totalDuration : prevEndTime));
+        setVideoThumbnail(thumbnailUrl);
       })
       .catch(error => {
         console.error('Error fetching video details:', error);
@@ -114,13 +116,13 @@ const VideoPage = () => {
 
   const muteVideo = () => {
     if (player) {
-      player.mute(); // Mute the video
+      player.mute();
     }
   };
   
   const unmuteVideo = () => {
     if (player) {
-      player.unMute(); // Unmute the video
+      player.unMute();
     }
   };
 
@@ -142,7 +144,7 @@ const VideoPage = () => {
   };
   
   const onRangeChangeEnd = (index) => {
-    unmuteVideo(); // Unmute the video when adjustment is complete
+    unmuteVideo(); 
     setSliderValue([startTimeHeader, endTimeHeader]);
     if (index === 0) {
       setIsStartTimeHeaderActive(false);
@@ -181,129 +183,144 @@ const VideoPage = () => {
     if (player) {
       player.seekTo(startTime);
     }
-    console.log("Restart Loop Doofus!")
   };
 
-  console.log('isEndTimeHeaderActive:', isEndTimeHeaderActive);
+  console.log('isEndTimeHeaderActive:', videoLength);
   console.log('endTimeHeader:', endTimeHeader);
   console.log('isStartTimeHeaderActive:', isStartTimeHeaderActive);
 
   return (
-    <Flex direction='column' minH='100vh' bg='whiteAlpha.900'>
+    <Flex direction='column' minH='100vh' bg='#F5F5F5'>
       <Header/>
       <Flex direction="column" flex="1">
-        <Container>
+      <Box
+          pos='relative'
+          w="100vw"
+          h={["60vh", "70vh"]}
+          inset="0"
+          backgroundImage={videoThumbnail}
+          backgroundSize="11px 11px"
+          backgroundRepeat="repeat"
+          _before={{
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            backdropFilter:'auto', 
+            backdropBlur:'8px', 
+            backdropInvert:'0.175',
+            backdropContrast:'0.8',
+            backdropSaturate:'1.7',
+          }}
+        >
+          <AbsoluteCenter
+            h={[300, 400]}
+            w={[300, 400]}
+            borderRadius='md' 
+            backgroundImage={videoThumbnail}
+            backgroundPosition="center"
+            backgroundSize='cover'
+            backgroundRepeat='no-repeat'
+            boxShadow='xl'
+          />  
+          </Box>
+        <Container maxW='900px' zIndex={100} px={[2, 4]}>
           <VStack mb='8'>
             <Box id="player" mb='6'></Box>
-            <Box width='100%' mb='2' px='2'>
-              <HStack mb='8' justify='center' gap='4'>
-                <VStack>
-                  <Text as='b' align='left' fontSize='xs' casing='uppercase'>Loop Start</Text>
-                  <Heading
-                    px='12'
-                    py='2'
-                    borderRadius='sm'
-                    as='h3'
-                    size='md'
-                    color={isStartTimeHeaderActive ? 'white' : 'gray.700'}
-                    bg={isStartTimeHeaderActive ? 'purple.600' : 'gray.100'}
-                    align="center"
-                    onChange={(e) => setStartTimeHeader(e.target.value)}
-                    >{formatSecondsToDuration(startTimeHeader)}
-                  </Heading>
-                </VStack>
-                <VStack>
-                  <Text as='b' align='left' fontSize='xs' casing='uppercase'>Loop End</Text>
-                  <Heading
-                    px='12'
-                    py='2'
-                    borderRadius='sm'
-                    as='h3'
-                    size='md'
-                    color={isEndTimeHeaderActive ? 'white' : 'gray.700'}
-                    bg={isEndTimeHeaderActive ? 'purple.600' : 'gray.100'}
-                    align="center"
-                    onChange={(e) => setEndTimeHeader(e.target.value)}
-                    >{formatSecondsToDuration(endTimeHeader)}
-                  </Heading>
-                </VStack>
-              </HStack>
+            <Box width='100%' mb='2'>
               {videoLength && (
-                <RangeSlider
-                  aria-label={['0', videoLength]}
-                  min={0}
-                  max={videoLength}
-                  defaultValue={[0, videoLength]}
-                  onChange={(values, index) => {
-                    onRangeChange(values);
-                    setSliderValue(values);
-                  }}
-                  onChangeEnd={(index) => {
-                    console.log('onChangeEnd index:', index);
-                    onRangeChangeEnd(index);
-                  }}
-                  >
-                  <RangeSliderTrack bg='gray.100' h={2}>
-                    <RangeSliderFilledTrack bg='purple.600' />
-                  </RangeSliderTrack>
-                  <RangeSliderThumb 
-                    boxSize={10} 
-                    index={0} 
-                    bg='white' 
-                    border='1px' 
-                    borderColor='purple.600'
-                    onSelect={() => {
-                      setIsStartTimeHeaderActive(true);
-                      setIsEndTimeHeaderActive(false);
+                <Box 
+                  shadow='sm'
+                  mt="-16"
+                  borderRadius='full'
+                  background='white'
+                  border='1px'
+                  borderColor='gray.200'
+                  pt={8}
+                  pb={2}
+                  px={12}>
+                  <RangeSlider
+                    aria-label={['0', videoLength]}
+                    min={0}
+                    max={videoLength}
+                    defaultValue={[0, videoLength]}
+                    onChange={(values, index) => {
+                      onRangeChange(values);
+                      setSliderValue(values);
+                    }}
+                    onChangeEnd={(index) => {
+                      console.log('onChangeEnd index:', index);
+                      onRangeChangeEnd(index);
                     }}
                     >
-                      <DragHandleIcon color='purple.600'/>
-                  </RangeSliderThumb>
-                  <RangeSliderThumb 
-                    boxSize={10} 
-                    index={1} 
-                    bg='white' 
-                    border='1px' 
-                    borderColor='purple.600'
-                    onSelect={() => {
-                      setIsStartTimeHeaderActive(false);
-                      setIsEndTimeHeaderActive(true);
-                      console.log('Thumb selected')
-                    }}
-                    >
-                    <DragHandleIcon color='purple.600'/>
-                  </RangeSliderThumb>
-                </RangeSlider>
+                    <RangeSliderTrack bg='gray.200' h={2}>
+                      <RangeSliderFilledTrack bg='black' />
+                    </RangeSliderTrack>
+                    <RangeSliderThumb
+                      boxSize={10}
+                      index={0}
+                      bg='white'
+                      border='1px'
+                      borderColor='black'
+                      onSelect={() => {
+                        setIsStartTimeHeaderActive(true);
+                        setIsEndTimeHeaderActive(false);
+                      }}
+                      >
+                        <DragHandleIcon color='black'/>
+                        <RangeSliderMark fontSize='md' fontWeight='bold' mt='-16'>
+                        {formatSecondsToDuration(sliderValue[0])}
+                      </RangeSliderMark>
+                    </RangeSliderThumb>
+                    <RangeSliderThumb
+                      boxSize={10}
+                      index={1}
+                      bg='white'
+                      border='1px'
+                      borderColor='black'
+                      onSelect={() => {
+                        setIsStartTimeHeaderActive(false);
+                        setIsEndTimeHeaderActive(true); 
+                      }}
+                      >
+                      <RangeSliderMark fontSize='md' as="b" mt='-16'>
+                      {formatSecondsToDuration(sliderValue[1])}
+                    </RangeSliderMark>
+                      <DragHandleIcon color='black'/>
+                    </RangeSliderThumb>
+                  </RangeSlider>
+                </Box>
               )}
             </Box>
             <HStack mb='6' justify='center'>
-              <IconButton
-                height='88px'
-                width='88px'
+              <Button
+                size='lg'
+                shadow='sm'
                 mx='2'
-                border='0px'
-                variant='outline'
-                colorScheme='purple'
-                isRound={true}
+                bg='white'
+                variant='solid'
+                border='1px' 
+                borderColor='gray.200'
+                borderRadius='full'
                 aria-label='Play or Pause'
-                fontSize='48px'
-                icon={isPlaying ? <Icon as={PauseIcon} /> : <Icon as={PlayIcon} />}
-                onClick={playPauseClick}
-              />
-              <IconButton
-                height='88px'
-                width='88px'
-                border='0px'
-                variant='outline'
-                colorScheme='purple'
-                isRound={true}
-                aria-label='Play or Pause'
-                fontSize='48px'
+                leftIcon={isPlaying ? <Icon as={PauseIcon} /> : <Icon as={PlayIcon} />}
+                onClick={playPauseClick}>
+                   {isPlaying ? 'Pause' : 'Play'}
+              </Button>
+              <Button
+                size='lg'
+                shadow='sm'
+                leftIcon={<RepeatIcon />}
+                variant='solid'
+                bg='white'
+                borderRadius='full'
+                border='1px' 
+                borderColor='gray.200'
+                aria-label='Restart Loop'
                 icon={<RepeatIcon/>}
-                onClick={restartLoop}
-              />
+                onClick={restartLoop}>
+                Restart Loop
+              </Button>
             </HStack>
-            <Text as='b' align='left' fontSize='xs' casing='uppercase' mb='2'>Playback Speed</Text>
             <PlaybackRateSelector player={player} />
           </VStack>
         </Container>
@@ -315,71 +332,3 @@ const VideoPage = () => {
 
 export default VideoPage;
 
-// TODO - REFACTOR WITH INDIVIDUAL COMPONENTS
-// import React, { useState, useEffect } from 'react';
-// import { useParams } from 'react-router-dom';
-// import { Flex, Container, VStack, Text, Heading, Box, IconButton, Icon } from '@chakra-ui/react';
-// import { PlayIcon, PauseIcon, RepeatIcon } from '@heroicons/react/20/solid';
-// import VideoPlayer from './VideoPlayer';
-// import PlaybackControls from './PlaybackControls';
-// import LoopSelector from './LoopSelector';
-// import { convertDurationToSeconds, formatSecondsToDuration } from './Utilities';
-
-// const VideoPage = () => {
-//   const { videoId } = useParams();
-//   const apiKey = 'YOUR_API_KEY_HERE'; // Replace with your YouTube API key
-
-//   const [videoLength, setVideoLength] = useState(null);
-//   const [isPlaying, setIsPlaying] = useState(false);
-//   const [startTime, setStartTime] = useState(0);
-//   const [endTime, setEndTime] = useState(0);
-
-//   useEffect(() => {
-//     // Fetch video details and set videoLength here
-//     // ...
-
-//   }, [videoId, apiKey]);
-
-//   const onPlayPauseClick = () => {
-//     setIsPlaying((prevIsPlaying) => !prevIsPlaying);
-//     // Implement play/pause logic using VideoPlayer component
-//   };
-
-//   const onRestartLoop = () => {
-//     // Implement loop restart logic using VideoPlayer component
-//   };
-
-//   const onRangeChange = (values, index) => {
-//     // Handle loop range selection
-//   };
-
-//   const onRangeChangeEnd = (index) => {
-//     // Handle loop range change completion
-//   };
-
-//   return (
-//     <Flex direction='column' minH='100vh' bg='whiteAlpha.900'>
-//       <Flex direction="column" flex="1">
-//         <Container>
-//           <VStack mb='8'>
-//             <VideoPlayer videoId={videoId} apiKey={apiKey} />
-//             <LoopSelector
-//               videoLength={videoLength}
-//               onRangeChange={onRangeChange}
-//               onRangeChangeEnd={onRangeChangeEnd}
-//             />
-//             <PlaybackControls
-//               isPlaying={isPlaying}
-//               onPlayPauseClick={onPlayPauseClick}
-//               onRestartLoop={onRestartLoop}
-//             />
-//             <Text as='b' align='left' fontSize='xs' casing='uppercase' mb='2'>Playback Speed</Text>
-//             {/* Include your PlaybackRateSelector component here */}
-//           </VStack>
-//         </Container>
-//       </Flex>
-//     </Flex>
-//   );
-// };
-
-// export default VideoPage;
