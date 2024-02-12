@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import { PlayIcon, PauseIcon } from '@heroicons/react/20/solid';
 import { DragHandleIcon, RepeatIcon } from '@chakra-ui/icons'
-import { Button, AbsoluteCenter, Flex, Icon, HStack, VStack, Box, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
+import { Text, Button, AbsoluteCenter, Flex, Icon, HStack, VStack, Box, RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark, Container } from '@chakra-ui/react';
 import PlaybackRateSelector from './PlaybackRateSelector';
 
 const VideoPage = () => {
@@ -13,10 +13,6 @@ const VideoPage = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoLength, setVideoLength] = useState(null);
   const [videoThumbnail, setVideoThumbnail] = useState(null);
-  const [startTimeHeader, setStartTimeHeader] = useState(0);
-  const [endTimeHeader, setEndTimeHeader] = useState(0);
-  const [isStartTimeHeaderActive, setIsStartTimeHeaderActive] = useState(false);
-  const [isEndTimeHeaderActive, setIsEndTimeHeaderActive] = useState(false);
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
   const [sliderValue, setSliderValue] = useState([null, null])
@@ -93,6 +89,23 @@ const VideoPage = () => {
       });
   }, [videoId, apiKey]);
 
+  const getCurrentTime = useCallback(() => {
+    if (player) {
+      const time = player.getCurrentTime();
+      setCurrentTime(time);
+    }
+    console.log('Playback Position:', currentTime);
+  }, [player, setCurrentTime]);
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      getCurrentTime();
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [videoId, videoLength, getCurrentTime]); 
+
+
   const onReady = (event) => {
     console.log('YouTube player is ready:', event);
   };
@@ -128,29 +141,16 @@ const VideoPage = () => {
 
   const onRangeChange = (values, index) => {
     muteVideo();
-    setCurrentTime(values[0]);
     if (player) {
       player.seekTo(values[0]);
     }
     setStartTime(values[0]);
     setEndTime(values[1]);
-    setStartTimeHeader(values[0]);
-    setEndTimeHeader(values[1]);
-    if (index === 0) {
-      setIsStartTimeHeaderActive(true);
-    } else if (index === 1) {
-      setIsEndTimeHeaderActive(true);
-    }
   };
   
-  const onRangeChangeEnd = (index) => {
+  const onRangeChangeEnd = () => {
     unmuteVideo(); 
-    setSliderValue([startTimeHeader, endTimeHeader]);
-    if (index === 0) {
-      setIsStartTimeHeaderActive(false);
-    } else if (index === 1) {
-      setIsEndTimeHeaderActive(false);
-    }
+    setSliderValue([startTime, endTime]);
   };
 
   const formatSecondsToDuration = (seconds) => {
@@ -185,9 +185,7 @@ const VideoPage = () => {
     }
   };
 
-  console.log('isEndTimeHeaderActive:', videoLength);
-  console.log('endTimeHeader:', endTimeHeader);
-  console.log('isStartTimeHeaderActive:', isStartTimeHeaderActive);
+  console.log(Math.floor(currentTime))
 
   return (
     <Flex direction='column' minH='100vh' bg='#F5F5F5'>
@@ -223,71 +221,71 @@ const VideoPage = () => {
             boxShadow='xl'
           />  
           </Box>
-        <Container maxW='900px' zIndex={100} px={[2, 4]}>
+        <Container maxW='900px' zIndex={100} px={[2, 4]}>        
           <VStack mb='8'>
             <Box id="player" mb='6'></Box>
             <Box width='100%' mb='2'>
               {videoLength && (
-                <Box 
-                  shadow='sm'
-                  mt="-16"
-                  borderRadius='full'
-                  background='white'
-                  border='1px'
-                  borderColor='gray.200'
-                  pt={8}
-                  pb={2}
-                  px={12}>
-                  <RangeSlider
-                    aria-label={['0', videoLength]}
-                    min={0}
-                    max={videoLength}
-                    defaultValue={[0, videoLength]}
-                    onChange={(values, index) => {
-                      onRangeChange(values);
-                      setSliderValue(values);
-                    }}
-                    onChangeEnd={(index) => {
-                      console.log('onChangeEnd index:', index);
-                      onRangeChangeEnd(index);
-                    }}
-                    >
-                    <RangeSliderTrack bg='gray.200' h={2}>
-                      <RangeSliderFilledTrack bg='black' />
-                    </RangeSliderTrack>
-                    <RangeSliderThumb
-                      boxSize={10}
-                      index={0}
-                      bg='white'
-                      border='1px'
-                      borderColor='black'
-                      onSelect={() => {
-                        setIsStartTimeHeaderActive(true);
-                        setIsEndTimeHeaderActive(false);
+                <Box mt="-20">
+                  <Box
+                    shadow='md'
+                    borderRadius='full'
+                    backdropFilter='auto'
+                    backdropBlur='20px'
+                    border='1px'
+                    borderColor='gray.200'
+                    pt={8}
+                    pb={4}
+                    px={12}
+                    sx={{'background-color':'rgba(255,255,255,0.65)'}}>
+                    <RangeSlider
+                      aria-label={['0', videoLength]}
+                      min={0}
+                      max={videoLength}
+                      defaultValue={[0, videoLength]}
+                      onChange={(values, index) => {
+                        onRangeChange(values);
+                        setSliderValue(values);
+                      }}
+                      onChangeEnd={(index) => {
+                        onRangeChangeEnd(index);
                       }}
                       >
-                        <DragHandleIcon color='black'/>
-                        <RangeSliderMark fontSize='md' fontWeight='bold' mt='-16'>
-                        {formatSecondsToDuration(sliderValue[0])}
+                      <RangeSliderTrack bg='blackAlpha.300' h={2}>
+                        <RangeSliderFilledTrack bg='blackAlpha.800' />
+                      </RangeSliderTrack>
+                      <RangeSliderMark value={currentTime} mt='-4'>
+                        <Flex align='center' direction='column' gap='2px'>
+                          <Box bg='red.500' w='3px' h='32px'></Box>
+                          <Text fontSize='sm' fontWeight='semibold' color='blackAlpha.700' textAlign={'center'}>{formatSecondsToDuration(Math.floor(currentTime))}</Text>
+                        </Flex>
                       </RangeSliderMark>
-                    </RangeSliderThumb>
-                    <RangeSliderThumb
-                      boxSize={10}
-                      index={1}
-                      bg='white'
-                      border='1px'
-                      borderColor='black'
-                      onSelect={() => {
-                        setIsStartTimeHeaderActive(false);
-                        setIsEndTimeHeaderActive(true); 
-                      }}
-                      >
-                      <RangeSliderMark fontSize='md' as="b" mt='-16'>
-                      {formatSecondsToDuration(sliderValue[1])}
-                    </RangeSliderMark>
-                      <DragHandleIcon color='black'/>
-                    </RangeSliderThumb>
-                  </RangeSlider>
+                      <RangeSliderThumb
+                        boxSize={10}
+                        index={0}
+                        bg='white'
+                        border='1px'
+                        borderColor='black'
+                        >
+                          <DragHandleIcon color='black'/>
+                          <RangeSliderMark fontSize='md' fontWeight='bold' mt='-16'>
+                          {formatSecondsToDuration(sliderValue[0])}
+                        </RangeSliderMark>
+                      </RangeSliderThumb>
+                      <RangeSliderThumb
+                        boxSize={10}
+                        index={1}
+                        bg='white'
+                        border='1px'
+                        borderColor='blackAlpha.900'
+                        >
+                        <RangeSliderMark fontSize='md' fontWeight='bold' mt='-16'>
+                        {formatSecondsToDuration(sliderValue[1])}
+                      </RangeSliderMark>
+                        <DragHandleIcon color='black'/>
+                      </RangeSliderThumb>
+                    </RangeSlider>
+                  </Box>
                 </Box>
               )}
             </Box>
