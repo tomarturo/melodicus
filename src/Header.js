@@ -7,7 +7,7 @@ const Header = () => {
   return (
   <Flex bg='blackAlpha.900' justify='space-between' gap='4' px={['2', '4']} py='4'  align='center'>
     <Link as={ReactRouterLink} to='/'>  
-      <Image src={process.env.PUBLIC_URL + '/logotype white.svg'} w='120px'/>
+      <Image src={process.env.PUBLIC_URL + '/grotesklogo.svg'} w='120px'/>
     </Link>
   </Flex>
   );

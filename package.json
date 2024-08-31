@@ -1,5 +1,5 @@
 {
-  "name": "hear-it",
+  "name": "melodicus",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -17,12 +17,10 @@
     "axios": "^1.6.1",
     "framer-motion": "^10.16.5",
     "get-youtube-id": "^1.0.1",
-    "rc-slider": "^10.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.18.0",
     "react-scripts": "5.0.1",
-    "react-youtube": "^10.1.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

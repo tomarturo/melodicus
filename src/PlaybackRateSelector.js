@@ -16,7 +16,7 @@ function PlaybackRateSelector({ player }) {
     return (
         <Container maxW='fit-content' overflowX='auto' borderWidth='1px' bordercolor="gray.200" borderRadius="full" bg='white' shadow='sm' alignContent='center'>
             <RadioGroup onChange={handleRadioChange} value={selectedRate} name="rate">
-                <Flex spacing={-3}>
+                <Flex spacing={-4}>
                     {rates.map((rate) => (
                         <Box
                           maxW='100%'
@@ -24,7 +24,7 @@ function PlaybackRateSelector({ player }) {
                           borderRightColor="gray.200"
                           borderRightWidth="1px"
                           py={2}
-                          px={4}
+                          px={2}
                           _last={{borderRight:'none'}}>
                           <Radio
                             size='md'

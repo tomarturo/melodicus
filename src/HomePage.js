@@ -20,6 +20,7 @@ const HomePage = () => {
   const handleButtonClick = () => {
     const videoId = getYoutubeID(videoLink);
     navigate(`/video/${videoId}`);
+    console.log("VIDEO ID:", videoId)
   };
 
   return (

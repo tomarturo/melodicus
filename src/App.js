@@ -6,6 +6,7 @@ import VideoPage from './VideoPage';
 import SearchResults from './SearchResults';
 import '@fontsource-variable/space-grotesk'
 import '@fontsource-variable/work-sans';
+import NullVideoPage from './NullVideoPage';
 
 const theme = extendTheme({
   fonts: {
@@ -20,6 +21,7 @@ function App () {
       <Routes>
         <Route path="/" index element={<HomePage />} />
         <Route path="/video/:videoId" element={< VideoPage />} />
+        <Route path="/video/null" element={< NullVideoPage />} />
         <Route path="/search/:query" element={<SearchResults />} />
       </Routes>
     </ChakraProvider>
