@@ -17,6 +17,12 @@ const HomePage = () => {
     navigate(`/search/${searchQuery}`)
   }
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   const handleButtonClick = () => {
     const videoId = getYoutubeID(videoLink);
     navigate(`/video/${videoId}`);
@@ -56,6 +62,7 @@ const HomePage = () => {
                       placeholder='Enter a YouTube link'
                       value={videoLink}
                       onChange={(e) => setVideoLink(e.target.value)}
+                      onKeyDown={handleKeyDown}
                     />
                     <InputRightElement>
                     <IconButton onClick={handleButtonClick} icon={<ArrowForwardIcon />}  isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>
@@ -95,6 +102,7 @@ const HomePage = () => {
                       placeholder='Enter a song title & artist'
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
                     />
                    <InputRightElement>
                       <IconButton onClick={handleSearch} icon={<SearchIcon />} isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>

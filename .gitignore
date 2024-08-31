@@ -1,9 +1,11 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 #development
-.Sandbox.js
-.kurt-sandu-cover.png
-.sandu-cover.png
+src/Sandbox.js
+kurt-sandu-cover.png
+sandu-cover.png
+public/logotype.svg
+src/ToggleVideoImage.js
 
 # dependencies
 /node_modules

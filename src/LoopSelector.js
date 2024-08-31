@@ -34,10 +34,10 @@ const LoopSelector = ({
         backdropFilter='auto'
         backdropBlur='20px'
         border='1px'
-        borderColor='gray.200'
+        borderColor='blackAlpha.200'
         pt={8}
-        pb={4}
-        px={12}
+        pb={5}
+        px={14}
         sx={{ 'background-color': 'rgba(255,255,255,0.65)' }}
       >
         <RangeSlider
@@ -51,7 +51,7 @@ const LoopSelector = ({
           }}
           onChangeEnd={onRangeChangeEnd}
         >
-          <RangeSliderTrack bg='blackAlpha.300' h={2}>
+          <RangeSliderTrack bg='blackAlpha.500' h={2}>
             <RangeSliderFilledTrack bg='blackAlpha.800' />
           </RangeSliderTrack>
           <RangeSliderMark value={currentTime} mt='-4' w="0px">
@@ -66,37 +66,34 @@ const LoopSelector = ({
             <RangeSliderThumb
               key={index}
               index={index}
-              h="32px"
+              h="38px"
               w="2px"
               bg="blackAlpha.800"
-              _focus={{ boxShadow: "none" }}
-              _active={{ bg: "blackAlpha.900" }}
+              _hover={{ cursor: "ew-resize" }}
+              _active={{ cursor: "ew-resize"}}
             >
               <Flex
                 role="group"
                 position="absolute"
-                top="-20px"
+                top="-12px"
                 left="50%"
+                gap={8}
                 transform="translateX(-50%)"
                 direction="column"
                 align="center"
+                justifyContent="space-between"
               >
-                <Box
-                  as="button"
-                  bg="white"
+                <Circle
+                  bg="black"
                   borderRadius="full"
-                  boxSize="24px"
+                  boxSize="12px"
                   display="flex"
                   alignItems="center"
-                  justifyContent="center"
-                  boxShadow="md"
-                  border="1px"
-                  borderColor="blackAlpha.200"
-                  _hover={{ bg: "purple.50" }}
-                  _active={{ bg: "purple.100" }}
+                  justifyContent="between"
+                  _hover={{ cursor: "ew-resize" }}
+                  _active={{ cursor: "ew-resize"}}
                 >
-                  <Circle size='16px' bg='black' color="black" border="0px" />
-                </Box>
+                </Circle>
                 <Text
                   fontSize='sm'
                   fontWeight='bold'

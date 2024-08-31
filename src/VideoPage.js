@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { Flex, VStack, Box, Container } from '@chakra-ui/react';
 import Header from './Header';
 import Footer from './Footer';
-import { Button, AbsoluteCenter, Flex, Icon, HStack, VStack, Box, Container } from '@chakra-ui/react';
 import VideoDisplay from './VideoDisplay';
 import LoopSelector from './LoopSelector';
 import PlaybackControls from './PlaybackControls';

@@ -13,7 +13,7 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
         bg='white'
         variant='solid'
         border='1px'
-        borderColor='gray.200'
+        borderColor='blackAlpha.200'
         borderRadius='full'
         aria-label='Play or Pause'
         leftIcon={isPlaying ? <Icon as={PauseIcon} /> : <Icon as={PlayIcon} />}
@@ -29,7 +29,7 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
         bg='white'
         borderRadius='full'
         border='1px'
-        borderColor='gray.200'
+        borderColor='blackAlpha.200'
         aria-label='Restart Loop'
         onClick={restartLoop}
       >
