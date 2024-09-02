@@ -41,8 +41,8 @@ const HomePage = () => {
             </Flex>
             <Tabs colorScheme='gray' w='100%' align='center' isFitted maxW='2xl'>
               <TabList>
-                <Tab _selected={{ fontWeight:'semibold' }}>Paste a Link</Tab>
                 <Tab _selected={{ fontWeight:'semibold' }}>Find a Song</Tab>
+                <Tab _selected={{ fontWeight:'semibold' }}>Paste a Link</Tab>
               </TabList>
               <TabIndicator
                 mt="-1.5px"
@@ -55,7 +55,34 @@ const HomePage = () => {
                   <InputGroup size='md' mb='2'>
                     <Input
                       rounded='full'
-                      variant='filled'
+                      variant='outline'
+                      pr='2rem'
+                      mb={4}
+                      type='text'
+                      placeholder='Enter a song title & artist'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+                   <InputRightElement>
+                      <IconButton onClick={handleSearch} icon={<SearchIcon />} isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>
+                      </IconButton>
+                    </InputRightElement>
+                  </InputGroup>
+                  <Center>
+                  <HStack alignItems={['start', 'start', 'center']}>
+                    <Badge colorScheme='purple' mt={[1, 1, 0]}>pro tip</Badge>
+                      <Text fontSize='sm' textAlign={['left', 'left', 'center']}>
+                        This works best when you're specific. Include a song title & artist.
+                      </Text>
+                    </HStack>
+                  </Center>
+                </TabPanel>
+                <TabPanel px='0'>
+                  <InputGroup size='md' mb='2'>
+                    <Input
+                      rounded='full'
+                      variant='outline'
                       pr='2rem'
                       mb={4}
                       type='text'
@@ -87,33 +114,6 @@ const HomePage = () => {
                         Open YouTube in a new tab<Icon as={ArrowTopRightOnSquareIcon}></Icon>
                         </Link>&nbsp;
                         find your next song, then paste the link here.
-                      </Text>
-                    </HStack>
-                  </Center>
-                </TabPanel>
-                <TabPanel px='0'>
-                  <InputGroup size='md' mb='2'>
-                    <Input
-                      rounded='full'
-                      variant='filled'
-                      pr='2rem'
-                      mb={4}
-                      type='text'
-                      placeholder='Enter a song title & artist'
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                    />
-                   <InputRightElement>
-                      <IconButton onClick={handleSearch} icon={<SearchIcon />} isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>
-                      </IconButton>
-                    </InputRightElement>
-                  </InputGroup>
-                  <Center>
-                  <HStack alignItems={['start', 'start', 'center']}>
-                    <Badge colorScheme='purple' mt={[1, 1, 0]}>pro tip</Badge>
-                      <Text fontSize='sm' textAlign={['left', 'left', 'center']}>
-                        This works best when you're specific. Include a song title & artist.
                       </Text>
                     </HStack>
                   </Center>

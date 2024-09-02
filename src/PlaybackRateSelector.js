@@ -19,6 +19,7 @@ function RateButton(props) {
         cursor='pointer'
         borderWidth='1px'
         borderColor='blackAlpha.200'
+        bg='white'
         borderRightWidth={props.isLast ? '1px' : '0'}
         borderRightRadius={props.isLast ? 'full' : '0'}
         borderLeftRadius={props.isFirst ? 'full' : '0'}
@@ -27,6 +28,7 @@ function RateButton(props) {
           color: 'white',
           borderColor: 'black',
         }}
+        _hover={{fontWeight:"semibold", transition:"all 0.1s"}}
         py={2}
         fontSize="sm"
         transition="all 0.2s"
@@ -57,8 +59,8 @@ function PlaybackRateSelector({ player }) {
   const group = getRootProps();
 
   return (
-    <Container maxW='fit-content' overflowX='auto' height="64px">
-      <HStack {...group} spacing={0} borderRadius="full" bg='white' shadow='sm'
+    <Container maxW='fit-content' height="64px">
+      <HStack {...group} spacing={0} borderRadius="full"  shadow='sm'  overflowX='scroll'
         backdropFilter='auto'
         backdropBlur='20px'>
         {rates.map((rate, index) => {

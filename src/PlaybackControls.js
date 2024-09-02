@@ -9,12 +9,12 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
       <Button
         size='lg'
         shadow='sm'
-        mx='2'
-        bg='white'
-        variant='solid'
+        color="black"
+        bg="white"
         border='1px'
         borderColor='blackAlpha.200'
         borderRadius='full'
+        _hover={{ color: 'white', bg: 'black' }}
         aria-label='Play or Pause'
         leftIcon={isPlaying ? <Icon as={PauseIcon} /> : <Icon as={PlayIcon} />}
         onClick={playPauseClick}
@@ -22,18 +22,19 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
         {isPlaying ? 'Pause' : 'Play'}
       </Button>
       <Button
-        size='lg'
-        shadow='sm'
         leftIcon={<Icon as={RepeatIcon} />}
-        variant='solid'
-        bg='white'
-        borderRadius='full'
+        size='lg'
+        shadow='md'
+        color="black"
+        bg="white"
         border='1px'
         borderColor='blackAlpha.200'
+        borderRadius='full'
+        _hover={{ color: 'white', bg: 'black' }}
         aria-label='Restart Loop'
         onClick={restartLoop}
       >
-        Restart Loop
+        Restart
       </Button>
     </HStack>
   );

@@ -149,9 +149,6 @@ const VideoPage = () => {
 
   const handleRangeChange = (values) => {
     muteVideo();
-    if (player) {
-      player.seekTo(values[0]);
-    }
     setStartTime(values[0]);
     setEndTime(values[1]);
   };
@@ -207,7 +204,7 @@ const VideoPage = () => {
       <Header />
       <Flex direction="column" flex="1">
         <VideoDisplay videoThumbnail={videoThumbnail} />
-        <Container maxW='900px' zIndex={100} px={[2, 4]}>
+        <Container maxW='900px' zIndex={100} px={[0, 0, 10, 0]}>
           <VStack mb='8'>
             <Box id="player" mb='6'></Box>
             <Box width='100%' mb='2'>

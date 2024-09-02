@@ -27,17 +27,17 @@ const LoopSelector = ({
   };
 
   return (
-    <Box mt="-20">
+    <Box mt={"-20"} mb={["6", "4"]}>
       <Box
         shadow='md'
-        borderRadius='full'
+        borderRadius={["none", "none", "full"]}
         backdropFilter='auto'
         backdropBlur='20px'
         border='1px'
         borderColor='blackAlpha.200'
-        pt={8}
-        pb={5}
-        px={14}
+        pt={6}
+        pb={4}  
+        px={[6, 8, 14]}
         sx={{ 'background-color': 'rgba(255,255,255,0.65)' }}
       >
         <RangeSlider
@@ -56,8 +56,8 @@ const LoopSelector = ({
           </RangeSliderTrack>
           <RangeSliderMark value={currentTime} mt='-4' w="0px">
             <Flex align='center' direction='column' gap='2px'>
-              <Box bg='red.500' w='3px' h='32px'></Box>
-              <Text fontSize='sm' fontWeight='semibold' color='blackAlpha.700' textAlign='center'>
+              <Box bg='red.600' w='3px' h='32px'></Box>
+              <Text fontSize='xs' color='blackAlpha.700' textAlign='center'>
                 {formatSecondsToDuration(currentTime)}
               </Text>
             </Flex>
@@ -66,45 +66,50 @@ const LoopSelector = ({
             <RangeSliderThumb
               key={index}
               index={index}
-              h="38px"
-              w="2px"
-              bg="blackAlpha.800"
+              h="64px"
+              bg="none"
+              shadow="none"
               _hover={{ cursor: "ew-resize" }}
               _active={{ cursor: "ew-resize"}}
+              _focus={{ border: "transparent", backgroundColor: "transparent"}}
             >
               <Flex
                 role="group"
                 position="absolute"
-                top="-12px"
                 left="50%"
-                gap={8}
                 transform="translateX(-50%)"
                 direction="column"
                 align="center"
                 justifyContent="space-between"
               >
-                <Circle
-                  bg="black"
-                  borderRadius="full"
-                  boxSize="12px"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="between"
-                  _hover={{ cursor: "ew-resize" }}
-                  _active={{ cursor: "ew-resize"}}
-                >
-                </Circle>
                 <Text
                   fontSize='sm'
+                  mb="1"
                   fontWeight='bold'
-                  mt='1'
                   opacity='0'
+                  color="blackAlpha.900"
                   transition="opacity 0.2s"
                   _groupHover={{ opacity: "1" }}
                   _groupActive={{ opacity: "1" }}
                 >
                   {formatSecondsToDuration(sliderValue[index])}
                 </Text>
+                <Box 
+                h="40px" 
+                w="2px"
+                bg="blackAlpha.800" 
+                _groupHover={{ backgroundColor: "blackAlpha.900" }}
+                  _groupActive={{ backgroundColory: "blackAlpha.900" }}/>
+                <Circle
+                  bg="blackAlpha.800"
+                  borderRadius="full"
+                  boxSize="10px"
+                  _hover={{ cursor: "ew-resize" }}
+                  _active={{ cursor: "ew-resize"}}
+                  _groupHover={{ backgroundColor: "blackAlpha.900" }}
+                  _groupActive={{ backgroundColory: "blackAlpha.900" }}
+                >
+                </Circle>
               </Flex>
             </RangeSliderThumb>
           ))}

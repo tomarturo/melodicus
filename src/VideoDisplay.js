@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, AbsoluteCenter } from '@chakra-ui/react';
 
 const VideoDisplay = ({ videoThumbnail }) => {
+
   return (
     <Box
       pos='relative'
       w="100vw"
-      h={["60vh", "70vh"]}
+      h={["45vh", "50vh", "55vh", "70vh", "75vh"]}
       inset="0"
       backgroundImage={videoThumbnail}
       backgroundSize="11px 11px"
@@ -23,8 +24,10 @@ const VideoDisplay = ({ videoThumbnail }) => {
       }}
     >
       <AbsoluteCenter
-        h={[300, 400]}
-        w={[300, 400]}
+        axis="horizontal"
+        top={[6, 8, 8, 10, ]}
+        h={[250, 280, 320, 380, 450]}
+        w={[250, 280, 320, 380, 450]}
         borderRadius='md'
         backgroundImage={videoThumbnail}
         backgroundPosition="center"

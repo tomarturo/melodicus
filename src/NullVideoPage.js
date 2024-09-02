@@ -39,7 +39,7 @@ const NullVideoPage = () => {
           <InputGroup size='md' mb='2'>
             <Input
             rounded='full'
-            variant='filled'
+            variant='outline'
             pr='2rem'
             mb={4}
             type='text'
