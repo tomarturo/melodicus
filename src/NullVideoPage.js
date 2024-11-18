@@ -16,7 +16,7 @@ const NullVideoPage = () => {
     };
 
     return (
-    <Flex direction='column' minH='100vh' bg='#F5F5F5'>
+    <Flex direction='column' minH='100vh' bg='white'>
       <Header/>
       <Flex direction="column" flex="1">
         <Container maxW='3xl' mt='12'>

@@ -30,8 +30,8 @@ const SearchResults = ({ searchQuery }) => {
           q: query,
           type: 'video',
           part: 'snippet',
-          key:'AIzaSyCz_FUhutA28tmaBM-_EGIuFFfPxuA_irQ'
-          // key: 'AIzaSyB8asYxNRmtKE_lhgOKoMcLiWNsbwvCSFs', // DEV KEY
+          key: process.env.REACT_APP_YOUTUBE_API_KEY
+          // key:'AIzaSyCz_FUhutA28tmaBM-_EGIuFFfPxuA_irQ'
         },
       })
       .then((response) => {
@@ -51,7 +51,7 @@ const SearchResults = ({ searchQuery }) => {
 
   return (
     <div>
-      <Flex direction='column' minH='100vh'>
+      <Flex direction='column' minH='100vh' bg="white">
         <Header />
         <Flex direction="column" flex="1">
         {quotaExceeded ? (

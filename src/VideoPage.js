@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Flex, VStack, Box, Container } from '@chakra-ui/react';
+import { Flex, VStack, Box, Container, Button, useToast } from '@chakra-ui/react';
 import Header from './Header';
 import Footer from './Footer';
 import VideoDisplay from './VideoDisplay';
 import LoopSelector from './LoopSelector';
 import PlaybackControls from './PlaybackControls';
 import PlaybackRateSelector from './PlaybackRateSelector';
-
+import { useAuth } from './contexts/AuthContext';
+import { supabase } from './supabaseClient';
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
@@ -19,7 +20,8 @@ const VideoPage = () => {
   const [endTime, setEndTime] = useState(0);
   const [sliderValue, setSliderValue] = useState([null, null])
   const { videoId } = useParams();
-  const apiKey = 'AIzaSyCz_FUhutA28tmaBM-_EGIuFFfPxuA_irQ';
+  const [videoTitle, setVideoTitle] = useState(null);
+  const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
   const convertDurationToSeconds = (duration) => {
     const matches = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
     const hours = parseInt(matches[1]) || 0;
@@ -27,6 +29,9 @@ const VideoPage = () => {
     const seconds = parseInt(matches[3]) || 0;
     return hours * 3600 + minutes * 60 + seconds;
   };
+  const { user } = useAuth();
+  const toast = useToast();
+  const [isSaved, setIsSaved] = useState(false);
 
   const onStateChange = (event) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
@@ -120,10 +125,12 @@ const VideoPage = () => {
         const duration = data.items[0]?.contentDetails?.duration;
         const thumbnailUrl = data.items[0]?.snippet?.thumbnails?.medium?.url;
         const totalDuration = convertDurationToSeconds(duration);
+        const title = data.items[0]?.snippet?.title;
 
         setVideoLength(totalDuration);
         setEndTime(prevEndTime => (prevEndTime === 0 ? totalDuration : prevEndTime));
         setVideoThumbnail(thumbnailUrl);
+        setVideoTitle(title); 
       })
       .catch(error => {
         console.error('Error fetching video details:', error);
@@ -199,6 +206,84 @@ const VideoPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (user) {
+      const checkIfSaved = async () => {
+        const { data, error } = await supabase
+          .from('saved_songs')
+          .select('id')
+          .eq('video_id', videoId)
+          .eq('user_id', user.id)
+          .single();
+        
+        if (data) {
+          setIsSaved(true);
+        }
+      };
+  
+      checkIfSaved();
+    }
+  }, [user, videoId]);
+
+  const handleSaveVideo = async () => {
+    if (!user) {
+      toast({
+        title: "Please log in",
+        description: "You need to be logged in to save videos",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+  
+    try {
+      if (isSaved) {
+        // Delete the saved video
+        const { error } = await supabase
+          .from('saved_songs')
+          .delete()
+          .eq('video_id', videoId)
+          .eq('user_id', user.id);
+  
+        if (error) throw error;
+  
+        setIsSaved(false);
+        toast({
+          title: "Video removed from saved",
+          status: "success",
+          duration: 3000,
+        });
+      } else {
+        // Save the video
+        const { error } = await supabase
+          .from('saved_songs')
+          .insert([
+            {
+              video_id: videoId,
+              title: videoTitle,
+            }
+          ]);
+  
+        if (error) throw error;
+  
+        setIsSaved(true);
+        toast({
+          title: "Video saved!",
+          description: "You can find this in your saved videos",
+          status: "success",
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 3000,
+      });
+    }
+  };  
+
   return (
     <Flex direction='column' minH='100vh' bg='#F5F5F5'>
       <Header />
@@ -219,6 +304,13 @@ const VideoPage = () => {
                 />
               )}
             </Box>
+            <Button
+              onClick={handleSaveVideo}
+              colorScheme={isSaved ? "red" : "blue"}
+              isDisabled={!user}
+            >
+              {!user ? 'Login to Save' : (isSaved ? 'Unsave' : 'Save')}
+            </Button>
             <PlaybackControls
               isPlaying={isPlaying}
               playPauseClick={playPauseClick}

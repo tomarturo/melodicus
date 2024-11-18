@@ -6,6 +6,7 @@ import { ArrowTopRightOnSquareIcon, } from '@heroicons/react/20/solid';
 import { Icon, Center, Badge, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, HStack, Link } from '@chakra-ui/react'
 import Header from './Header';
 import Footer from './Footer';
+import AuthModal from './AuthModal';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const HomePage = () => {
   };
 
   return (
-    <Flex direction='column' minH='100vh'>
+    <Flex direction='column' minH='100vh' bg='white'>
       <Header/>
       <Flex direction="column" flex="1" pt='12'>
         <Container maxW='3xl'>
@@ -120,6 +121,7 @@ const HomePage = () => {
                 </TabPanel>
               </TabPanels>
             </Tabs>
+            <AuthModal/>
           </VStack>
         </Container>
       </Flex>

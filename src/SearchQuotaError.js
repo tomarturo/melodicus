@@ -14,7 +14,7 @@ const SearchQuotaError = ({ query }) => {
     };
 
     return (
-    <Container maxW='3xl' mt='12'>
+    <Container maxW='3xl' mt='12' bg="white">
       <Heading as='h1' size='xl' align="center" mb='6'>We can't run your search right now</Heading>
       <Text align='center' mb='8'>
       <Link
