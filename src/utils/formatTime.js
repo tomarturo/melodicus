@@ -13,14 +13,13 @@ export const convertDurationToSeconds = (duration) => {
   export const formatSecondsToDuration = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-  
+    const remainingSeconds = Math.floor(seconds % 60);
+
     const pad = (value) => (value < 10 ? `0${value}` : value);
-  
+
     if (hours > 0) {
       return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
     } else {
       return `${pad(minutes)}:${pad(remainingSeconds)}`;
     }
   };
-  

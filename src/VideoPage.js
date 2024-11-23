@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Flex, VStack, Box, Container, Button, useToast } from '@chakra-ui/react';
+import {
+  Flex, VStack, HStack, Box, Container, Button, useToast, Text, Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Input,
+} from '@chakra-ui/react';
 import Header from './Header';
 import Footer from './Footer';
 import VideoDisplay from './VideoDisplay';
@@ -9,6 +18,8 @@ import PlaybackControls from './PlaybackControls';
 import PlaybackRateSelector from './PlaybackRateSelector';
 import { useAuth } from './contexts/AuthContext';
 import { supabase } from './supabaseClient';
+import { convertDurationToSeconds, formatSecondsToDuration } from './utils/formatTime';
+import { createSavedSection, getSavedSections, deleteSavedSection } from './utils/sectionsFunctions'
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
@@ -22,16 +33,13 @@ const VideoPage = () => {
   const { videoId } = useParams();
   const [videoTitle, setVideoTitle] = useState(null);
   const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
-  const convertDurationToSeconds = (duration) => {
-    const matches = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-    const hours = parseInt(matches[1]) || 0;
-    const minutes = parseInt(matches[2]) || 0;
-    const seconds = parseInt(matches[3]) || 0;
-    return hours * 3600 + minutes * 60 + seconds;
-  };
   const { user } = useAuth();
   const toast = useToast();
   const [isSaved, setIsSaved] = useState(false);
+  const [savedSongId, setSavedSongId] = useState(null);
+  const [savedSections, setSavedSections] = useState([]);
+  const [isAddingSectionName, setIsAddingSectionName] = useState(false);
+  const [newSectionName, setNewSectionName] = useState('');
 
   const onStateChange = (event) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
@@ -130,7 +138,7 @@ const VideoPage = () => {
         setVideoLength(totalDuration);
         setEndTime(prevEndTime => (prevEndTime === 0 ? totalDuration : prevEndTime));
         setVideoThumbnail(thumbnailUrl);
-        setVideoTitle(title); 
+        setVideoTitle(title);
       })
       .catch(error => {
         console.error('Error fetching video details:', error);
@@ -215,15 +223,28 @@ const VideoPage = () => {
           .eq('video_id', videoId)
           .eq('user_id', user.id)
           .single();
-        
+
         if (data) {
           setIsSaved(true);
+          setSavedSongId(data.id);
+          // Fetch saved sections when we have the saved_song_id
+          const { data: sections } = await getSavedSections(supabase, data.id);
+          if (sections) {
+            setSavedSections(sections);
+          }
+        } else {
+          // Reset states if video is not saved
+          setIsSaved(false);
+          setSavedSongId(null);
+          setSavedSections([]);
         }
       };
-  
+
       checkIfSaved();
     }
   }, [user, videoId]);
+
+  //Save song
 
   const handleSaveVideo = async () => {
     if (!user) {
@@ -235,7 +256,7 @@ const VideoPage = () => {
       });
       return;
     }
-  
+
     try {
       if (isSaved) {
         // Delete the saved video
@@ -244,10 +265,13 @@ const VideoPage = () => {
           .delete()
           .eq('video_id', videoId)
           .eq('user_id', user.id);
-  
+
         if (error) throw error;
-  
+
         setIsSaved(false);
+        setSavedSongId(null);      // Reset saved_song_id
+        setSavedSections([]);      // Clear saved sections
+
         toast({
           title: "Video removed from saved",
           status: "success",
@@ -255,18 +279,22 @@ const VideoPage = () => {
         });
       } else {
         // Save the video
-        const { error } = await supabase
+        const { data, error } = await supabase    // Get the returned data
           .from('saved_songs')
           .insert([
             {
               video_id: videoId,
               title: videoTitle,
             }
-          ]);
-  
+          ])
+          .select()    // Add this to get back the inserted row
+          .single();   // We only inserted one row
+
         if (error) throw error;
-  
+
         setIsSaved(true);
+        setSavedSongId(data.id);   // Set the new saved_song_id
+
         toast({
           title: "Video saved!",
           description: "You can find this in your saved videos",
@@ -282,7 +310,103 @@ const VideoPage = () => {
         duration: 3000,
       });
     }
-  };  
+  };
+
+  //save section
+
+  const handleSaveSection = async () => {
+    if (!user) {
+      toast({
+        title: "Please log in",
+        description: "You need to be logged in to save sections",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (!savedSongId) {
+      toast({
+        title: "Save the video first",
+        description: "You need to save the video before saving sections",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsAddingSectionName(true);  // Open the modal instead of saving directly
+  };
+
+  const saveSectionWithName = async () => {
+    try {
+      const { data, error } = await createSavedSection(
+        supabase,
+        {
+          saved_song_id: savedSongId,
+          start_time: startTime,
+          end_time: endTime,
+          name: newSectionName.trim() || null  // Use null if name is empty
+        }
+      );
+
+      console.log("Response:", { data, error });
+
+      if (error) throw error;
+
+      setSavedSections([...savedSections, data]);
+      setNewSectionName('');  // Reset the input
+      setIsAddingSectionName(false);  // Close the modal
+
+      toast({
+        title: "Section saved!",
+        status: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Error in saveSectionWithName:", error);
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 3000,
+      });
+    }
+  };
+
+
+  //delete section
+  const handleDeleteSection = async (sectionId) => {
+    try {
+      const { error } = await deleteSavedSection(supabase, sectionId);
+      if (error) throw error;
+
+      setSavedSections(savedSections.filter(section => section.id !== sectionId));
+      toast({
+        title: "Section deleted",
+        status: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 3000,
+      });
+    }
+  };
+
+  //jump to section
+  const jumpToSection = (startTime, endTime) => {
+    if (player) {
+      setStartTime(startTime);
+      setEndTime(endTime);
+      setSliderValue([startTime, endTime]);
+      player.seekTo(startTime);
+    }
+  };
+
 
   return (
     <Flex direction='column' minH='100vh' bg='#F5F5F5'>
@@ -317,6 +441,95 @@ const VideoPage = () => {
               restartLoop={restartLoop}
             />
             <PlaybackRateSelector player={player} />
+            <Modal
+              isOpen={isAddingSectionName}
+              onClose={() => {
+                setIsAddingSectionName(false);
+                setNewSectionName('');
+              }}
+            >
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Name This Section</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <Input
+                    placeholder="Enter section name (optional)"
+                    value={newSectionName}
+                    onChange={(e) => setNewSectionName(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        saveSectionWithName();
+                      }
+                    }}
+                  />
+                </ModalBody>
+                <ModalFooter>
+                  <Button colorScheme="blue" mr={3} onClick={saveSectionWithName}>
+                    Save Section
+                  </Button>
+                  <Button variant="ghost" onClick={() => {
+                    setIsAddingSectionName(false);
+                    setNewSectionName('');
+                  }}>
+                    Cancel
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+            <VStack spacing={4} width="100%" mt={4}>
+              <Button
+                onClick={handleSaveSection}
+                colorScheme="green"
+                isDisabled={!user || !isSaved || !startTime || !endTime}
+              >
+                Save Current Section
+              </Button>
+
+              {savedSections.length > 0 && (
+                <Box width="100%" p={4} borderRadius="md" backgroundColor="white">
+                  <Text fontWeight="bold" mb={2}>Saved Sections:</Text>
+                  <VStack spacing={2} align="stretch">
+                    {savedSections.map((section) => (
+                      <Box
+                        key={section.id}
+                        p={2}
+                        borderWidth={1}
+                        borderRadius="md"
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
+                        <Button
+                          size="sm"
+                          onClick={() => jumpToSection(section.start_time, section.end_time)}
+                          colorScheme="blue"
+                          flex={1}
+                          mr={2}
+                        >      <HStack spacing={3} align="center" width="100%">  {/* Added spacing={1} for gap */}
+                            {section.name && (
+                              <Text fontSize="sm" fontWeight="700">  {/* Increased size and weight */}
+                                {section.name}
+                              </Text>
+                            )}
+                            <Text fontSize="xs" color="whiteAlpha.800">  {/* Made time slightly less prominent */}
+                              {formatSecondsToDuration(section.start_time)} - {formatSecondsToDuration(section.end_time)}
+                            </Text>
+                          </HStack>
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleDeleteSection(section.id)}
+                          colorScheme="red"
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    ))}
+                  </VStack>
+                </Box>
+              )}
+            </VStack>
           </VStack>
         </Container>
       </Flex>

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Flex, Text, Circle } from '@chakra-ui/react';
 import { RangeSlider, RangeSliderTrack, RangeSliderFilledTrack, RangeSliderThumb, RangeSliderMark } from '@chakra-ui/react';
+import { convertDurationToSeconds, formatSecondsToDuration } from './utils/formatTime';
 
 const LoopSelector = ({ 
   videoLength, 
@@ -11,20 +12,10 @@ const LoopSelector = ({
   onRangeChangeEnd 
 }) => {
   const [sliderValue, setSliderValue] = React.useState([startTime, endTime]);
-
-  const formatSecondsToDuration = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-
-    const pad = (value) => (value < 10 ? `0${value}` : value);
-
-    if (hours > 0) {
-      return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
-    } else {
-      return `${pad(minutes)}:${pad(remainingSeconds)}`;
-    }
-  };
+  
+  useEffect(() => {
+    setSliderValue([startTime, endTime]);
+  }, [startTime, endTime]);
 
   return (
     <Box mt={"-20"} mb={["6", "4"]}>
@@ -44,7 +35,7 @@ const LoopSelector = ({
           aria-label={['0', videoLength]}
           min={0}
           max={videoLength}
-          defaultValue={[startTime, endTime]}
+          value={[startTime, endTime]}
           onChange={(values) => {
             onRangeChange(values);
             setSliderValue(values);
