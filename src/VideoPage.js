@@ -19,7 +19,7 @@ import PlaybackRateSelector from './PlaybackRateSelector';
 import { useAuth } from './contexts/AuthContext';
 import { supabase } from './supabaseClient';
 import { convertDurationToSeconds, formatSecondsToDuration } from './utils/formatTime';
-import { createSavedSection, getSavedSections, deleteSavedSection } from './utils/sectionsFunctions'
+import { createSavedSection, getSavedSections, deleteSavedSection, updateSavedSection } from './utils/sectionsFunctions'
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
@@ -40,6 +40,8 @@ const VideoPage = () => {
   const [savedSections, setSavedSections] = useState([]);
   const [isAddingSectionName, setIsAddingSectionName] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
+  const [isEditingSection, setIsEditingSection] = useState(false);
+  const [editingSectionId, setEditingSectionId] = useState(null);
 
   const onStateChange = (event) => {
     if (event.data === window.YT.PlayerState.PLAYING) {
@@ -340,26 +342,45 @@ const VideoPage = () => {
 
   const saveSectionWithName = async () => {
     try {
-      const { data, error } = await createSavedSection(
-        supabase,
-        {
-          saved_song_id: savedSongId,
-          start_time: startTime,
-          end_time: endTime,
-          name: newSectionName.trim() || null  // Use null if name is empty
-        }
-      );
+      if (isEditingSection) {
+        // Update existing section
+        const { data, error } = await updateSavedSection(
+          supabase,
+          editingSectionId,
+          { name: newSectionName.trim() || null }
+        );
 
-      console.log("Response:", { data, error });
+        if (error) throw error;
 
-      if (error) throw error;
+        // Update the sections list
+        setSavedSections(savedSections.map(section =>
+          section.id === editingSectionId ? { ...section, name: data.name } : section
+        ));
+      } else {
+        // Create new section (existing code)
+        const { data, error } = await createSavedSection(
+          supabase,
+          {
+            saved_song_id: savedSongId,
+            start_time: startTime,
+            end_time: endTime,
+            name: newSectionName.trim() || null
+          }
+        );
 
-      setSavedSections([...savedSections, data]);
-      setNewSectionName('');  // Reset the input
-      setIsAddingSectionName(false);  // Close the modal
+        if (error) throw error;
+
+        setSavedSections([...savedSections, data]);
+      }
+
+      // Reset states
+      setNewSectionName('');
+      setIsEditingSection(false);
+      setEditingSectionId(null);
+      setIsAddingSectionName(false);
 
       toast({
-        title: "Section saved!",
+        title: isEditingSection ? "Section updated!" : "Section saved!",
         status: "success",
         duration: 3000,
       });
@@ -373,8 +394,6 @@ const VideoPage = () => {
       });
     }
   };
-
-
   //delete section
   const handleDeleteSection = async (sectionId) => {
     try {
@@ -395,6 +414,13 @@ const VideoPage = () => {
         duration: 3000,
       });
     }
+  };
+
+  // edit section name
+  const handleEditSection = (section) => {
+    setEditingSectionId(section.id);
+    setNewSectionName(section.name || '');
+    setIsEditingSection(true);
   };
 
   //jump to section
@@ -442,15 +468,17 @@ const VideoPage = () => {
             />
             <PlaybackRateSelector player={player} />
             <Modal
-              isOpen={isAddingSectionName}
+              isOpen={isAddingSectionName || isEditingSection}
               onClose={() => {
                 setIsAddingSectionName(false);
+                setIsEditingSection(false);
+                setEditingSectionId(null);
                 setNewSectionName('');
               }}
             >
               <ModalOverlay />
               <ModalContent>
-                <ModalHeader>Name This Section</ModalHeader>
+                <ModalHeader>{isEditingSection ? 'Edit Section Name' : 'Name This Section'}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                   <Input
@@ -466,10 +494,12 @@ const VideoPage = () => {
                 </ModalBody>
                 <ModalFooter>
                   <Button colorScheme="blue" mr={3} onClick={saveSectionWithName}>
-                    Save Section
+                    {isEditingSection ? 'Update' : 'Save Section'}
                   </Button>
                   <Button variant="ghost" onClick={() => {
                     setIsAddingSectionName(false);
+                    setIsEditingSection(false);
+                    setEditingSectionId(null);
                     setNewSectionName('');
                   }}>
                     Cancel
@@ -516,6 +546,14 @@ const VideoPage = () => {
                               {formatSecondsToDuration(section.start_time)} - {formatSecondsToDuration(section.end_time)}
                             </Text>
                           </HStack>
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleEditSection(section)}
+                          colorScheme="gray"
+                          mr={2}
+                        >
+                          Edit
                         </Button>
                         <Button
                           size="sm"
