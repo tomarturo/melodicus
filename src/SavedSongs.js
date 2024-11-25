@@ -62,7 +62,7 @@ const SavedSongs = () => {
 
  if (!user) {
    return (
-     <Flex direction="column" minH="100vh" bg="white"> 
+     <Flex direction="column" minH="100vh" bg='#f7f3e3'> 
        <Flex direction="column" flex="1">
            <Header />
            <Container centerContent py={10}>
@@ -89,17 +89,16 @@ const SavedSongs = () => {
  }
 
  return (
-   <Flex direction="column" minH="100vh" bg="white">
-     <Flex direction="column" flex="1">
+   <Flex direction="column" minH="100vh">
          <Header />
-         <Container maxW="3xl" pt="12">
-           <Heading mb={6}>My Saved Songs</Heading>
+     <Flex direction="column" flex="1" bg='#f7f3e3' borderRadius="xl" overflow='hidden' >
+         <Container w="100%" pt="12" pb="8" >
            {songs.length === 0 ? (
              <Text>No saved songs yet.</Text>
            ) : (
              <Stack spacing='8'>
                {songs.map((video) => (
-                 <Card key={video.id.videoId} variant='unstyled' direction={{ base: 'column', sm: 'row' }} alignItems='center'>
+                 <Card key={video.id.videoId} variant='unstyled' bg='transparent' direction={{ base: 'column', sm: 'row' }} alignItems='center'>
                    <Link to={`/video/${video.id.videoId}`} style={{ flex: 1 }}>
                      <Flex direction={{ base: 'column', sm: 'row' }} alignItems='center'>
                        <Image

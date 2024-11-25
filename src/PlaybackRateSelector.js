@@ -59,7 +59,7 @@ function PlaybackRateSelector({ player }) {
   const group = getRootProps();
 
   return (
-    <Container maxW='fit-content' height="64px">
+    <Container maxW='fit-content'>
       <HStack {...group} spacing={0} borderRadius="full"  shadow='sm'  overflowX='scroll'
         backdropFilter='auto'
         backdropBlur='20px'>

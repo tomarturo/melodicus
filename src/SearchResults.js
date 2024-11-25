@@ -51,9 +51,9 @@ const SearchResults = ({ searchQuery }) => {
 
   return (
     <div>
-      <Flex direction='column' minH='100vh' bg="white">
+      <Flex direction='column' minH='100vh'>
         <Header />
-        <Flex direction="column" flex="1">
+        <Flex direction="column" flex="1" pt='12' bg='#f7f3e3' borderRadius='lg' overflow="hidden">
         {quotaExceeded ? (
           <SearchQuotaError query={query} />
             ) : (

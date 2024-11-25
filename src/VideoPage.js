@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  Flex, VStack, HStack, Box, Container, Button, useToast, Text, Modal,
+  Flex, HStack, Box, Button, useToast, Text, Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
@@ -9,10 +9,10 @@ import {
   ModalBody,
   ModalCloseButton,
   Input,
+  AbsoluteCenter,
 } from '@chakra-ui/react';
 import Header from './Header';
 import Footer from './Footer';
-import VideoDisplay from './VideoDisplay';
 import LoopSelector from './LoopSelector';
 import PlaybackControls from './PlaybackControls';
 import PlaybackRateSelector from './PlaybackRateSelector';
@@ -20,6 +20,7 @@ import { useAuth } from './contexts/AuthContext';
 import { supabase } from './supabaseClient';
 import { convertDurationToSeconds, formatSecondsToDuration } from './utils/formatTime';
 import { createSavedSection, getSavedSections, deleteSavedSection, updateSavedSection } from './utils/sectionsFunctions'
+import PositionedSections from './PositionedSections';
 
 const VideoPage = () => {
   const [player, setPlayer] = useState(null);
@@ -435,32 +436,71 @@ const VideoPage = () => {
 
 
   return (
-    <Flex direction='column' minH='100vh' bg='#F5F5F5'>
+    <Flex direction='column' minH='100vh' >
       <Header />
       <Flex direction="column" flex="1">
-        <VideoDisplay videoThumbnail={videoThumbnail} />
-        <Container maxW='900px' zIndex={100} px={[0, 0, 10, 0]}>
-          <VStack mb='8'>
-            <Box id="player" mb='6'></Box>
-            <Box width='100%' mb='2'>
-              {videoLength && (
-                <LoopSelector
-                  videoLength={videoLength}
-                  currentTime={currentTime}
-                  startTime={startTime}
-                  endTime={endTime}
-                  onRangeChange={handleRangeChange}
-                  onRangeChangeEnd={handleRangeChangeEnd}
-                />
-              )}
-            </Box>
-            <Button
-              onClick={handleSaveVideo}
-              colorScheme={isSaved ? "red" : "blue"}
-              isDisabled={!user}
-            >
-              {!user ? 'Login to Save' : (isSaved ? 'Unsave' : 'Save')}
-            </Button>
+        <Box borderTopLeftRadius="xl"
+          borderTopRightRadius="xl"
+          overflow="hidden"
+          position='relative'>
+          <Box
+            h={["45vh", "50vh", "55vh"]}
+            backgroundImage={videoThumbnail}
+            backgroundSize="11px 11px"
+            backgroundRepeat="repeat"
+            _before={{
+              content: '""',
+              position: 'absolute',
+              inset: 0,
+              backdropFilter: 'auto',
+              backdropBlur: '8px',
+              backdropContrast: '0.8',
+              backdropSaturate: '8',
+            }}
+          />
+          <AbsoluteCenter
+            axis="horizontal"
+            top={[6, 8, 8, 10,]}
+            h={[250, 280, 320]}
+            w={[250, 280, 320]}
+            borderRadius='md'
+            backgroundImage={videoThumbnail}
+            backgroundPosition="center"
+            backgroundSize='cover'
+            backgroundRepeat='no-repeat'
+            boxShadow='xl'
+          />
+          <Box
+            position="absolute"
+            bottom={1}
+            left={0}
+            right={0}
+            zIndex={3}
+          >
+            {videoLength && (
+              <PositionedSections
+                sections={savedSections}
+                videoLength={videoLength}
+                onJumpToSection={jumpToSection}
+                onEditSection={handleEditSection}
+                onDeleteSection={handleDeleteSection}
+              />
+            )}
+          </Box>
+        </Box>
+        <Box id="player"></Box>
+        {videoLength && (
+          <LoopSelector
+            videoLength={videoLength}
+            currentTime={currentTime}
+            startTime={startTime}
+            endTime={endTime}
+            onRangeChange={handleRangeChange}
+            onRangeChangeEnd={handleRangeChangeEnd}
+          />
+        )}
+        <Box px={[0, 0, 10, 0]} marginTop={4}>
+          <HStack mb='8' align="center">
             <PlaybackControls
               isPlaying={isPlaying}
               playPauseClick={playPauseClick}
@@ -478,11 +518,11 @@ const VideoPage = () => {
             >
               <ModalOverlay />
               <ModalContent>
-                <ModalHeader>{isEditingSection ? 'Edit Section Name' : 'Name This Section'}</ModalHeader>
+                <ModalHeader>{isEditingSection ? 'Edit Loop Name' : 'Name This Loop'}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                   <Input
-                    placeholder="Enter section name (optional)"
+                    placeholder="Loop name (optional)"
                     value={newSectionName}
                     onChange={(e) => setNewSectionName(e.target.value)}
                     onKeyPress={(e) => {
@@ -494,7 +534,7 @@ const VideoPage = () => {
                 </ModalBody>
                 <ModalFooter>
                   <Button colorScheme="blue" mr={3} onClick={saveSectionWithName}>
-                    {isEditingSection ? 'Update' : 'Save Section'}
+                    {isEditingSection ? 'Update' : 'Save Loop'}
                   </Button>
                   <Button variant="ghost" onClick={() => {
                     setIsAddingSectionName(false);
@@ -507,69 +547,22 @@ const VideoPage = () => {
                 </ModalFooter>
               </ModalContent>
             </Modal>
-            <VStack spacing={4} width="100%" mt={4}>
-              <Button
-                onClick={handleSaveSection}
-                colorScheme="green"
-                isDisabled={!user || !isSaved || !startTime || !endTime}
-              >
-                Save Current Section
-              </Button>
-
-              {savedSections.length > 0 && (
-                <Box width="100%" p={4} borderRadius="md" backgroundColor="white">
-                  <Text fontWeight="bold" mb={2}>Saved Sections:</Text>
-                  <VStack spacing={2} align="stretch">
-                    {savedSections.map((section) => (
-                      <Box
-                        key={section.id}
-                        p={2}
-                        borderWidth={1}
-                        borderRadius="md"
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Button
-                          size="sm"
-                          onClick={() => jumpToSection(section.start_time, section.end_time)}
-                          colorScheme="blue"
-                          flex={1}
-                          mr={2}
-                        >      <HStack spacing={3} align="center" width="100%">  {/* Added spacing={1} for gap */}
-                            {section.name && (
-                              <Text fontSize="sm" fontWeight="700">  {/* Increased size and weight */}
-                                {section.name}
-                              </Text>
-                            )}
-                            <Text fontSize="xs" color="whiteAlpha.800">  {/* Made time slightly less prominent */}
-                              {formatSecondsToDuration(section.start_time)} - {formatSecondsToDuration(section.end_time)}
-                            </Text>
-                          </HStack>
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleEditSection(section)}
-                          colorScheme="gray"
-                          mr={2}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleDeleteSection(section.id)}
-                          colorScheme="red"
-                        >
-                          Delete
-                        </Button>
-                      </Box>
-                    ))}
-                  </VStack>
-                </Box>
-              )}
-            </VStack>
-          </VStack>
-        </Container>
+            <Button
+              onClick={handleSaveSection}
+              colorScheme="green"
+              isDisabled={!user || !isSaved || !startTime || !endTime}
+            >
+              New Loop
+            </Button>
+            <Button
+              onClick={handleSaveVideo}
+              colorScheme={isSaved ? "red" : "blue"}
+              isDisabled={!user}
+            >
+              {!user ? 'Login to Save' : (isSaved ? 'Remove Song' : 'Save Song')}
+            </Button>
+          </HStack>
+        </Box>
       </Flex>
       <Footer />
     </Flex>

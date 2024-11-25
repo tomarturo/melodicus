@@ -5,7 +5,7 @@ import { RepeatIcon } from '@chakra-ui/icons'
 
 const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
   return (
-    <HStack mb='6' justify='center'>
+    <HStack gap="4">
       <Button
         size='lg'
         shadow='sm'

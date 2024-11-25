@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Box, AbsoluteCenter } from '@chakra-ui/react';
+import LoopSelector from './LoopSelector';
 
 const VideoDisplay = ({ videoThumbnail }) => {
 
   return (
     <Box
       pos='relative'
-      w="100vw"
-      h={["45vh", "50vh", "55vh", "70vh", "75vh"]}
+      h={["45vh", "50vh", "55vh"]}
       inset="0"
       backgroundImage={videoThumbnail}
       backgroundSize="11px 11px"
@@ -26,8 +26,8 @@ const VideoDisplay = ({ videoThumbnail }) => {
       <AbsoluteCenter
         axis="horizontal"
         top={[6, 8, 8, 10, ]}
-        h={[250, 280, 320, 380, 450]}
-        w={[250, 280, 320, 380, 450]}
+        h={[250, 280, 320]}
+        w={[250, 280, 320]}
         borderRadius='md'
         backgroundImage={videoThumbnail}
         backgroundPosition="center"

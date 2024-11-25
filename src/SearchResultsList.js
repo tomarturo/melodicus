@@ -6,7 +6,7 @@ const SearchResultsList = ({ searchResults }) => (
   <Stack spacing='8'>
     {searchResults.map((video) => (
       <Link key={video.id.videoId} to={`/video/${video.id.videoId}`}>
-        <Card variant='unstyled' direction={{ base: 'column', sm: 'row' }} alignItems='center'>
+        <Card variant='unstyled' bg='transparent' direction={{ base: 'column', sm: 'row' }} alignItems='center'>
           <Image
             borderRadius='lg'
             boxSize={['100%', 180]}

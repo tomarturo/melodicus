@@ -31,9 +31,9 @@ const HomePage = () => {
   };
 
   return (
-    <Flex direction='column' minH='100vh' bg='white'>
+    <Flex direction='column' minH='100vh'>
       <Header/>
-      <Flex direction="column" flex="1" pt='12'>
+      <Flex direction="column" flex="1" pt='12' bg='#f7f3e3' borderRadius='lg' overflow="hidden">
         <Container maxW='3xl'>
           <VStack>
             <Flex mb='12' gap={8} direction={'column'}>
@@ -107,7 +107,7 @@ const HomePage = () => {
                         alignItems='center'
                         gap='2px'
                         fontWeight='semibold'
-                        color='gray.600'
+                        color='blackAlpha.800'
                         href={`https://www.youtube.com/`}
                         target="_blank"
                         rel="noopener noreferrer"

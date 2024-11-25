@@ -16,9 +16,9 @@ const NullVideoPage = () => {
     };
 
     return (
-    <Flex direction='column' minH='100vh' bg='white'>
+    <Flex direction='column' minH='100vh'>
       <Header/>
-      <Flex direction="column" flex="1">
+      <Flex direction="column" flex="1" bg='#f7f3e3'>
         <Container maxW='3xl' mt='12'>
           <Heading as='h1' size='xl' align="center" mb='6'>We're having trouble with the link you provided</Heading>
           <Text align='center' mb='8'>

@@ -18,18 +18,12 @@ const LoopSelector = ({
   }, [startTime, endTime]);
 
   return (
-    <Box mt={"-20"} mb={["6", "4"]}>
       <Box
-        shadow='md'
-        borderRadius={["none", "none", "full"]}
-        backdropFilter='auto'
-        backdropBlur='20px'
-        border='1px'
-        borderColor='blackAlpha.200'
-        pt={6}
+        pt={4}
         pb={4}  
         px={[6, 8, 14]}
-        sx={{ 'background-color': 'rgba(255,255,255,0.65)' }}
+        bg="whiteAlpha.900"
+        borderBottomRadius="xl"
       >
         <RangeSlider
           aria-label={['0', videoLength]}
@@ -106,7 +100,6 @@ const LoopSelector = ({
           ))}
         </RangeSlider>
       </Box>
-    </Box>
   );
 };
 
