@@ -21,7 +21,7 @@ const LoopSelector = ({
       <Box
         pt={4}
         pb={4}  
-        px={[6, 8, 14]}
+        px={8}
         bg="whiteAlpha.900"
         borderBottomRadius="xl"
       >
