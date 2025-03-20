@@ -6,8 +6,6 @@ import { ArrowTopRightOnSquareIcon, } from '@heroicons/react/20/solid';
 import { Icon, Center, Badge, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, HStack, Link } from '@chakra-ui/react'
 import Header from './Header';
 import Footer from './Footer';
-import AuthModal from './AuthModal';
-
 const HomePage = () => {
   const navigate = useNavigate();
   const [videoLink, setVideoLink] = useState('');
@@ -102,7 +100,7 @@ const HomePage = () => {
                     <Badge colorScheme='purple' mt={[1, 1, 0]}>pro tip</Badge>
                       <Text fontSize='sm' textAlign={['left', 'left', 'center']}>
                       <Link
-                        isExternal    
+                        isExternal
                         display='inline-flex'
                         alignItems='center'
                         gap='2px'
@@ -121,7 +119,6 @@ const HomePage = () => {
                 </TabPanel>
               </TabPanels>
             </Tabs>
-            <AuthModal/>
           </VStack>
         </Container>
       </Flex>

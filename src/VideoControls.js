@@ -9,9 +9,6 @@ const VideoControls = ({
   onRestartLoop,
   player,
   onNewLoop,
-  onSaveVideo,
-  isUserLoggedIn,
-  isSaved,
   canSaveLoop,
 }) => (
   <HStack mb='8' align="center" justify="space-between" wrap="wrap">
@@ -27,16 +24,9 @@ const VideoControls = ({
         <Button
           onClick={onNewLoop}
           colorScheme="green"
-          isDisabled={!isUserLoggedIn || !isSaved || !canSaveLoop}
+        isDisabled={!canSaveLoop}
         >
-          New Loop
-        </Button>
-        <Button
-          onClick={onSaveVideo}
-          colorScheme={isSaved ? "red" : "blue"}
-          isDisabled={!isUserLoggedIn}
-        >
-          {!isUserLoggedIn ? 'Login to Save' : (isSaved ? 'Remove Song' : 'Save Song')}
+        Save Loop
         </Button>
     </HStack>
   </HStack>

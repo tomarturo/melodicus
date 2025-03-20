@@ -1,13 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, useToast } from '@chakra-ui/react';
-import { useAuth } from './contexts/AuthContext';
-import { supabase } from './supabaseClient';
-
 // Custom Hooks
 import useYouTubePlayer from './hooks/useYouTubePlayer';
 import useLoopManager from './hooks/useLoopManager';
-import useSavedSections from './hooks/useSavedSections';
+import useLocalSections from './hooks/useLocalSections';
 
 // Components
 import VideoLayout from './VideoLayout'
@@ -18,7 +15,6 @@ import SectionNameModal from './SectionNameModal';
 
 const VideoPage = () => {
   const { videoId } = useParams();
-  const { user } = useAuth();
   const toast = useToast();
   const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
 
@@ -36,56 +32,81 @@ const VideoPage = () => {
   const {
     startTime,
     endTime,
-    sliderValue,
     handleRangeChange,
     handleRangeChangeEnd,
     jumpToSection
-  } = useLoopManager(videoLength, currentTime, controls);
+  } = useLoopManager(videoLength, currentTime, { ...controls, player });
 
   const {
-    isSaved,
     savedSections,
     isAddingSectionName,
     isEditingSection,
     newSectionName,
     setIsAddingSectionName,
     setNewSectionName,
-    handleSaveVideo,
     saveSection,
     updateSection,
-    deleteSection
-  } = useSavedSections(supabase, videoId, user, videoTitle);
+    deleteSection,
+    startEditingSection
+  } = useLocalSections(videoId, videoTitle);
+
+  // Add direct loop checking here
+  useEffect(() => {
+    if (!player) return;
+
+    let intervalId;
+    const checkProgress = () => {
+      if (player && player.getCurrentTime && typeof player.getCurrentTime === 'function') {
+        try {
+          const currentTime = player.getCurrentTime();
+          if (currentTime >= endTime) {
+            player.seekTo(startTime, true);
+          }
+    } catch (error) {
+          console.error("Error in checkProgress:", error);
+        }
+      }
+  };
+
+    if (player.getPlayerState) {
+      const setupInterval = () => {
+        if (player.getPlayerState() !== -1) {
+          intervalId = setInterval(checkProgress, 250);
+        } else {
+          setTimeout(setupInterval, 1000);
+        }
+};
+      setupInterval();
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [player, startTime, endTime]);
 
   // Event handlers
   const handlePlayPause = () => {
+    if (!player) return;
+
     if (isPlaying) {
-      controls.pause();
+      player.pauseVideo();
     } else {
-      controls.play();
+      player.playVideo();
     }
   };
 
   const handleNewLoop = () => {
-    if (!user) {
+    if (startTime === endTime) {
       toast({
-        title: "Please log in",
-        description: "You need to be logged in to save sections",
+        title: "Invalid section",
+        description: "Please select a valid section to save",
         status: "warning",
         duration: 3000,
       });
       return;
     }
-
-    if (!isSaved) {
-      toast({
-        title: "Save the video first",
-        description: "You need to save the video before saving sections",
-        status: "warning",
-        duration: 3000,
-      });
-      return;
-    }
-
     setIsAddingSectionName(true);
   };
 
@@ -117,10 +138,7 @@ const VideoPage = () => {
       videoLength={videoLength}
       savedSections={savedSections}
       onJumpToSection={jumpToSection}
-      onEditSection={(section) => {
-        setNewSectionName(section.name || '');
-        setIsAddingSectionName(true);
-      }}
+      onEditSection={startEditingSection}
       onDeleteSection={deleteSection}
     >
       <Box id="player" display="none" />
@@ -129,10 +147,7 @@ const VideoPage = () => {
         videoLength={videoLength}
         savedSections={savedSections}
         onJumpToSection={jumpToSection}
-        onEditSection={(section) => {
-          setNewSectionName(section.name || '');
-          setIsAddingSectionName(true);
-        }}
+        onEditSection={startEditingSection}
         onDeleteSection={deleteSection}
       />
       {videoLength && (
@@ -149,12 +164,9 @@ const VideoPage = () => {
         <VideoControls
           isPlaying={isPlaying}
           onPlayPause={handlePlayPause}
-          onRestartLoop={() => controls.seekTo(startTime)}
+          onRestartLoop={() => player && player.seekTo(startTime, true)}
           player={player}
           onNewLoop={handleNewLoop}
-          onSaveVideo={handleSaveVideo}
-          isUserLoggedIn={!!user}
-          isSaved={isSaved}
           canSaveLoop={startTime !== endTime}
         />
       </Box>

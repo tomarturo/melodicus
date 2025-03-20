@@ -63,7 +63,7 @@ const useYouTubePlayer = (videoId, apiKey) => {
           if (typeof time === 'number' && !isNaN(time)) {
             setCurrentTime(time);
             // Debug log
-            console.log('Current time updated:', time);
+            // console.log('Current time updated:', time);
           }
         } catch (error) {
           console.error('Error getting current time:', error);

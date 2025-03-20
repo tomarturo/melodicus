@@ -4,43 +4,77 @@ const useLoopManager = (videoLength, currentTime, playerControls) => {
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(videoLength || 0);
   const [sliderValue, setSliderValue] = useState([null, null]);
-
-  // Update end time when video length becomes available
   useEffect(() => {
     if (videoLength && endTime === 0) {
       setEndTime(videoLength);
     }
   }, [videoLength, endTime]);
 
-  // Monitor loop boundaries
   useEffect(() => {
-    if (!playerControls) return;
+    if (!playerControls?.player) return;
 
-    const checkLoop = setInterval(() => {
-      if (currentTime >= endTime) {
-        playerControls.seekTo(startTime);
+    let intervalId;
+    const player = playerControls.player;
+    const checkProgress = () => {
+      if (player && player.getCurrentTime && typeof player.getCurrentTime === 'function') {
+        try {
+          const currentTime = player.getCurrentTime();
+      console.log('Loop check:', {
+            currentTime: Number(currentTime).toFixed(2),
+            endTime: Number(endTime).toFixed(2),
+            startTime: Number(startTime).toFixed(2),
+      });
+          if (currentTime >= endTime) {
+            player.seekTo(startTime, true);
       }
-    }, 1000);
+        } catch (error) {
+          console.error("Error in checkProgress:", error);
+      }
+      }
+  };
 
-    return () => clearInterval(checkLoop);
-  }, [currentTime, startTime, endTime, playerControls]);
+    if (player && player.getPlayerState) {
+      const setupInterval = () => {
+        if (player.getPlayerState() !== -1) {
+          intervalId = setInterval(checkProgress, 250);
+        } else {
+          setTimeout(setupInterval, 1000);
+        }
+  };
+      setupInterval();
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+  };
+  }, [playerControls?.player, endTime, startTime]);
 
   const handleRangeChange = (values) => {
-    playerControls?.mute();
-    setStartTime(values[0]);
-    setEndTime(values[1]);
+    if (playerControls?.player?.mute) {
+      playerControls.player.mute();
+    }
+    setStartTime(Number(values[0]));
+    setEndTime(Number(values[1]));
   };
 
   const handleRangeChangeEnd = () => {
-    playerControls?.unmute();
-    setSliderValue([startTime, endTime]);
-  };
+    if (playerControls?.player?.unMute) {
+      playerControls.player.unMute();
+    }
+    setSliderValue([Number(startTime), Number(endTime)]);
+};
 
   const jumpToSection = (start, end) => {
-    setStartTime(start);
-    setEndTime(end);
-    setSliderValue([start, end]);
-    playerControls?.seekTo(start);
+    const startNum = Number(start);
+    const endNum = Number(end);
+    setStartTime(startNum);
+    setEndTime(endNum);
+    setSliderValue([startNum, endNum]);
+    if (playerControls?.player?.seekTo) {
+      playerControls.player.seekTo(startNum, true);
+    }
   };
 
   return {
