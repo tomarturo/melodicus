@@ -62,7 +62,7 @@ const SavedSongs = () => {
 
  if (!user) {
    return (
-     <Flex direction="column" minH="100vh" bg='#f7f3e3'> 
+     <Flex direction="column" minH="100vh" bg='#FAF9F6'> 
        <Flex direction="column" flex="1">
            <Header />
            <Container centerContent py={10}>
@@ -91,7 +91,7 @@ const SavedSongs = () => {
  return (
    <Flex direction="column" minH="100vh">
          <Header />
-     <Flex direction="column" flex="1" bg='#f7f3e3' borderRadius="xl" overflow='hidden' >
+     <Flex direction="column" flex="1" bg='#FAF9F6' borderRadius="xl" overflow='hidden' >
          <Container w="100%" pt="12" pb="8" >
            {songs.length === 0 ? (
              <Text>No saved songs yet.</Text>

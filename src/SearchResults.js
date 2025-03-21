@@ -53,24 +53,28 @@ const SearchResults = ({ searchQuery }) => {
     <div>
       <Flex direction='column' minH='100vh'>
         <Header />
-        <Flex direction="column" flex="1" pt='12' bg='#f7f3e3' borderRadius='lg' overflow="hidden">
+        <Flex direction="column" flex="1" pt='12' bg='#FAF9F6' borderRadius='lg' overflow="hidden">
         {quotaExceeded ? (
           <SearchQuotaError query={query} />
             ) : (
-              <Container mt='12'>
+              <Container pb='12'>
                 <Heading as="h1" size="2xl" mb='8' align="center">Hear it. Sing it. Play it.</Heading>
                   <InputGroup mb='8'>
                     <Input
                       rounded='full'
                       variant='filled'
+                      bg="blackAlpha.100"
+                      _hover={{ bg: "blackAlpha.200" }}
+                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.200" }}
                       pr='2rem'
                       type='text'
                       placeholder='Enter a search query'
+                      _placeholder={{ opacity: 1, color: 'blackAlpha.600' }}
                       defaultValue={query}
                       onChange={(e) => setCurrentSearchQuery(e.target.value)}
                     />
                     <InputRightElement>
-                      <IconButton onClick={handleSearch} icon={<SearchIcon />} isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>
+                      <IconButton onClick={handleSearch} icon={<SearchIcon />} isRound size='sm' color="blackAlpha.900" bg="none" _hover={{ color: 'whiteAlpha.900', bg: 'blackAlpha.800' }}>
                       </IconButton>
                     </InputRightElement>
                   </InputGroup>

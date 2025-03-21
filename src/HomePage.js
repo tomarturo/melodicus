@@ -30,47 +30,61 @@ const HomePage = () => {
 
   return (
     <Flex direction='column' minH='100vh'>
-      <Header/>
-      <Flex direction="column" flex="1" pt='12' bg='#f7f3e3' borderRadius='lg' overflow="hidden">
+      <Header />
+      <Flex direction="column" flex="1" pt='12' bg='#FAF9F6' borderRadius='lg' overflow="hidden">
         <Container maxW='3xl'>
           <VStack>
             <Flex mb='12' gap={8} direction={'column'}>
               <Heading as='h1' size='3xl' color='blackAlpha.900' align="center">Learn the songs & licks you love</Heading>
               <Text fontSize='xl' color='blackAlpha.800' align="center">Uninterrupted loops. Controlled playback. Zero distractions.</Text>
             </Flex>
-            <Tabs colorScheme='gray' w='100%' align='center' isFitted maxW='2xl'>
-              <TabList>
-                <Tab _selected={{ fontWeight:'semibold' }}>Find a Song</Tab>
-                <Tab _selected={{ fontWeight:'semibold' }}>Paste a Link</Tab>
+            <Tabs
+              w='100%'
+              align='center'
+              isFitted maxW='2xl'>
+              <TabList
+                borderBottomColor="blackAlpha.300">
+                <Tab
+                  color='blackAlpha.700'
+                  _selected={{ color: 'blackAlpha.800', fontWeight: 'semibold' }}
+                >Find a Song</Tab>                
+                <Tab
+                color='blackAlpha.700'
+                _selected={{ color: 'blackAlpha.800', fontWeight: 'semibold' }}
+                >Paste a Link</Tab>
               </TabList>
               <TabIndicator
-                mt="-1.5px"
-                height="2px"
-                bg="black"
-                borderRadius="1px"
+                 mt="-1.5px"
+                 height="2px"
+                 bg="black"
+                 borderRadius="1px"
               />
               <TabPanels>
                 <TabPanel px='0'>
                   <InputGroup size='md' mb='2'>
                     <Input
                       rounded='full'
-                      variant='outline'
+                      variant='filled'
+                      bg="blackAlpha.100"
+                      _hover={{ bg: "blackAlpha.200" }}
+                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.200" }}
                       pr='2rem'
                       mb={4}
                       type='text'
                       placeholder='Enter a song title & artist'
+                      _placeholder={{ opacity: 1, color: 'blackAlpha.600' }}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
                     />
-                   <InputRightElement>
-                      <IconButton onClick={handleSearch} icon={<SearchIcon />} isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>
+                    <InputRightElement>
+                      <IconButton onClick={handleSearch} icon={<SearchIcon />} isRound size='sm' color="blackAlpha.900" bg="none" _hover={{ color: 'whiteAlpha.900', bg: 'blackAlpha.800' }}>
                       </IconButton>
                     </InputRightElement>
                   </InputGroup>
                   <Center>
-                  <HStack alignItems={['start', 'start', 'center']}>
-                    <Badge colorScheme='purple' mt={[1, 1, 0]}>pro tip</Badge>
+                    <HStack alignItems={['start', 'start', 'center']}>
+                      <Badge colorScheme='purple' mt={[1, 1, 0]}>pro tip</Badge>
                       <Text fontSize='sm' textAlign={['left', 'left', 'center']}>
                         This works best when you're specific. Include a song title & artist.
                       </Text>
@@ -78,39 +92,43 @@ const HomePage = () => {
                   </Center>
                 </TabPanel>
                 <TabPanel px='0'>
-                  <InputGroup size='md' mb='2'>
+                  <InputGroup size='md' mb='2' colorScheme='blackAlpha'>
                     <Input
                       rounded='full'
-                      variant='outline'
+                      variant='filled'
+                      bg="blackAlpha.100"
+                      _hover={{ bg: "blackAlpha.200" }}
+                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.200" }}
                       pr='2rem'
                       mb={4}
                       type='text'
                       placeholder='Enter a YouTube link'
+                      _placeholder={{ opacity: 1, color: 'blackAlpha.600' }}
                       value={videoLink}
                       onChange={(e) => setVideoLink(e.target.value)}
                       onKeyDown={handleKeyDown}
                     />
                     <InputRightElement>
-                    <IconButton onClick={handleButtonClick} icon={<ArrowForwardIcon />}  isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>
-                    </IconButton>
+                      <IconButton onClick={handleButtonClick} icon={<ArrowForwardIcon />} isRound size='sm' color="blackAlpha.900" bg="none" _hover={{ color: 'whiteAlpha.900', bg: 'blackAlpha.800' }}>
+                      </IconButton>
                     </InputRightElement>
                   </InputGroup>
                   <Center>
                     <HStack alignItems={['start', 'start', 'center']}>
-                    <Badge colorScheme='purple' mt={[1, 1, 0]}>pro tip</Badge>
+                      <Badge colorScheme='purple' mt={[1, 1, 0]}>pro tip</Badge>
                       <Text fontSize='sm' textAlign={['left', 'left', 'center']}>
-                      <Link
-                        isExternal
-                        display='inline-flex'
-                        alignItems='center'
-                        gap='2px'
-                        fontWeight='semibold'
-                        color='blackAlpha.800'
-                        href={`https://www.youtube.com/`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        <Link
+                          isExternal
+                          display='inline-flex'
+                          alignItems='center'
+                          gap='2px'
+                          fontWeight='semibold'
+                          color='blackAlpha.800'
+                          href={`https://www.youtube.com/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                        Open YouTube in a new tab<Icon as={ArrowTopRightOnSquareIcon}></Icon>
+                          Open YouTube in a new tab<Icon as={ArrowTopRightOnSquareIcon}></Icon>
                         </Link>&nbsp;
                         find your next song, then paste the link here.
                       </Text>
@@ -122,7 +140,7 @@ const HomePage = () => {
           </VStack>
         </Container>
       </Flex>
-      <Footer/>
+      <Footer />
     </Flex>
   );
 };
