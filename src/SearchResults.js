@@ -1,4 +1,3 @@
-// SearchResults.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
@@ -10,6 +9,10 @@ import {
   Input,
   InputGroup,
   InputRightElement,
+  Text,
+  Center,
+  HStack,
+  Badge
 } from '@chakra-ui/react';
 import Header from './Header';
 import Footer from './Footer';
@@ -22,6 +25,11 @@ const SearchResults = ({ searchQuery }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
   const [quotaExceeded, setQuotaExceeded] = useState(false);
+  
+  // Add validation state
+  const [isSearchValid, setIsSearchValid] = useState(true);
+  const [searchErrorMessage, setSearchErrorMessage] = useState('');
+  const [hasSearchSubmitAttempt, setHasSearchSubmitAttempt] = useState(false);
 
   useEffect(() => {
     axios
@@ -43,10 +51,29 @@ const SearchResults = ({ searchQuery }) => {
         }
       });
       setCurrentSearchQuery(searchQuery);
-      }, [query, searchQuery]);
+      // Reset validation state when query changes
+      setIsSearchValid(true);
+      setHasSearchSubmitAttempt(false);
+  }, [query, searchQuery]);
 
   const handleSearch = () => {
+    setHasSearchSubmitAttempt(true);
+    
+    // Check if search query is empty
+    if (!currentSearchQuery || !currentSearchQuery.trim()) {
+      setIsSearchValid(false);
+      setSearchErrorMessage('Please enter a song title & artist');
+      return;
+    }
+    
+    // If we have a search query, proceed with navigation
     window.location.href = `/search/${currentSearchQuery}`;
+  };
+  
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
@@ -59,8 +86,9 @@ const SearchResults = ({ searchQuery }) => {
             ) : (
               <Container pb='12'>
                 <Heading as="h1" size="2xl" mb='8' align="center">Hear it. Sing it. Play it.</Heading>
-                  <InputGroup mb='8'>
+                  <InputGroup mb="2">
                     <Input
+                      mb='1'
                       rounded='full'
                       variant='filled'
                       bg="blackAlpha.100"
@@ -68,16 +96,39 @@ const SearchResults = ({ searchQuery }) => {
                       _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.200" }}
                       pr='2rem'
                       type='text'
-                      placeholder='Enter a search query'
+                      placeholder='Enter a song title & artist'
                       _placeholder={{ opacity: 1, color: 'blackAlpha.600' }}
                       defaultValue={query}
                       onChange={(e) => setCurrentSearchQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      borderColor={!isSearchValid && hasSearchSubmitAttempt ? "red.500" : "transparent"}
                     />
                     <InputRightElement>
-                      <IconButton onClick={handleSearch} icon={<SearchIcon />} isRound size='sm' color="blackAlpha.900" bg="none" _hover={{ color: 'whiteAlpha.900', bg: 'blackAlpha.800' }}>
-                      </IconButton>
+                      <IconButton 
+                        onClick={handleSearch} 
+                        icon={<SearchIcon />} 
+                        isRound 
+                        size='sm' 
+                        color="blackAlpha.900" 
+                        bg="none" 
+                        _hover={{ color: 'whiteAlpha.900', bg: 'blackAlpha.800' }}
+                      />
                     </InputRightElement>
                   </InputGroup>
+                  <Center mb='8'>
+                    <HStack alignItems={['start', 'start', 'center']}>
+                      <Badge colorScheme={isSearchValid ? 'purple' : 'red'} mt={[1, 1, 0]}>
+                        {isSearchValid ? 'pro tip' : 'try again'}
+                      </Badge>
+                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isSearchValid && hasSearchSubmitAttempt ? "red.500" : "inherit"}>
+                        {isSearchValid ? (
+                          'This works best when you are specific. Include a song title & artist.'
+                        ) : (
+                          searchErrorMessage
+                        )}
+                      </Text>
+                    </HStack>
+                  </Center>  
                 <SearchResultsList searchResults={searchResults} />
               </Container>
             )}
