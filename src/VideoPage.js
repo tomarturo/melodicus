@@ -160,7 +160,7 @@ const VideoPage = () => {
           onRangeChangeEnd={handleRangeChangeEnd}
         />
       )}
-      <Box px={2} marginTop={4}>
+      <Box>
         <VideoControls
           isPlaying={isPlaying}
           onPlayPause={handlePlayPause}

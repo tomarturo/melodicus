@@ -14,6 +14,7 @@ const VideoDisplay = ({
   return (
     <Box
       pos='relative'
+      flexGrow='1'
       h={["45vh", "50vh", "55vh"]}
       inset="0"
       borderTopLeftRadius="xl"

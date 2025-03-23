@@ -10,7 +10,7 @@
     "@fontsource-variable/open-sans": "^5.0.23",
     "@fontsource-variable/space-grotesk": "^5.0.16",
     "@fontsource-variable/work-sans": "^5.0.17",
-    "@heroicons/react": "^2.0.18",
+    "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.46.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",

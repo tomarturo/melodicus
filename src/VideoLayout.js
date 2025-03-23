@@ -17,7 +17,7 @@ const VideoLayout = ({
       {React.Children.map(children, child => 
         child && React.cloneElement(child, {
           videoLength,
-          savedSections,
+          // savedSections,
           onJumpToSection,
           onEditSection,
           onDeleteSection

@@ -19,11 +19,9 @@ const LoopSelector = ({
 
   return (
       <Box
-        pt={4}
-        pb={4}  
+        py={4}  
         px={8}
-        bg="whiteAlpha.900"
-        borderBottomRadius="xl"
+        bg='#FAF9F6'
       >
         <RangeSlider
           aria-label={['0', videoLength]}
