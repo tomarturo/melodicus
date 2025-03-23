@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Center, Box, Button, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, Flex, Divider } from '@chakra-ui/react';
+import { AbsoluteCenter, Center, Box, Button, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, Flex, Divider } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 
 const PositionedSections = ({
@@ -126,6 +126,7 @@ const PositionedSections = ({
             bg="blackAlpha.500"
             rounded="md"
             zIndex={90} 
+            position="relative"
           >
             <Box
               position="absolute"
@@ -169,44 +170,50 @@ const PositionedSections = ({
                       <ChevronDownIcon style={{ width: '18px', height: '18px' }} />
                     </Flex>
                   </MenuButton>
-                  <MenuList
-                    zIndex={103}
-                    minW="0" w="100px"
-                    sx={{
-                      padding: '8px',
-                      boxShadow: 'md'
-                    }}
-                  >
-                    <MenuItem
-                      onClick={() => onEditSection(section)}
+                  <AbsoluteCenter>
+                    <MenuList
+                      zIndex={103}
+                      minW="0" w="100px"
                       sx={{
-                        fontSize: '14px',
-                        padding: '8px 12px',
-                        borderRadius: '4px',
-                        margin: '0 0 4px 0',
-                        _hover: {
-                          bg: 'blue.50',
-                          color: 'blue.700',
-                        }
+                        padding: '4px',
+                        boxShadow: 'md'
                       }}
                     >
-                      Edit
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => onDeleteSection(section.id)}
-                      sx={{
-                        fontSize: '14px',
-                        padding: '8px 12px',
-                        borderRadius: '4px',
-                        _hover: {
-                          bg: 'red.50',
+                      <MenuItem
+                        onClick={() => onEditSection(section)}
+                        sx={{
+                          color: 'blackAlpha.800',
+                          fontSize: '14px',
+                          fontWeight: 'medium',
+                          padding: '8px 12px',
+                          borderRadius: '4px',
+                          margin: '0 0 4px 0',
+                          _hover: {
+                            bg: 'blackAlpha.100',
+                            color: 'blackAlpha.900',
+                          }
+                        }}
+                      >
+                        Edit
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => onDeleteSection(section.id)}
+                        sx={{
+                          fontWeight: 'medium',
+                          fontSize: '14px',
+                          padding: '8px 12px',
+                          borderRadius: '4px',
                           color: 'red.700',
-                        }
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </MenuList>
+                          _hover: {
+                            bg: 'red.50',
+                            color: 'red.800',
+                          }
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </MenuList>
+                  </AbsoluteCenter>
                 </Menu>
               </Flex>
             </Box>

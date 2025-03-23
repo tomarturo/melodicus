@@ -147,7 +147,7 @@ const HomePage = () => {
                       variant='filled'
                       bg="blackAlpha.100"
                       _hover={{ bg: "blackAlpha.200" }}
-                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.200" }}
+                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.900" }}
                       pr='2rem'
                       mb='1'
                       type='text'
@@ -192,7 +192,7 @@ const HomePage = () => {
                       variant='filled'
                       bg="blackAlpha.100"
                       _hover={{ bg: "blackAlpha.200" }}
-                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.200" }}
+                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.900" }}
                       pr='2rem'
                       mb='1'
                       type='text'

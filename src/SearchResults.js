@@ -93,7 +93,7 @@ const SearchResults = ({ searchQuery }) => {
                       variant='filled'
                       bg="blackAlpha.100"
                       _hover={{ bg: "blackAlpha.200" }}
-                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.200" }}
+                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.900" }}
                       pr='2rem'
                       type='text'
                       placeholder='Enter a song title & artist'
