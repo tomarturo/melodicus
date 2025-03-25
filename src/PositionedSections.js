@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { AbsoluteCenter, Center, Box, Button, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, Flex, Divider } from '@chakra-ui/react';
+import { AbsoluteCenter, Center, Box, Button, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip, Flex, Divider, Icon } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
+
 
 const PositionedSections = ({
   sections,
@@ -175,6 +176,7 @@ const PositionedSections = ({
                       zIndex={103}
                       minW="0" w="100px"
                       sx={{
+                        borderColor: 'transparent',
                         padding: '4px',
                         boxShadow: 'md'
                       }}

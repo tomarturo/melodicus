@@ -5,6 +5,7 @@ import { Box, useToast } from '@chakra-ui/react';
 import useYouTubePlayer from './hooks/useYouTubePlayer';
 import useLoopManager from './hooks/useLoopManager';
 import useLocalSections from './hooks/useLocalSections';
+import useSharingUrl from './hooks/useSharingUrl';
 
 // Components
 import VideoLayout from './VideoLayout'
@@ -17,6 +18,9 @@ const VideoPage = () => {
   const { videoId } = useParams();
   const toast = useToast();
   const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
+
+  // Process URL parameters first for timestamp sharing
+  const { loadedSections, isLoading } = useSharingUrl(videoId);
 
   // Initialize hooks
   const {
@@ -47,8 +51,18 @@ const VideoPage = () => {
     saveSection,
     updateSection,
     deleteSection,
-    startEditingSection
+    startEditingSection,
+    setSavedSections
   } = useLocalSections(videoId, videoTitle);
+
+  // Apply loaded sections from URL if available
+  useEffect(() => {
+    if (!isLoading && loadedSections && loadedSections.length > 0) {
+      // Now we can use setSavedSections directly since we've exposed it in the hook
+      setSavedSections(loadedSections);
+      
+    }
+  }, [loadedSections, isLoading, setSavedSections, toast]);
 
   // Add direct loop checking here
   useEffect(() => {
@@ -62,11 +76,11 @@ const VideoPage = () => {
           if (currentTime >= endTime) {
             player.seekTo(startTime, true);
           }
-    } catch (error) {
+        } catch (error) {
           console.error("Error in checkProgress:", error);
         }
       }
-  };
+    };
 
     if (player.getPlayerState) {
       const setupInterval = () => {
@@ -75,7 +89,7 @@ const VideoPage = () => {
         } else {
           setTimeout(setupInterval, 1000);
         }
-};
+      };
       setupInterval();
     }
 
@@ -168,6 +182,8 @@ const VideoPage = () => {
           player={player}
           onNewLoop={handleNewLoop}
           canSaveLoop={startTime !== endTime}
+          videoId={videoId}
+          savedSections={savedSections}
         />
       </Box>
       <SectionNameModal

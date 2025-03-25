@@ -8,14 +8,15 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
     <HStack gap="2">
       <Button
         size='lg'
-        w="130px"
-        rounded='full'
         variant='filled'
+        rounded='full'
         bg="blackAlpha.100"
         border="1px"
         color="blackAlpha.800"
-        borderColor="blackAlpha.100"
-        _hover={{ bg:"blackAlpha.200", borderColor:"blackAlpha.700", border:"2px", color:"blackAlpha.900"}}
+        borderColor="blackAlpha.200"
+        _hover={{
+          boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
+        }}
         aria-label='Play or Pause'
         leftIcon={isPlaying ? <Icon as={PauseIcon} /> : <Icon as={PlayIcon} />}
         onClick={playPauseClick}
@@ -24,15 +25,16 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
       </Button>
       <Button
         leftIcon={<Icon as={RepeatIcon} />}
-        w="140px"
         size='lg'
-        rounded='full'
         variant='filled'
+        rounded='full'
         bg="blackAlpha.100"
         border="1px"
         color="blackAlpha.800"
-        borderColor="blackAlpha.100"
-        _hover={{ bg:"blackAlpha.200", borderColor:"blackAlpha.700", border:"2px", color:"blackAlpha.900"}}
+        borderColor="blackAlpha.200"
+        _hover={{
+          boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
+        }}
         aria-label='Restart Loop'
         onClick={restartLoop}
       >

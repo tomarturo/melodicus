@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getSavedSections, createSavedSection, updateSavedSection, deleteSavedSection } from '../utils/sectionsFunctions';
 
-const useSavedSections = (supabase, videoId, user, videoTitle) => {
+const useSavedSections = (videoId, user, videoTitle) => {
   const [isSaved, setIsSaved] = useState(false);
   const [savedSongId, setSavedSongId] = useState(null);
   const [savedSections, setSavedSections] = useState([]);

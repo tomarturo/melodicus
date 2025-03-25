@@ -40,29 +40,34 @@ function PlaybackRateSelector({ player }) {
       maxW='fit-content' pl="5"
       > 
       <IconButton
-        variant='filled'
-        aria-label='Increase playback rate'
         size="sm"
-        icon={<MinusIcon style={{ width: '20px', height: '20px' }} />}
-        onClick={onMinusClick}
-        isDisabled={currentRate === rates[0]}
-        rounded="full"
+        variant='filled'
+        rounded='full'
         bg="blackAlpha.100"
         border="1px"
         color="blackAlpha.800"
-        borderColor="blackAlpha.100"
-        _hover={{ bg:"blackAlpha.200", borderColor:"blackAlpha.700", border:"2px", color:"blackAlpha.900"}}
+        borderColor="blackAlpha.200"
+        _hover={{
+          boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
+        }}
+        isDisabled={currentRate === rates[0]}
+        onClick={onMinusClick}
+        icon={<MinusIcon style={{ width: '20px', height: '20px' }} />}
+        aria-label='Increase playback rate'
       />
       <Select
+        size="lg"
+        variant='filled'
+        rounded='full'
+        bg="blackAlpha.100"
+        border="1px"
+        color="blackAlpha.800"
+        borderColor="blackAlpha.200"
+        _hover={{
+          boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
+        }}
         value={currentRate.toString()}
         onChange={handleChange}
-        size="lg"
-        rounded="full"
-        bg="blackAlpha.100"
-        border="2px"
-        color="blackAlpha.800"
-        borderColor="blackAlpha.100"
-        _hover={{ bg:"blackAlpha.200", borderColor:"blackAlpha.700", border:"2px", color:"blackAlpha.900"}}
       >
         {rates.map((rate) => (
           <option key={rate} value={rate}>
@@ -71,18 +76,20 @@ function PlaybackRateSelector({ player }) {
         ))}
       </Select>
         <IconButton
-          variant='filled'
-          aria-label='Increase playback rate'
           size="sm"
-          icon={<PlusIcon style={{ width: '20px', height: '20px' }} />}
-          onClick={onPlusClick}
-          isDisabled={currentRate === rates[rates.length - 1]}
-          rounded="full"
+          variant='filled'
+          rounded='full'
           bg="blackAlpha.100"
           border="1px"
           color="blackAlpha.800"
-          borderColor="blackAlpha.100"
-          _hover={{ bg:"blackAlpha.200", borderColor:"blackAlpha.700", border:"2px", color:"blackAlpha.900"}}
+          borderColor="blackAlpha.200"
+          _hover={{
+            boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
+          }}
+          icon={<PlusIcon style={{ width: '20px', height: '20px' }} />}
+          onClick={onPlusClick}
+          isDisabled={currentRate === rates[rates.length - 1]}
+          aria-label='Increase playback rate'
         />
     </HStack>
   );
