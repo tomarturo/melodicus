@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
 import { ArrowForwardIcon, SearchIcon } from '@chakra-ui/icons';
-import { ArrowTopRightOnSquareIcon, } from '@heroicons/react/20/solid';
 import { Icon, Center, Badge, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, HStack, Link } from '@chakra-ui/react'
 import Header from './Header';
 import Footer from './Footer';
+import { ExternalLink } from 'lucide-react';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -127,11 +127,11 @@ const HomePage = () => {
                 <Tab
                   color='blackAlpha.700'
                   _selected={{ color: 'blackAlpha.800', fontWeight: 'semibold' }}
-                >Find a Song</Tab>
+                >Find a song</Tab>
                 <Tab
                   color='blackAlpha.700'
                   _selected={{ color: 'blackAlpha.800', fontWeight: 'semibold' }}
-                >Paste a Link</Tab>
+                >Paste a link</Tab>
               </TabList>
               <TabIndicator
                 mt="-1.5px"
@@ -235,7 +235,7 @@ const HomePage = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              Open YouTube in a new tab<Icon as={ArrowTopRightOnSquareIcon}></Icon>
+                              Open YouTube in a new tab<Icon as={ExternalLink}></Icon>
                             </Link>&nbsp;
                             find your next song, then paste the link here.
                           </>

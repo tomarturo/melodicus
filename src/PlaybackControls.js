@@ -1,12 +1,13 @@
 import React from 'react';
 import { HStack, Button, Icon } from '@chakra-ui/react';
 import { PlayIcon, PauseIcon } from '@heroicons/react/20/solid';
-import { RepeatIcon } from '@chakra-ui/icons'
+import { Repeat } from 'lucide-react';
 
 const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
   return (
     <HStack gap="2">
       <Button
+        width='128px'
         size='lg'
         variant='filled'
         rounded='full'
@@ -24,7 +25,7 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
         {isPlaying ? 'Pause' : 'Play'}
       </Button>
       <Button
-        leftIcon={<Icon as={RepeatIcon} />}
+        leftIcon={<Icon as={Repeat} />}
         size='lg'
         variant='filled'
         rounded='full'

@@ -4,7 +4,7 @@ import getYoutubeID from 'get-youtube-id';
 import Header from './Header';
 import Footer from './Footer';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
-import { ArrowTopRightOnSquareIcon, } from '@heroicons/react/20/solid';
+import { ExternalLink } from 'lucide-react';
 import { Flex, IconButton, Icon, Link, Heading, Text, Input, InputGroup, InputRightElement, Container, } from '@chakra-ui/react';
 
 const NullVideoPage = () => {
@@ -32,7 +32,7 @@ const NullVideoPage = () => {
             target="_blank"
             rel="noopener noreferrer"
             >
-            Follow this link<Icon as={ArrowTopRightOnSquareIcon}></Icon>
+            Follow this link<Icon as={ExternalLink}></Icon>
             </Link>{' '}
             to open YouTube in a new tab. Find the song you want to learn, then copy and paste its link below.
         </Text>
