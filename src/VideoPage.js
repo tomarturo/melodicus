@@ -114,8 +114,8 @@ const VideoPage = () => {
   const handleNewLoop = () => {
     if (startTime === endTime) {
       toast({
-        title: "Invalid section",
-        description: "Please select a valid section to save",
+        title: "Invalid loop",
+        description: "Please select a valid loop to save",
         status: "warning",
         duration: 3000,
       });
@@ -133,7 +133,7 @@ const VideoPage = () => {
       }
 
       toast({
-        title: isEditingSection ? "Section updated!" : "Section saved!",
+        title: isEditingSection ? "Loop updated!" : "Loop saved!",
         status: "success",
         duration: 3000,
       });

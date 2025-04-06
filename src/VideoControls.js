@@ -37,9 +37,9 @@ const VideoControls = ({
           borderColor="blackAlpha.200"
           _hover={{ 
               boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg:"blackAlpha.200", borderColor:"blackAlpha.700", color:"blackAlpha.900"}}
-          aria-label='Add Loop'
+          aria-label='Add loop'
         >
-          Add Loop
+          Add loop
         </Button>
         <ShareTimestamps videoId={videoId} savedSections={savedSections} />
     </HStack>

@@ -38,7 +38,7 @@ const ShareTimestamps = ({ videoId, savedSections }) => {
     if (!savedSections || savedSections.length === 0) {
       toast({
         title: 'No loops to save',
-        description: 'Isolate the part of the song you want to practice, then click Add Loop',
+        description: 'Isolate the part of the song you want to practice then click Add Loop',
         status: 'warning',
         duration: 3000,
         isClosable: true,
@@ -158,12 +158,12 @@ const ShareTimestamps = ({ videoId, savedSections }) => {
         borderColor="blackAlpha.200"
         _hover={{ 
           boxShadow: "0 0 0 1px", 
-          boxShadowColor: "blackAlpha.800", 
+          boxShadowColor: "blackAlpha.900", 
           bg:"blackAlpha.200", 
           borderColor:"blackAlpha.700", 
           color:"blackAlpha.900"
         }}
-        aria-label="Share Sections"
+        aria-label="Save"
       >
         Save
       </Button>
@@ -183,6 +183,7 @@ const ShareTimestamps = ({ videoId, savedSections }) => {
                   value={shareableLink}
                   isReadOnly
                   variant="filled"
+                  rounded='full'
                   size="md"
                   bg="blackAlpha.100"
                   fontFamily="mono"
