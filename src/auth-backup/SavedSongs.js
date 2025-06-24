@@ -91,7 +91,7 @@ const SavedSongs = () => {
  return (
    <Flex direction="column" minH="100vh">
          <Header />
-     <Flex direction="column" flex="1" bg='#FAF9F6' borderRadius="xl" overflow='hidden' >
+     <Flex direction="column" flex="1" bg='#FAF9F6' borderRadius={['none', 'none', 'xl']} overflow='hidden' >
          <Container w="100%" pt="12" pb="8" >
            {songs.length === 0 ? (
              <Text>No saved songs yet.</Text>
@@ -102,7 +102,7 @@ const SavedSongs = () => {
                    <Link to={`/video/${video.id.videoId}`} style={{ flex: 1 }}>
                      <Flex direction={{ base: 'column', sm: 'row' }} alignItems='center'>
                        <Image
-                         borderRadius='lg'
+                         borderRadius='xl'
                          boxSize={['100%', 180]}
                          maxW={{base:'100%', sm:'200px'}}
                          src={`https://img.youtube.com/vi/${video.id.videoId}/mqdefault.jpg`}

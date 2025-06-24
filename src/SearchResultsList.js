@@ -8,7 +8,7 @@ const SearchResultsList = ({ searchResults }) => (
       <Link key={video.id.videoId} to={`/video/${video.id.videoId}`}>
         <Card variant='unstyled' bg='transparent' direction={{ base: 'column', sm: 'row' }} alignItems='center'>
           <Image
-            borderRadius='lg'
+            borderRadius='xl'
             boxSize={['100%', 180]}
             maxW={{base:'100%', sm:'200px'}}
             src={video.snippet.thumbnails.medium.url}

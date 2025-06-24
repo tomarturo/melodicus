@@ -15,7 +15,7 @@ function App() {
 
   return (
     <ChakraProvider>
-      <Container maxW="1400px">
+      <Container px={["0", "0", 6]} maxW="1400px">
         <Routes>
           <Route path="/" index element={<HomePage />} />
           <Route

@@ -1,5 +1,5 @@
 import React from 'react';
-import { HStack, Button, Icon } from '@chakra-ui/react';
+import { Flex, HStack, Button, Icon } from '@chakra-ui/react';
 import PlaybackControls from './PlaybackControls';
 import PlaybackRateSelector from './PlaybackRateSelector';
 import ShareTimestamps from './ShareTimestamps';
@@ -15,17 +15,28 @@ const VideoControls = ({
   videoId,
   savedSections,
 }) => (
-  <HStack align="center" justify="space-between" wrap="wrap" bg='#FAF9F6' pt={4} pb={8} px={8} borderBottomRadius={12}>
-    <HStack wrap="wrap">
+<Flex 
+    alignItems="start" 
+    wrap={["wrap", "nowrap", "nowrap"]}
+    justify="space-between" 
+    alignContent="center"  // This centers the wrapped rows vertically
+    bg='#FAF9F6' 
+    pt={4} 
+    pb={8} 
+    px={["12px", "12px", 8]} 
+    borderBottomRadius={["0", "0", "xl"]}
+  >
+    <Flex wrap="wrap" columnGap={3} rowGap={3}  justifyContent="flex-start" alignContent="center" alignItems="center" minW={["auto", "280px"]}  >
         <PlaybackControls
           isPlaying={isPlaying}
           playPauseClick={onPlayPause}
           restartLoop={onRestartLoop}
         />
         <PlaybackRateSelector player={player} />
-    </HStack>
-    <HStack spacing={3}>
+    </Flex>
+    <Flex wrap="wrap" columnGap={3} rowGap={3} justifyContent="flex-end"  alignContent="center" alignItems="center">
         <Button
+          width={["-webkit-fill-available", "153px"]}
           onClick={onNewLoop}
           leftIcon={<Icon as={CirclePlus} w="20px" h="20px" />}
           variant='filled'
@@ -42,8 +53,8 @@ const VideoControls = ({
           Add loop
         </Button>
         <ShareTimestamps videoId={videoId} savedSections={savedSections} />
-    </HStack>
-  </HStack>
+    </Flex>
+  </Flex>
 );
 
 export default VideoControls;

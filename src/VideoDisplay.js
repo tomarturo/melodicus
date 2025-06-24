@@ -31,16 +31,14 @@ const VideoDisplay = ({
         backdropInvert: '0.175',
         backdropContrast: '0.8',
         backdropSaturate: '1.7',
-        borderTopLeftRadius: 'xl',
-        borderTopRightRadius: 'xl',
+        borderTopLeftRadius: { base: '0', md: 'xl' },
+        borderTopRightRadius: { base: '0', md: 'xl' },
       }}
     >
       <AbsoluteCenter
-        axis="horizontal"
-        top={[6, 8, 8, 10]}
-        h={[280, 280, 320]}
-        w={[280, 280, 320]}
-        borderRadius='md'
+        h={[240, 280, 280, 320, 320, 400, 700 ]}
+        w={[240, 280, 280, 320, 320, 400, 700 ]}
+        borderRadius='xl'
         backgroundImage={videoThumbnail}
         backgroundPosition="center"
         backgroundSize='cover'

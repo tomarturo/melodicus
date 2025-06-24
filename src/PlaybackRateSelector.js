@@ -38,7 +38,7 @@ function PlaybackRateSelector({ player }) {
 
   return (
     <HStack 
-      maxW='fit-content' pl="5"
+      maxW='fit-content'
       > 
       <IconButton
         size="sm"
