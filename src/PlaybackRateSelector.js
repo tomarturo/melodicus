@@ -64,6 +64,7 @@ function PlaybackRateSelector({ player }) {
         border="1px"
         color="blackAlpha.800"
         borderColor="blackAlpha.200"
+        minW="100px" 
         _hover={{
           boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
         }}
