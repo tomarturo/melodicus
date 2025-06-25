@@ -5,9 +5,9 @@ import { Repeat } from 'lucide-react';
 
 const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
   return (
-    <HStack gap="2">
+    <HStack gap="2" justify="center">
       <Button
-        width='128px'
+        width= "128px"
         size='lg'
         variant='filled'
         rounded='full'
@@ -25,6 +25,8 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
         {isPlaying ? 'Pause' : 'Play'}
       </Button>
       <Button
+        
+        width= "128px"
         leftIcon={<Icon as={Repeat} />}
         size='lg'
         variant='filled'

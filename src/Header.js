@@ -34,7 +34,7 @@ const Header = ({ query = '' }) => {
   };
 
   return (
-    <Flex justify='space-between' gap='4' py={["2","2","4"]} px={["3", "3", 0]} align='center'>
+    <Flex justify='space-between' gap='4' h="48px" py={["2","2","4"]} px={["3", "3", 0]} align='center'>
       <Box>
         <Link as={ReactRouterLink} to='/'>
           <Image src={process.env.PUBLIC_URL + '/wordmark.svg'} w='120px'/>

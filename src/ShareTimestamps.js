@@ -150,7 +150,7 @@ const ShareTimestamps = ({ videoId, savedSections }) => {
         onClick={handleOpen}
         leftIcon={<Icon as={Paperclip} />}
         size='lg'
-        width={["-webkit-fill-available", "153px",]}
+        width="153px"
         rounded='full'
         variant='filled'
         bg="blackAlpha.100"
