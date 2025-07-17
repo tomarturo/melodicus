@@ -6,6 +6,7 @@ const useLocalSections = (videoId, videoTitle) => {
   const [isEditingSection, setIsEditingSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
   const [currentEditingSection, setCurrentEditingSection] = useState(null);
+  const [reloadTrigger, setReloadTrigger] = useState(0);
 
   // Storage key consistent across the app - wrap in useCallback
   const getStorageKey = useCallback(() => `video_sections_${videoId}`, [videoId]);
@@ -38,7 +39,7 @@ const useLocalSections = (videoId, videoTitle) => {
     };
     
     loadSections();
-  }, [videoId, videoTitle, getStorageKey]); // Add getStorageKey to dependencies
+  }, [videoId, videoTitle, getStorageKey, reloadTrigger]); // Add reloadTrigger to dependencies
 
   // Save to localStorage with proper error handling
   const saveToLocalStorage = useCallback((sections) => {
@@ -127,6 +128,11 @@ const useLocalSections = (videoId, videoTitle) => {
     saveToLocalStorage(normalizedSections);
   }, [videoId, videoTitle, saveToLocalStorage]);
 
+  // Function to reload sections from localStorage
+  const reloadSections = useCallback(() => {
+    setReloadTrigger(prev => prev + 1);
+  }, []);
+
   return {
     savedSections,
     isAddingSectionName,
@@ -138,7 +144,8 @@ const useLocalSections = (videoId, videoTitle) => {
     updateSection,
     deleteSection,
     startEditingSection,
-    setSavedSections: updateSectionsFromExternal
+    setSavedSections: updateSectionsFromExternal,
+    reloadSections
   };
 };
 

@@ -19,14 +19,9 @@ const useLoopManager = (videoLength, currentTime, playerControls) => {
       if (player && player.getCurrentTime && typeof player.getCurrentTime === 'function') {
         try {
           const currentTime = player.getCurrentTime();
-      console.log('Loop check:', {
-            currentTime: Number(currentTime).toFixed(2),
-            endTime: Number(endTime).toFixed(2),
-            startTime: Number(startTime).toFixed(2),
-      });
           if (currentTime >= endTime) {
             player.seekTo(startTime, true);
-      }
+          }
         } catch (error) {
           console.error("Error in checkProgress:", error);
       }
