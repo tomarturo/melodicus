@@ -10,6 +10,7 @@ const useSharingUrl = (videoId) => {
   const [hasSectionsInUrl, setHasSectionsInUrl] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [urlSections, setUrlSections] = useState(null);
+  const [hasImported, setHasImported] = useState(false);
 
   useEffect(() => {
     // Parse URL parameters
@@ -21,6 +22,8 @@ const useSharingUrl = (videoId) => {
         // Decode the timestamp data
         const sectionsString = decodeURIComponent(atob(encodedSections));
         const sections = JSON.parse(sectionsString);
+        
+        console.log('Decoded sections from URL:', sections);
         
         // Store the sections but don't apply them automatically
         setUrlSections(sections);
@@ -38,7 +41,10 @@ const useSharingUrl = (videoId) => {
 
   // Function to apply the sections from URL
   const importSectionsFromUrl = () => {
-    if (!urlSections) return false;
+    if (!urlSections || hasImported) {
+      console.log('No URL sections to import or already imported');
+      return false;
+    }
     
     try {
       // Normalize the sections
@@ -53,9 +59,17 @@ const useSharingUrl = (videoId) => {
         video_title: section.video_title || section.videoTitle || ''
       }));
       
+      console.log('Normalized sections for storage:', normalizedSections);
+      
       // Save to localStorage
       const storageKey = `video_sections_${videoId}`;
       localStorage.setItem(storageKey, JSON.stringify(normalizedSections));
+      
+      console.log('Sections saved to localStorage with key:', storageKey);
+      
+      // Mark as imported to prevent re-importing
+      setHasImported(true);
+      setHasSectionsInUrl(false);
       
       // Return true to indicate success
       return true;
@@ -69,7 +83,8 @@ const useSharingUrl = (videoId) => {
     hasSectionsInUrl, 
     isLoading,
     importSectionsFromUrl,
-    sectionsCount: urlSections ? urlSections.length : 0
+    sectionsCount: urlSections ? urlSections.length : 0,
+    hasImported
   };
 };
 

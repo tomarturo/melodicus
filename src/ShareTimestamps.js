@@ -64,6 +64,7 @@ const ShareTimestamps = ({ videoId, savedSections }) => {
         start_time: section.start_time,
         end_time: section.end_time,
         video_id: videoId,
+        video_title: section.video_title || ''
       }));
       
       // Convert sections to a compressed string representation

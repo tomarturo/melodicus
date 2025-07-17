@@ -7,12 +7,7 @@ import SearchResults from './SearchResults';
 import '@fontsource-variable/space-grotesk'
 import '@fontsource-variable/work-sans';
 import NullVideoPage from './NullVideoPage';
-import useSharingUrl from './hooks/useSharingUrl';
-
 function App() {
-
-  const { loadedTimestamps } = useSharingUrl();
-
   return (
     <ChakraProvider>
       <Container px={["0", "0", 6]} maxW="1400px">
@@ -20,7 +15,7 @@ function App() {
           <Route path="/" index element={<HomePage />} />
           <Route
             path="/video/:videoId"
-            element={<VideoPage loadedTimestamps={loadedTimestamps} />}
+            element={<VideoPage />}
           />
           <Route path="/video/null" element={<NullVideoPage />} />
           <Route path="/search/:query" element={<SearchResults />} />
