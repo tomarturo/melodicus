@@ -156,14 +156,19 @@ const PositionedSections = ({
               bottom={`0px`}
               top={`auto`}
               marginBottom={`${section.row * rowHeight}px`}
-              bg="whiteAlpha.700"
+              bg="whiteAlpha.900"
+              boxShadow="md"
               transform={transformValue}
               zIndex={stackIndex}
               borderRadius="full"
+              border="1px"
+              borderColor="blackAlpha.300"
               pl='3'
+              transition="transform 0.2s ease"
               _hover={{
-                bg: "whiteAlpha.900",
-                zIndex: 100 // Higher z-index on hover to bring to front
+                bg: `#ffffff`,
+                transform: `${transformValue} translateY(-2px)`,
+                zIndex: 100
               }}
             >
               <Flex
@@ -179,7 +184,10 @@ const PositionedSections = ({
                   </Text>
                 </Button>
                 <Center h="6" pl="2">
-                  <Divider orientation="vertical" borderColor="blackAlpha.900" />
+                  <Divider 
+                    orientation="vertical" 
+                    borderColor="blackAlpha.500"
+                  />
                 </Center>
                 <Menu placement="top" autoSelect={false} gutter={12}>
                   <MenuButton
