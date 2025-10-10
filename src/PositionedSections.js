@@ -46,12 +46,31 @@ const PositionedSections = ({
 
         // Check if this section overlaps with any markers in this row
         for (const occupied of rowOccupancy[row]) {
-          // Check for overlap
-          if (
+          // Check for visual overlap
+          const visualOverlap = (
             (markerStart >= occupied.start && markerStart <= occupied.end) ||
             (markerEnd >= occupied.start && markerEnd <= occupied.end) ||
             (markerStart <= occupied.start && markerEnd >= occupied.end)
-          ) {
+          );
+
+          // Check for time proximity (within 8 seconds)
+          const timeProximity = occupied.section && Math.abs(section.start_time - occupied.section.start_time) < 8;
+
+          // Add buffer zones to prevent any edge cases - expand the collision detection
+          const bufferZone = 3; // 5% buffer on each side
+          const bufferedMarkerStart = Math.max(0, markerStart - bufferZone);
+          const bufferedMarkerEnd = Math.min(100, markerEnd + bufferZone);
+          const bufferedOccupiedStart = Math.max(0, occupied.start - bufferZone);
+          const bufferedOccupiedEnd = Math.min(100, occupied.end + bufferZone);
+
+          const bufferedOverlap = (
+            (bufferedMarkerStart >= bufferedOccupiedStart && bufferedMarkerStart <= bufferedOccupiedEnd) ||
+            (bufferedMarkerEnd >= bufferedOccupiedStart && bufferedMarkerEnd <= bufferedOccupiedEnd) ||
+            (bufferedMarkerStart <= bufferedOccupiedStart && bufferedMarkerEnd >= bufferedOccupiedEnd)
+          );
+
+          // Stack if there's ANY risk: visual overlap, time proximity, or buffered overlap
+          if (visualOverlap || timeProximity || bufferedOverlap) {
             hasOverlap = true;
             break;
           }
@@ -73,7 +92,8 @@ const PositionedSections = ({
       // Mark this position as occupied in the chosen row
       rowOccupancy[selectedRow].push({
         start: markerStart,
-        end: markerEnd
+        end: markerEnd,
+        section: section
       });
 
       // Add the section with its row assignment
@@ -167,7 +187,7 @@ const PositionedSections = ({
                     size="xs"
                     zIndex={102}
                   >
-                    <Flex px="2" align justify>
+                    <Flex px="1" align justify>
                       <ChevronDownIcon style={{ width: '18px', height: '18px' }} />
                     </Flex>
                   </MenuButton>
