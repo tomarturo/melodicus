@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
-import { Image, Link, Flex, Box, Input, InputGroup, InputRightElement, IconButton } from '@chakra-ui/react';
+import { Image, Link, Flex, Box, Input, InputGroup, InputRightElement, IconButton, Button, useDisclosure } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
+import AuthModal from './AuthModal';
+import { useAuth } from './contexts/AuthContext';
 
 const Header = ({ query = '' }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { user, logout } = useAuth();
   const [currentSearchQuery, setCurrentSearchQuery] = useState(query);
   const [isSearchValid, setIsSearchValid] = useState(true);
   const [hasSearchSubmitAttempt, setHasSearchSubmitAttempt] = useState(false);
@@ -72,6 +76,47 @@ const Header = ({ query = '' }) => {
           </InputRightElement>
         </InputGroup>
       )}
+      <Flex gap='3' align='center'>
+        {user && (
+          <Link as={ReactRouterLink} to="/saved-songs">
+            <Button
+              size='sm'
+              rounded='full'
+              variant='ghost'
+              color='whiteAlpha.800'
+              _hover={{ color: 'white', bg: 'whiteAlpha.200' }}
+            >
+              My songs
+            </Button>
+          </Link>
+        )}
+        {user ? (
+          <Button
+            onClick={logout}
+            size='sm'
+            rounded='full'
+            variant='outline'
+            color='whiteAlpha.800'
+            borderColor='whiteAlpha.400'
+            _hover={{ color: 'white', bg: 'whiteAlpha.200', borderColor: 'whiteAlpha.600' }}
+          >
+            Log out
+          </Button>
+        ) : (
+          <Button
+            onClick={onOpen}
+            size='sm'
+            rounded='full'
+            variant='outline'
+            color='whiteAlpha.800'
+            borderColor='whiteAlpha.400'
+            _hover={{ color: 'white', bg: 'whiteAlpha.200', borderColor: 'whiteAlpha.600' }}
+          >
+            Log in
+          </Button>
+        )}
+        <AuthModal isOpen={isOpen} onClose={onClose} />
+      </Flex>
     </Flex>
   );
 };

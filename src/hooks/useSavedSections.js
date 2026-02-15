@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../supabaseClient';
 import { getSavedSections, createSavedSection, updateSavedSection, deleteSavedSection } from '../utils/sectionsFunctions';
 
 const useSavedSections = (videoId, user, videoTitle) => {
@@ -7,10 +8,10 @@ const useSavedSections = (videoId, user, videoTitle) => {
   const [savedSections, setSavedSections] = useState([]);
   const [isAddingSectionName, setIsAddingSectionName] = useState(false);
   const [isEditingSection, setIsEditingSection] = useState(false);
-  const [editingSectionId, setEditingSectionId] = useState(null);
+  const [currentEditingSection, setCurrentEditingSection] = useState(null);
   const [newSectionName, setNewSectionName] = useState('');
 
-  // Check if video is saved
+  // Check if video is saved and load sections
   useEffect(() => {
     if (!user) return;
 
@@ -35,7 +36,7 @@ const useSavedSections = (videoId, user, videoTitle) => {
     };
 
     checkIfSaved();
-  }, [user, videoId, supabase]);
+  }, [user, videoId]);
 
   const handleSaveVideo = async () => {
     try {
@@ -67,14 +68,28 @@ const useSavedSections = (videoId, user, videoTitle) => {
 
   const saveSection = async (startTime, endTime) => {
     try {
+      let songId = savedSongId;
+
+      // Auto-save video if not already saved
+      if (!isSaved) {
+        const { data } = await supabase
+          .from('saved_songs')
+          .insert([{ video_id: videoId, title: videoTitle }])
+          .select()
+          .single();
+        setIsSaved(true);
+        setSavedSongId(data.id);
+        songId = data.id;
+      }
+
       const { data } = await createSavedSection(supabase, {
-        saved_song_id: savedSongId,
+        saved_song_id: songId,
         start_time: startTime,
         end_time: endTime,
         name: newSectionName.trim() || null
       });
 
-      setSavedSections([...savedSections, data]);
+      setSavedSections(prev => [...prev, data]);
       setNewSectionName('');
       setIsAddingSectionName(false);
     } catch (error) {
@@ -83,21 +98,24 @@ const useSavedSections = (videoId, user, videoTitle) => {
     }
   };
 
-  const updateSection = async (sectionId) => {
+  const updateSection = async () => {
+    if (!currentEditingSection) return;
+
     try {
-      const { data } = await updateSavedSection(supabase, sectionId, {
+      const { data } = await updateSavedSection(supabase, currentEditingSection.id, {
         name: newSectionName.trim() || null
       });
 
-      setSavedSections(sections => 
-        sections.map(section => 
-          section.id === sectionId ? { ...section, name: data.name } : section
+      setSavedSections(sections =>
+        sections.map(section =>
+          section.id === currentEditingSection.id ? { ...section, name: data.name } : section
         )
       );
 
       setNewSectionName('');
       setIsEditingSection(false);
-      setEditingSectionId(null);
+      setCurrentEditingSection(null);
+      setIsAddingSectionName(false);
     } catch (error) {
       console.error('Error updating section:', error);
       throw error;
@@ -107,7 +125,7 @@ const useSavedSections = (videoId, user, videoTitle) => {
   const deleteSection = async (sectionId) => {
     try {
       await deleteSavedSection(supabase, sectionId);
-      setSavedSections(sections => 
+      setSavedSections(sections =>
         sections.filter(section => section.id !== sectionId)
       );
     } catch (error) {
@@ -116,22 +134,35 @@ const useSavedSections = (videoId, user, videoTitle) => {
     }
   };
 
+  const startEditingSection = (section) => {
+    setCurrentEditingSection(section);
+    setNewSectionName(section.name || '');
+    setIsEditingSection(true);
+    setIsAddingSectionName(true);
+  };
+
+  const reloadSections = useCallback(async () => {
+    if (!savedSongId) return;
+    const { data: sections } = await getSavedSections(supabase, savedSongId);
+    setSavedSections(sections || []);
+  }, [savedSongId]);
+
   return {
     isSaved,
     savedSongId,
     savedSections,
     isAddingSectionName,
     isEditingSection,
-    editingSectionId,
     newSectionName,
     setIsAddingSectionName,
-    setIsEditingSection,
-    setEditingSectionId,
     setNewSectionName,
     handleSaveVideo,
     saveSection,
     updateSection,
-    deleteSection
+    deleteSection,
+    startEditingSection,
+    setSavedSections,
+    reloadSections
   };
 };
 

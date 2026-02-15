@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, useToast } from '@chakra-ui/react';
+import { useAuth } from './contexts/AuthContext';
 // Custom Hooks
 import useYouTubePlayer from './hooks/useYouTubePlayer';
 import useLoopManager from './hooks/useLoopManager';
-import useLocalSections from './hooks/useLocalSections';
+import useSections from './hooks/useSections';
 import useSharingUrl from './hooks/useSharingUrl';
 
 // Components
@@ -16,6 +17,7 @@ import SectionNameModal from './SectionNameModal';
 
 const VideoPage = () => {
   const { videoId } = useParams();
+  const { user } = useAuth();
   const toast = useToast();
   const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
 
@@ -54,7 +56,7 @@ const VideoPage = () => {
     startEditingSection,
     setSavedSections,
     reloadSections
-  } = useLocalSections(videoId, videoTitle);
+  } = useSections(videoId, user, videoTitle);
 
   // Apply loaded sections from URL if available
   useEffect(() => {
