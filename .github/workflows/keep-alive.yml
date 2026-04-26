@@ -9,13 +9,16 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    environment: Production
     steps:
       - name: Ping Supabase
         env:
           SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
         run: |
-          curl -s -o /dev/null -w "%{http_code}" \
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             "${{ secrets.REACT_APP_SUPABASE_URL }}/rest/v1/" \
             -H "apikey: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}"
+            -H "Authorization: Bearer ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}")
+          echo "Status: $STATUS"
+          if [ "$STATUS" != "200" ]; then exit 1; fi
