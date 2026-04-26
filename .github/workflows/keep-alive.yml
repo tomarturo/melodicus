@@ -19,8 +19,10 @@ jobs:
             echo "Error: SUPABASE_URL or SUPABASE_ANON_KEY secrets are not set"
             exit 1
           fi
+          CLEAN_URL="${SUPABASE_URL%/}"
+          echo "Pinging: ${CLEAN_URL}/rest/v1/"
           response=$(curl -s -o /dev/null -w "%{http_code}" --fail \
-            "${SUPABASE_URL}/rest/v1/" \
+            "${CLEAN_URL}/rest/v1/" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
           echo "Response status: $response"
