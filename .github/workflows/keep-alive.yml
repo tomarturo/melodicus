@@ -12,8 +12,8 @@ jobs:
     steps:
       - name: Ping Supabase
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
             echo "Error: SUPABASE_URL or SUPABASE_ANON_KEY secrets are not set"
