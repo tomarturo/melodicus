@@ -15,14 +15,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "Error: SUPABASE_URL or SUPABASE_ANON_KEY secrets are not set"
-            exit 1
-          fi
-          CLEAN_URL="${SUPABASE_URL%/}"
-          echo "Pinging: ${CLEAN_URL}/rest/v1/"
-          response=$(curl -s -o /dev/null -w "%{http_code}" --fail \
-            "${CLEAN_URL}/rest/v1/" \
-            -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
-          echo "Response status: $response"
+          curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.REACT_APP_SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}"
