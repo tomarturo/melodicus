@@ -13,6 +13,7 @@ import VideoLayout from './VideoLayout'
 import VideoDisplay from './VideoDisplay';
 import VideoControls from './VideoControls';
 import LoopSelector from './LoopSelector';
+import WaveformTimeline from './WaveformTimeline';
 import SectionNameModal from './SectionNameModal';
 
 const VideoPage = () => {
@@ -177,6 +178,15 @@ const VideoPage = () => {
         onEditSection={startEditingSection}
         onDeleteSection={deleteSection}
       />
+      {/* Phase 1: the wavesurfer track renders alongside the slider it will
+          replace, so the two can be compared before LoopSelector is removed. */}
+      {videoLength && (
+        <WaveformTimeline
+          videoLength={videoLength}
+          currentTime={currentTime}
+          onSeek={controls.seekTo}
+        />
+      )}
       {videoLength && (
         <LoopSelector
           videoLength={videoLength}
