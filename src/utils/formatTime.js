@@ -23,3 +23,8 @@ export const convertDurationToSeconds = (duration) => {
       return `${pad(minutes)}:${pad(remainingSeconds)}`;
     }
   };
+
+  // Loop boundaries come off the timeline as raw floats (166.61218337538818).
+  // Sub-millisecond precision means nothing for a practice loop and only bloats
+  // the base64 sharing URL, so round before anything is persisted.
+  export const roundSeconds = (seconds) => Math.round(Number(seconds) * 1000) / 1000;

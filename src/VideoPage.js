@@ -8,6 +8,7 @@ import useLoopManager from './hooks/useLoopManager';
 import useSections from './hooks/useSections';
 import useSharingUrl from './hooks/useSharingUrl';
 import { MIN_LOOP } from './hooks/useWaveformTimeline';
+import { roundSeconds } from './utils/formatTime';
 
 // Components
 import VideoLayout from './VideoLayout'
@@ -107,7 +108,9 @@ const VideoPage = () => {
       if (isEditingSection) {
         await updateSection();
       } else {
-        await saveSection(startTime, endTime);
+        // Rounded here rather than in either backend, so localStorage and
+        // Supabase store the same value for the same loop.
+        await saveSection(roundSeconds(startTime), roundSeconds(endTime));
       }
 
       toast({
