@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.esm.js';
@@ -31,6 +31,10 @@ const SECTION_ID_PREFIX = 'section-';
 // or below the band would be cut off.
 const TRACK_HEIGHT = 48;
 const CHIP_ROWS = 2;
+
+// Multipliers of fit-to-width. zoom() just sets minPxPerSec and re-renders, so
+// level 1 (clientWidth / duration) is exactly the non-scrolling fit.
+export const ZOOM_LEVELS = [1, 2, 4, 8];
 
 // Shortest loop the region is allowed to become. Shared with the save gate in
 // VideoPage so the UI can't produce a loop that saving would then reject.
@@ -142,11 +146,12 @@ const useWaveformTimeline = ({
   onSectionMenu,
 }) => {
   const containerRef = useRef(null);
-  const timelineRef = useRef(null);
   const wavesurferRef = useRef(null);
   const regionsRef = useRef(null);
   const loopRegionRef = useRef(null);
   const sectionRegionsRef = useRef(new Map());
+  const zoomIndexRef = useRef(0);
+  const [zoomIndex, setZoomIndex] = useState(0);
   // Regions can only be added once the plugin knows the duration, so the
   // sections effect has to wait for 'ready' rather than just for `duration`.
   const [isReady, setIsReady] = useState(false);
@@ -166,6 +171,20 @@ const useWaveformTimeline = ({
       loopEnd,
     };
   });
+
+  // Re-applied on every zoom change and whenever the container resizes: the
+  // fit-to-width baseline depends on clientWidth, so a stale minPxPerSec would
+  // make a narrowed window scroll at level 1.
+  const applyZoom = useCallback(() => {
+    const wavesurfer = wavesurferRef.current;
+    const container = containerRef.current;
+    if (!wavesurfer || !container || !duration) return;
+    const base = container.clientWidth / duration;
+    if (!base) return;
+    const target = base * ZOOM_LEVELS[zoomIndexRef.current];
+    if (Math.abs((wavesurfer.options.minPxPerSec || 0) - target) < 0.01) return;
+    wavesurfer.zoom(target);
+  }, [duration]);
 
   // Create the instance once per duration. No url and no media: wavesurfer's
   // load() runs on (peaks && duration) alone, skipping fetch and decode.
@@ -192,13 +211,14 @@ const useWaveformTimeline = ({
       autoCenter: true,
       plugins: [
         regions,
-        // Without an explicit container the ruler is inserted inside the
-        // renderer's shadow root, where it overlaps the waveform band. Its own
-        // element above the track keeps the two legible and lets Chakra own
-        // the spacing between them.
+        // Left to its default the ruler is appended inside the renderer's
+        // wrapper, below the band - which is what we want, because the wrapper
+        // is the element that gets the zoomed width. Given its own container in
+        // the light DOM it would size to that container instead and keep
+        // rendering fit-to-width ticks under a track scrolled to 4x, so ruler
+        // and track would disagree about where a given second is.
         TimelinePlugin.create({
           height: 20,
-          container: timelineRef.current,
           formatTimeCallback: formatSecondsToDuration,
         }),
         HoverPlugin.create({
@@ -273,6 +293,8 @@ const useWaveformTimeline = ({
       setIsReady(true);
     });
 
+    wavesurfer.on('resize', applyZoom);
+
     return () => {
       wavesurferRef.current = null;
       regionsRef.current = null;
@@ -280,9 +302,20 @@ const useWaveformTimeline = ({
       sectionRegionsRef.current = new Map();
       setIsReady(false);
       wavesurfer.destroy();
-      if (timelineRef.current) timelineRef.current.replaceChildren();
     };
-  }, [duration]);
+  }, [duration, applyZoom]);
+
+  // Zooming in on a long video is the difference between a 3-second loop being
+  // half a percent of the track and being workable. Scroll back to the loop
+  // afterwards so the view lands somewhere meaningful rather than wherever the
+  // previous scroll offset happened to be.
+  useEffect(() => {
+    zoomIndexRef.current = zoomIndex;
+    const wavesurfer = wavesurferRef.current;
+    if (!wavesurfer || !isReady) return;
+    applyZoom();
+    wavesurfer.setScrollTime(latest.current.loopStart || 0);
+  }, [zoomIndex, isReady, applyZoom]);
 
   // YouTube owns the clock; we just push its position into the renderer.
   // setTime() passes the time explicitly to updateProgress(), so the cursor
@@ -369,7 +402,7 @@ const useWaveformTimeline = ({
     });
   }, [sections, isReady]);
 
-  return { containerRef, timelineRef };
+  return { containerRef, zoomIndex, setZoomIndex };
 };
 
 export default useWaveformTimeline;

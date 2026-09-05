@@ -3,12 +3,16 @@ import { useState, useEffect } from 'react';
 const useLoopManager = (videoLength, currentTime, playerControls) => {
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(videoLength || 0);
+  // Until the user picks a loop, it spans the whole video - so it has to follow
+  // videoLength as that gets refined from the player's exact duration, not just
+  // seed itself once while endTime is still 0.
+  const [hasCustomLoop, setHasCustomLoop] = useState(false);
 
   useEffect(() => {
-    if (videoLength && endTime === 0) {
+    if (videoLength && !hasCustomLoop) {
       setEndTime(videoLength);
     }
-  }, [videoLength, endTime]);
+  }, [videoLength, hasCustomLoop]);
 
   useEffect(() => {
     if (!playerControls?.player) return;
@@ -54,6 +58,7 @@ const useLoopManager = (videoLength, currentTime, playerControls) => {
     }
     setStartTime(start);
     setEndTime(end);
+    setHasCustomLoop(true);
   };
 
   const handleRangeChangeEnd = () => {
@@ -67,6 +72,7 @@ const useLoopManager = (videoLength, currentTime, playerControls) => {
     const endNum = Number(end);
     setStartTime(startNum);
     setEndTime(endNum);
+    setHasCustomLoop(true);
     if (playerControls?.player?.seekTo) {
       playerControls.player.seekTo(startNum, true);
     }

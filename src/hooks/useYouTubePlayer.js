@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { convertDurationToSeconds } from '../utils/formatTime';
 
 const useYouTubePlayer = (videoId, apiKey) => {
@@ -8,6 +8,11 @@ const useYouTubePlayer = (videoId, apiKey) => {
   const [videoLength, setVideoLength] = useState(null);
   const [videoTitle, setVideoTitle] = useState(null);
   const [videoThumbnail, setVideoThumbnail] = useState(null);
+  // The Data API reports duration as an ISO-8601 string of whole seconds, so it
+  // can sit up to a second off the real media. Every region on the timeline maps
+  // through this value, so prefer the player's fractional figure once it exists
+  // and don't let the API response (which may resolve later) overwrite it.
+  const playerDurationRef = useRef(null);
 
   // Initialize YouTube Player
   useEffect(() => {
@@ -28,6 +33,11 @@ const useYouTubePlayer = (videoId, apiKey) => {
           onReady: (event) => {
             console.log("Player is ready");
             setPlayer(event.target);
+            const exactDuration = event.target.getDuration?.();
+            if (Number.isFinite(exactDuration) && exactDuration > 0) {
+              playerDurationRef.current = exactDuration;
+              setVideoLength(exactDuration);
+            }
           },
           onStateChange: (event) => {
             // @ts-ignore
@@ -96,7 +106,7 @@ const useYouTubePlayer = (videoId, apiKey) => {
         const totalDuration = convertDurationToSeconds(duration);
         const title = data.items[0]?.snippet?.title;
 
-        setVideoLength(totalDuration || 0);
+        setVideoLength(playerDurationRef.current || totalDuration || 0);
         setVideoThumbnail(thumbnailUrl);
         setVideoTitle(title);
       })

@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
-import { Box, Menu, MenuButton, MenuList, MenuItem, Portal } from '@chakra-ui/react';
-import useWaveformTimeline from './hooks/useWaveformTimeline';
+import { Box, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text } from '@chakra-ui/react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
+import useWaveformTimeline, { ZOOM_LEVELS } from './hooks/useWaveformTimeline';
 
 const WaveformTimeline = ({
   videoLength,
@@ -25,7 +26,7 @@ const WaveformTimeline = ({
     setMenu({ section, x, y });
   }, []);
 
-  const { containerRef, timelineRef } = useWaveformTimeline({
+  const { containerRef, zoomIndex, setZoomIndex } = useWaveformTimeline({
     duration: videoLength,
     currentTime,
     loopStart: startTime,
@@ -42,7 +43,27 @@ const WaveformTimeline = ({
 
   return (
     <Box py={4} px={8} bg="#FAF9F6">
-      <Box ref={timelineRef} mb={1} />
+      <Flex justify="flex-end" align="center" gap={1} mb={1}>
+        <IconButton
+          size="xs"
+          variant="ghost"
+          aria-label="Zoom out"
+          icon={<Icon as={ZoomOut} boxSize="16px" />}
+          isDisabled={zoomIndex === 0}
+          onClick={() => setZoomIndex((index) => Math.max(0, index - 1))}
+        />
+        <Text fontSize="xs" color="blackAlpha.700" minW="26px" textAlign="center">
+          {ZOOM_LEVELS[zoomIndex]}x
+        </Text>
+        <IconButton
+          size="xs"
+          variant="ghost"
+          aria-label="Zoom in"
+          icon={<Icon as={ZoomIn} boxSize="16px" />}
+          isDisabled={zoomIndex === ZOOM_LEVELS.length - 1}
+          onClick={() => setZoomIndex((index) => Math.min(ZOOM_LEVELS.length - 1, index + 1))}
+        />
+      </Flex>
       <Box ref={containerRef} />
 
       <Menu isOpen={!!menu} onClose={closeMenu} placement="bottom-start" gutter={4}>
