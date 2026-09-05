@@ -1,15 +1,7 @@
 import React from 'react';
 import { Box, AbsoluteCenter } from '@chakra-ui/react';
-import PositionedSections from './PositionedSections';
 
-const VideoDisplay = ({ 
-  videoThumbnail,
-  videoLength,
-  savedSections,
-  onJumpToSection,
-  onEditSection,
-  onDeleteSection
-}) => {
+const VideoDisplay = ({ videoThumbnail }) => {
   return (
     <Box
       pos='relative'
@@ -44,24 +36,6 @@ const VideoDisplay = ({
         backgroundRepeat='no-repeat'
         boxShadow='xl'
       />
-      
-      {/* Position the sections at the bottom of the container */}
-      <Box
-        position="absolute"
-        bottom="0"
-        left="0"
-        right="0"
-      >
-        {videoLength && (
-          <PositionedSections
-            sections={savedSections}
-            videoLength={videoLength}
-            onJumpToSection={onJumpToSection}
-            onEditSection={onEditSection}
-            onDeleteSection={onDeleteSection}
-          />
-        )}
-      </Box>
     </Box>
   );
 };

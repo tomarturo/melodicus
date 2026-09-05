@@ -134,23 +134,20 @@ const VideoPage = () => {
       onDeleteSection={deleteSection}
     >
       <Box id="player" display="none" />
-      <VideoDisplay
-        videoThumbnail={videoThumbnail}
-        videoLength={videoLength}
-        savedSections={savedSections}
-        onJumpToSection={jumpToSection}
-        onEditSection={startEditingSection}
-        onDeleteSection={deleteSection}
-      />
+      <VideoDisplay videoThumbnail={videoThumbnail} />
       {videoLength && (
         <WaveformTimeline
           videoLength={videoLength}
           currentTime={currentTime}
           startTime={startTime}
           endTime={endTime}
+          savedSections={savedSections}
           onSeek={controls.seekTo}
           onRangeChange={handleRangeChange}
           onRangeChangeEnd={handleRangeChangeEnd}
+          onJumpToSection={jumpToSection}
+          onEditSection={startEditingSection}
+          onDeleteSection={deleteSection}
         />
       )}
       <Box>

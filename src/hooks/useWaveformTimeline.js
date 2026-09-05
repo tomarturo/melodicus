@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.esm.js';
@@ -20,7 +20,17 @@ const PLAYHEAD_COLOR = '#C53030'; // red.600
 // the played-portion darkening it overlaps.
 const LOOP_COLOR = 'rgba(128, 90, 213, 0.30)'; // purple.500
 const LOOP_EDGE_COLOR = '#553C9A'; // purple.700
+const SECTION_COLOR = 'rgba(85, 60, 154, 0.13)'; // purple.700, well under the loop
+const SECTION_CHIP_COLOR = '#553C9A'; // purple.700
 const LOOP_REGION_ID = 'loop';
+const SECTION_ID_PREFIX = 'section-';
+
+// Tall enough to hold two staggered rows of section labels inside the band.
+// Labels have to live inside it: the renderer's scroll container is
+// overflow-x: auto, which makes the cross axis clip too, so a chip hung above
+// or below the band would be cut off.
+const TRACK_HEIGHT = 48;
+const CHIP_ROWS = 2;
 
 // Shortest loop the region is allowed to become. Shared with the save gate in
 // VideoPage so the UI can't produce a loop that saving would then reject.
@@ -44,22 +54,79 @@ const renderTrackBar = (peaks, ctx) => {
 // irrelevant because renderTrackBar ignores them.
 const PLACEHOLDER_PEAKS = [[0, 0]];
 
-// A region body swallows drag-to-create: every region wires up its own
+// Region bodies swallow drag-to-create: every region wires up its own
 // makeDraggable, whose pointermove calls preventDefault, and the wrapper-level
 // handler that enableDragSelection installs bails out on defaultPrevented.
-// Making the body inert while leaving the two resize handles live keeps the
-// whole track available for drawing a new loop, which matters most when the
-// loop still spans the entire video and covers every pixel of the track.
-// Also restyles the handles, whose 2px black border the plugin hard-codes.
-const styleLoopRegion = (region) => {
+// (drag: false does not help - the listener is attached either way.) So every
+// region we add gets an inert body, and only the parts that genuinely need
+// clicks - resize handles, section labels - get pointer events back. Without
+// this the loop alone would block the whole track while it still spans the
+// entire video.
+const styleRegion = (region, edgeColor) => {
   const element = region.element;
   if (!element) return;
   element.style.pointerEvents = 'none';
   element.querySelectorAll('[part~="region-handle"]').forEach((handle) => {
     handle.style.pointerEvents = 'auto';
+    if (!edgeColor) return;
     const side = handle.getAttribute('part').includes('handle-left') ? 'Left' : 'Right';
-    handle.style[`border${side}`] = `3px solid ${LOOP_EDGE_COLOR}`;
+    handle.style[`border${side}`] = `3px solid ${edgeColor}`;
   });
+  element.querySelectorAll('[data-interactive]').forEach((node) => {
+    node.style.pointerEvents = 'auto';
+  });
+};
+
+// Region content is handed to setContent as an HTMLElement and lands inside the
+// renderer's shadow root, where Chakra's class names do not reach - hence plain
+// DOM and inline styles. The caret defers to a real Chakra menu rendered outside
+// the shadow root by WaveformTimeline.
+const buildSectionChip = (section, row, handlers) => {
+  const chip = document.createElement('div');
+  chip.dataset.interactive = 'true';
+  Object.assign(chip.style, {
+    position: 'absolute',
+    top: `${4 + row * 20}px`,
+    left: '0',
+    display: 'inline-flex',
+    alignItems: 'center',
+    background: SECTION_CHIP_COLOR,
+    color: '#FAF9F6',
+    font: '500 11px/1 system-ui, -apple-system, sans-serif',
+    borderRadius: '9999px',
+    whiteSpace: 'nowrap',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.25)',
+  });
+
+  const name = document.createElement('span');
+  name.textContent = section.name || 'Unnamed';
+  name.title = `${formatSecondsToDuration(section.start_time)} – ${formatSecondsToDuration(section.end_time)}`;
+  Object.assign(name.style, { padding: '4px 2px 4px 9px', cursor: 'pointer' });
+  name.addEventListener('click', (event) => {
+    event.stopPropagation();
+    handlers.current.onJumpToSection(section.start_time, section.end_time);
+  });
+
+  const caret = document.createElement('button');
+  caret.type = 'button';
+  caret.setAttribute('aria-label', `Options for ${section.name || 'Unnamed'}`);
+  caret.textContent = '⌄';
+  Object.assign(caret.style, {
+    background: 'none',
+    border: 'none',
+    color: 'inherit',
+    font: 'inherit',
+    lineHeight: '1',
+    padding: '2px 8px 6px 4px',
+    cursor: 'pointer',
+  });
+  caret.addEventListener('click', (event) => {
+    event.stopPropagation();
+    handlers.current.onSectionMenu(section, event.clientX, event.clientY);
+  });
+
+  chip.append(name, caret);
+  return chip;
 };
 
 const useWaveformTimeline = ({
@@ -67,21 +134,37 @@ const useWaveformTimeline = ({
   currentTime,
   loopStart,
   loopEnd,
+  sections,
   onSeek,
   onLoopChange,
   onLoopChangeEnd,
+  onJumpToSection,
+  onSectionMenu,
 }) => {
   const containerRef = useRef(null);
   const timelineRef = useRef(null);
   const wavesurferRef = useRef(null);
+  const regionsRef = useRef(null);
   const loopRegionRef = useRef(null);
+  const sectionRegionsRef = useRef(new Map());
+  // Regions can only be added once the plugin knows the duration, so the
+  // sections effect has to wait for 'ready' rather than just for `duration`.
+  const [isReady, setIsReady] = useState(false);
 
   // Callbacks and loop bounds get a new identity every render. Holding them in
   // a ref keeps them out of the instance effect's deps, so a re-render never
   // tears down and rebuilds the waveform.
   const latest = useRef({});
   useEffect(() => {
-    latest.current = { onSeek, onLoopChange, onLoopChangeEnd, loopStart, loopEnd };
+    latest.current = {
+      onSeek,
+      onLoopChange,
+      onLoopChangeEnd,
+      onJumpToSection,
+      onSectionMenu,
+      loopStart,
+      loopEnd,
+    };
   });
 
   // Create the instance once per duration. No url and no media: wavesurfer's
@@ -90,12 +173,13 @@ const useWaveformTimeline = ({
     if (!containerRef.current || !duration) return undefined;
 
     const regions = RegionsPlugin.create();
+    regionsRef.current = regions;
 
     const wavesurfer = WaveSurfer.create({
       container: containerRef.current,
       peaks: PLACEHOLDER_PEAKS,
       duration,
-      height: 28,
+      height: TRACK_HEIGHT,
       waveColor: TRACK_COLOR,
       progressColor: PLAYED_COLOR,
       cursorColor: PLAYHEAD_COLOR,
@@ -160,7 +244,7 @@ const useWaveformTimeline = ({
     // throwaway region reaches us here fully formed. Fold its bounds into the
     // loop and drop it, ignoring stray flicks shorter than a usable loop.
     regions.on('region-created', (region) => {
-      if (region.id === LOOP_REGION_ID) return;
+      if (region.id === LOOP_REGION_ID || region.id.startsWith(SECTION_ID_PREFIX)) return;
       const { start, end } = region;
       region.remove();
       const loop = loopRegionRef.current;
@@ -174,24 +258,27 @@ const useWaveformTimeline = ({
     // only populated on 'ready'. Adding the loop before then collapses it to
     // zero length, which renders it as a marker with no resize handles.
     wavesurfer.on('ready', () => {
-      if (loopRegionRef.current) return;
-      loopRegionRef.current = regions.addRegion({
-        id: LOOP_REGION_ID,
-        start: latest.current.loopStart || 0,
-        end: latest.current.loopEnd || duration,
-        color: LOOP_COLOR,
-        // The body stays inert so a drag anywhere on the track starts a new
-        // loop selection instead of sliding the existing one.
-        drag: false,
-        resize: true,
-        minLength: MIN_LOOP,
-      });
-      styleLoopRegion(loopRegionRef.current);
+      if (!loopRegionRef.current) {
+        loopRegionRef.current = regions.addRegion({
+          id: LOOP_REGION_ID,
+          start: latest.current.loopStart || 0,
+          end: latest.current.loopEnd || duration,
+          color: LOOP_COLOR,
+          drag: false,
+          resize: true,
+          minLength: MIN_LOOP,
+        });
+        styleRegion(loopRegionRef.current, LOOP_EDGE_COLOR);
+      }
+      setIsReady(true);
     });
 
     return () => {
       wavesurferRef.current = null;
+      regionsRef.current = null;
       loopRegionRef.current = null;
+      sectionRegionsRef.current = new Map();
+      setIsReady(false);
       wavesurfer.destroy();
       if (timelineRef.current) timelineRef.current.replaceChildren();
     };
@@ -218,6 +305,69 @@ const useWaveformTimeline = ({
       loop.setOptions({ start: loopStart, end: loopEnd });
     }
   }, [loopStart, loopEnd, duration]);
+
+  // Saved sections become their own regions on the same track, which is the
+  // point of the exercise: the pills they replace were positioned against the
+  // full container width while the track had horizontal padding, so the two
+  // never lined up. Diffed rather than rebuilt so untouched regions keep their
+  // DOM (and a rebuild doesn't fight an in-flight click on a chip).
+  useEffect(() => {
+    const regions = regionsRef.current;
+    if (!regions || !isReady) return;
+
+    const live = sectionRegionsRef.current;
+    const seen = new Set();
+
+    // Chips are staggered across rows so neighbours don't cover each other.
+    // Rows have to come from time order, not array order: sections arrive in
+    // creation order from both backends, so two loops adjacent on the track can
+    // otherwise land on the same row.
+    const rowById = new Map(
+      [...(sections || [])]
+        .sort((a, b) => a.start_time - b.start_time)
+        .map((section, order) => [section.id, order % CHIP_ROWS]),
+    );
+
+    (sections || []).forEach((section) => {
+      const id = `${SECTION_ID_PREFIX}${section.id}`;
+      seen.add(id);
+      const existing = live.get(id);
+
+      if (existing) {
+        if (
+          Math.abs(existing.start - section.start_time) > SYNC_EPSILON ||
+          Math.abs(existing.end - section.end_time) > SYNC_EPSILON
+        ) {
+          existing.setOptions({ start: section.start_time, end: section.end_time });
+        }
+        // Renaming is the only edit either backend supports, so it is the one
+        // change that has to be pushed into existing content.
+        const label = existing.element?.querySelector('span');
+        if (label && label.textContent !== (section.name || 'Unnamed')) {
+          label.textContent = section.name || 'Unnamed';
+        }
+        return;
+      }
+
+      const region = regions.addRegion({
+        id,
+        start: section.start_time,
+        end: section.end_time,
+        color: SECTION_COLOR,
+        drag: false,
+        resize: false,
+        content: buildSectionChip(section, rowById.get(section.id) || 0, latest),
+      });
+      styleRegion(region);
+      live.set(id, region);
+    });
+
+    live.forEach((region, id) => {
+      if (seen.has(id)) return;
+      region.remove();
+      live.delete(id);
+    });
+  }, [sections, isReady]);
 
   return { containerRef, timelineRef };
 };
