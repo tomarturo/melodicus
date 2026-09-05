@@ -26,7 +26,8 @@ const useSavedSections = (videoId, user, videoTitle) => {
       if (data) {
         setIsSaved(true);
         setSavedSongId(data.id);
-        const { data: sections } = await getSavedSections(supabase, data.id);
+        const { data: sections, error: sectionsError } = await getSavedSections(supabase, data.id);
+        if (sectionsError) console.error('Error loading sections:', sectionsError);
         setSavedSections(sections || []);
       } else {
         setIsSaved(false);
@@ -51,11 +52,13 @@ const useSavedSections = (videoId, user, videoTitle) => {
         setSavedSongId(null);
         setSavedSections([]);
       } else {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('saved_songs')
           .insert([{ video_id: videoId, title: videoTitle }])
           .select()
           .single();
+        if (error) throw error;
+        if (!data) throw new Error('The song was not saved: no row came back.');
 
         setIsSaved(true);
         setSavedSongId(data.id);
@@ -72,22 +75,30 @@ const useSavedSections = (videoId, user, videoTitle) => {
 
       // Auto-save video if not already saved
       if (!isSaved) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('saved_songs')
           .insert([{ video_id: videoId, title: videoTitle }])
           .select()
           .single();
+        if (error) throw error;
+        if (!data) throw new Error('The song was not saved: no row came back.');
         setIsSaved(true);
         setSavedSongId(data.id);
         songId = data.id;
       }
 
-      const { data } = await createSavedSection(supabase, {
+      const { data, error } = await createSavedSection(supabase, {
         saved_song_id: songId,
         start_time: startTime,
         end_time: endTime,
         name: newSectionName.trim() || null
       });
+
+      // Supabase reports failure as { data: null, error }. Dropping the error
+      // and storing data regardless put a null in savedSections while the UI
+      // still reported success, and the null then broke every consumer.
+      if (error) throw error;
+      if (!data) throw new Error('The loop was not saved: no row came back.');
 
       setSavedSections(prev => [...prev, data]);
       setNewSectionName('');
@@ -102,9 +113,12 @@ const useSavedSections = (videoId, user, videoTitle) => {
     if (!currentEditingSection) return;
 
     try {
-      const { data } = await updateSavedSection(supabase, currentEditingSection.id, {
+      const { data, error } = await updateSavedSection(supabase, currentEditingSection.id, {
         name: newSectionName.trim() || null
       });
+
+      if (error) throw error;
+      if (!data) throw new Error('The loop was not updated: no row came back.');
 
       setSavedSections(sections =>
         sections.map(section =>
@@ -124,7 +138,8 @@ const useSavedSections = (videoId, user, videoTitle) => {
 
   const deleteSection = async (sectionId) => {
     try {
-      await deleteSavedSection(supabase, sectionId);
+      const { error } = await deleteSavedSection(supabase, sectionId);
+      if (error) throw error;
       setSavedSections(sections =>
         sections.filter(section => section.id !== sectionId)
       );

@@ -81,6 +81,11 @@ const styleRegion = (region, edgeColor) => {
   });
 };
 
+// Number(null) and Number('') are both 0, which passes a plain isFinite check,
+// so blank bounds have to be rejected before the coercion.
+const toSeconds = (value) =>
+  value === null || value === undefined || value === '' ? NaN : Number(value);
+
 // Region content is handed to setContent as an HTMLElement and lands inside the
 // renderer's shadow root, where Chakra's class names do not reach - hence plain
 // DOM and inline styles. The caret defers to a real Chakra menu rendered outside
@@ -351,17 +356,27 @@ const useWaveformTimeline = ({
     const live = sectionRegionsRef.current;
     const seen = new Set();
 
+    // Sections reach us from three places - localStorage, Supabase, and a
+    // base64 query param - so one unusable row should be skipped rather than
+    // take the whole timeline down with it.
+    const usable = (sections || []).filter((section) => {
+      if (!section || section.id == null) return false;
+      const start = toSeconds(section.start_time);
+      const end = toSeconds(section.end_time);
+      return Number.isFinite(start) && Number.isFinite(end) && end > start;
+    });
+
     // Chips are staggered across rows so neighbours don't cover each other.
     // Rows have to come from time order, not array order: sections arrive in
     // creation order from both backends, so two loops adjacent on the track can
     // otherwise land on the same row.
     const rowById = new Map(
-      [...(sections || [])]
+      [...usable]
         .sort((a, b) => a.start_time - b.start_time)
         .map((section, order) => [section.id, order % CHIP_ROWS]),
     );
 
-    (sections || []).forEach((section) => {
+    usable.forEach((section) => {
       const id = `${SECTION_ID_PREFIX}${section.id}`;
       seen.add(id);
       const existing = live.get(id);
