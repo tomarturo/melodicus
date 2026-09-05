@@ -5,11 +5,21 @@ import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.esm.js';
 import HoverPlugin from 'wavesurfer.js/dist/plugins/hover.esm.js';
 import { formatSecondsToDuration } from '../utils/formatTime';
 
-// Chakra token equivalents, so the track keeps the look of the slider it replaces.
-const TRACK_COLOR = 'rgba(0, 0, 0, 0.36)'; // blackAlpha.500
-const PLAYED_COLOR = 'rgba(0, 0, 0, 0.80)'; // blackAlpha.800
+// blackAlpha.500 and blackAlpha.800 from the slider this replaces, but flattened
+// against the #FAF9F6 panel rather than left translucent. They have to be opaque:
+// the progress canvas is the main canvas recomposited with 'source-in', which
+// multiplies the two alphas, so a translucent waveColor drags progressColor down
+// with it - at 0.36 and 0.80 the played portion came out at 0.29, lighter than
+// the track it is supposed to darken.
+const TRACK_COLOR = '#A09F9D'; // blackAlpha.500 over #FAF9F6
+const PLAYED_COLOR = '#323231'; // blackAlpha.800 over #FAF9F6
 const PLAYHEAD_COLOR = '#C53030'; // red.600
-const LOOP_COLOR = 'rgba(0, 0, 0, 0.18)';
+// Chakra's default purple scale (the app uses ChakraProvider's default theme,
+// same palette as the purple Badges on the home and search pages). The loop
+// needs its own hue: as another shade of black it was indistinguishable from
+// the played-portion darkening it overlaps.
+const LOOP_COLOR = 'rgba(128, 90, 213, 0.30)'; // purple.500
+const LOOP_EDGE_COLOR = '#553C9A'; // purple.700
 const LOOP_REGION_ID = 'loop';
 
 // Shortest loop the region is allowed to become. Shared with the save gate in
@@ -23,9 +33,9 @@ const SYNC_EPSILON = 0.01;
 
 // We never have real audio for a YouTube video, so the waveform band is painted
 // as a solid bar instead. wavesurfer pre-sets fillStyle to waveColor before
-// calling this, then clones the canvas and composites it with progressColor, so
-// filling the whole rect gives us the played/unplayed split for free. Filling
-// per-canvas also stays correct once zoom splits the waveform into chunks.
+// calling this, then clones the canvas and recolors the copy with progressColor,
+// so one fill yields both the played and unplayed halves. Filling per-canvas also
+// stays correct once zoom splits the waveform into chunks.
 const renderTrackBar = (peaks, ctx) => {
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
@@ -40,12 +50,15 @@ const PLACEHOLDER_PEAKS = [[0, 0]];
 // Making the body inert while leaving the two resize handles live keeps the
 // whole track available for drawing a new loop, which matters most when the
 // loop still spans the entire video and covers every pixel of the track.
-const makeBodyInert = (region) => {
+// Also restyles the handles, whose 2px black border the plugin hard-codes.
+const styleLoopRegion = (region) => {
   const element = region.element;
   if (!element) return;
   element.style.pointerEvents = 'none';
   element.querySelectorAll('[part~="region-handle"]').forEach((handle) => {
     handle.style.pointerEvents = 'auto';
+    const side = handle.getAttribute('part').includes('handle-left') ? 'Left' : 'Right';
+    handle.style[`border${side}`] = `3px solid ${LOOP_EDGE_COLOR}`;
   });
 };
 
@@ -173,7 +186,7 @@ const useWaveformTimeline = ({
         resize: true,
         minLength: MIN_LOOP,
       });
-      makeBodyInert(loopRegionRef.current);
+      styleLoopRegion(loopRegionRef.current);
     });
 
     return () => {
