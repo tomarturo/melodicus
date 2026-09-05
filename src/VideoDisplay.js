@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, AbsoluteCenter } from '@chakra-ui/react';
-import LoopSelector from './LoopSelector';
 import PositionedSections from './PositionedSections';
 
 const VideoDisplay = ({ 
