@@ -7,12 +7,14 @@ import useYouTubePlayer from './hooks/useYouTubePlayer';
 import useLoopManager from './hooks/useLoopManager';
 import useSections from './hooks/useSections';
 import useSharingUrl from './hooks/useSharingUrl';
+import { MIN_LOOP } from './hooks/useWaveformTimeline';
+import { roundSeconds } from './utils/formatTime';
 
 // Components
 import VideoLayout from './VideoLayout'
 import VideoDisplay from './VideoDisplay';
 import VideoControls from './VideoControls';
-import LoopSelector from './LoopSelector';
+import WaveformTimeline from './WaveformTimeline';
 import SectionNameModal from './SectionNameModal';
 
 const VideoPage = () => {
@@ -77,42 +79,6 @@ const VideoPage = () => {
     }
   }, [hasSectionsInUrl, isLoading, importSectionsFromUrl, reloadSections, hasImported]);
 
-  // Add direct loop checking here
-  useEffect(() => {
-    if (!player) return;
-
-    let intervalId;
-    const checkProgress = () => {
-      if (player && player.getCurrentTime && typeof player.getCurrentTime === 'function') {
-        try {
-          const currentTime = player.getCurrentTime();
-          if (currentTime >= endTime) {
-            player.seekTo(startTime, true);
-          }
-        } catch (error) {
-          console.error("Error in checkProgress:", error);
-        }
-      }
-    };
-
-    if (player.getPlayerState) {
-      const setupInterval = () => {
-        if (player.getPlayerState() !== -1) {
-          intervalId = setInterval(checkProgress, 250);
-        } else {
-          setTimeout(setupInterval, 1000);
-        }
-      };
-      setupInterval();
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [player, startTime, endTime]);
-
   // Event handlers
   const handlePlayPause = () => {
     if (!player) return;
@@ -125,7 +91,7 @@ const VideoPage = () => {
   };
 
   const handleNewLoop = () => {
-    if (startTime === endTime) {
+    if (endTime - startTime < MIN_LOOP) {
       toast({
         title: "Invalid loop",
         description: "Please select a valid loop to save",
@@ -142,7 +108,9 @@ const VideoPage = () => {
       if (isEditingSection) {
         await updateSection();
       } else {
-        await saveSection(startTime, endTime);
+        // Rounded here rather than in either backend, so localStorage and
+        // Supabase store the same value for the same loop.
+        await saveSection(roundSeconds(startTime), roundSeconds(endTime));
       }
 
       toast({
@@ -169,22 +137,20 @@ const VideoPage = () => {
       onDeleteSection={deleteSection}
     >
       <Box id="player" display="none" />
-      <VideoDisplay
-        videoThumbnail={videoThumbnail}
-        videoLength={videoLength}
-        savedSections={savedSections}
-        onJumpToSection={jumpToSection}
-        onEditSection={startEditingSection}
-        onDeleteSection={deleteSection}
-      />
+      <VideoDisplay videoThumbnail={videoThumbnail} />
       {videoLength && (
-        <LoopSelector
+        <WaveformTimeline
           videoLength={videoLength}
           currentTime={currentTime}
           startTime={startTime}
           endTime={endTime}
+          savedSections={savedSections}
+          onSeek={controls.seekTo}
           onRangeChange={handleRangeChange}
           onRangeChangeEnd={handleRangeChangeEnd}
+          onJumpToSection={jumpToSection}
+          onEditSection={startEditingSection}
+          onDeleteSection={deleteSection}
         />
       )}
       <Box>
@@ -194,7 +160,7 @@ const VideoPage = () => {
           onRestartLoop={() => player && player.seekTo(startTime, true)}
           player={player}
           onNewLoop={handleNewLoop}
-          canSaveLoop={startTime !== endTime}
+          canSaveLoop={endTime - startTime >= MIN_LOOP}
           videoId={videoId}
           savedSections={savedSections}
         />
