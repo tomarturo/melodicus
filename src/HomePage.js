@@ -5,7 +5,7 @@ import { ArrowForwardIcon, SearchIcon } from '@chakra-ui/icons';
 import { Icon, Center, Badge, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, HStack, Link } from '@chakra-ui/react'
 import Header from './Header';
 import Footer from './Footer';
-import { ExternalLink } from 'lucide-react';
+import { ArrowSquareOut } from '@phosphor-icons/react';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -97,7 +97,6 @@ const HomePage = () => {
       const videoId = getYoutubeID(videoLink);
       if (videoId) {
         navigate(`/video/${videoId}`);
-        console.log("VIDEO ID:", videoId);
       } else {
         setIsLinkValid(false);
         setLinkErrorMessage('Could not extract YouTube video ID');
@@ -235,7 +234,7 @@ const HomePage = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              Open YouTube in a new tab<Icon as={ExternalLink}></Icon>
+                              Open YouTube in a new tab<Icon as={ArrowSquareOut}></Icon>
                             </Link>&nbsp;
                             find your next song, then paste the link here.
                           </>

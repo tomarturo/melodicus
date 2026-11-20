@@ -11,8 +11,7 @@ import {
   Input,
   HStack,
   VStack,
-  Box,
-  Text
+  Box
 } from '@chakra-ui/react';
 
 const SectionNameModal = ({

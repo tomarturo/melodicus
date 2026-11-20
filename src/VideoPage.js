@@ -56,22 +56,15 @@ const VideoPage = () => {
     updateSection,
     deleteSection,
     startEditingSection,
-    setSavedSections,
     reloadSections
   } = useSections(videoId, user, videoTitle);
 
   // Apply loaded sections from URL if available
   useEffect(() => {
-    console.log('VideoPage useEffect - isLoading:', isLoading, 'hasSectionsInUrl:', hasSectionsInUrl, 'hasImported:', hasImported);
-    
     if (!isLoading && hasSectionsInUrl && !hasImported) {
-      console.log('Attempting to import sections from URL...');
-      
       // Import sections from URL and then reload the local sections hook
       const success = importSectionsFromUrl();
-      
-      console.log('importSectionsFromUrl success:', success);
-      
+
       if (success) {
         // Trigger useLocalSections to reload from localStorage
         reloadSections();

@@ -25,22 +25,17 @@ const AuthModal = ({ isOpen, onClose }) => {
 
     const handleAuth = async (e) => {
         e.preventDefault();
-        console.log('handleAuth called with:', { email, password, isLogin }); // Debug log
         setLoading(true);
     
         try {
             if (isLogin) {
-                console.log('Attempting login...'); // Debug log
-                const result = await login(email, password);
-                console.log('Login result:', result); // Debug log
+                await login(email, password);
             } else {
-                console.log('Attempting signup...'); // Debug log
-                const result = await signup(email, password);
-                console.log('Signup result:', result); // Debug log
+                await signup(email, password);
             }
             onClose();
         } catch (error) {
-            console.error('Auth error:', error); // Debug log
+            console.error('Auth error:', error);
         } finally {
             setLoading(false);
         }

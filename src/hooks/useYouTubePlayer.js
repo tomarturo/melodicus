@@ -18,7 +18,7 @@ const useYouTubePlayer = (videoId, apiKey) => {
   useEffect(() => {
     const initPlayer = () => {
       // @ts-ignore
-      const ytPlayer = new window.YT.Player('player', {
+      new window.YT.Player('player', {
         width: '0',
         height: '0',
         videoId: videoId,
@@ -31,7 +31,6 @@ const useYouTubePlayer = (videoId, apiKey) => {
         },
         events: {
           onReady: (event) => {
-            console.log("Player is ready");
             setPlayer(event.target);
             const exactDuration = event.target.getDuration?.();
             if (Number.isFinite(exactDuration) && exactDuration > 0) {
@@ -72,8 +71,6 @@ const useYouTubePlayer = (videoId, apiKey) => {
           const time = player.getCurrentTime();
           if (typeof time === 'number' && !isNaN(time)) {
             setCurrentTime(time);
-            // Debug log
-            // console.log('Current time updated:', time);
           }
         } catch (error) {
           console.error('Error getting current time:', error);
