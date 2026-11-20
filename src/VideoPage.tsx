@@ -1,0 +1,178 @@
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Box, useToast } from '@chakra-ui/react';
+import { useAuth } from './contexts/AuthContext';
+// Custom Hooks
+import useYouTubePlayer from './hooks/useYouTubePlayer';
+import useLoopManager from './hooks/useLoopManager';
+import useSections from './hooks/useSections';
+import useSharingUrl from './hooks/useSharingUrl';
+import { MIN_LOOP } from './hooks/useWaveformTimeline';
+import { roundSeconds } from './utils/formatTime';
+import { env } from './lib/env';
+import { errorMessage } from './lib/errors';
+
+// Components
+import VideoLayout from './VideoLayout'
+import VideoDisplay from './VideoDisplay';
+import VideoControls from './VideoControls';
+import WaveformTimeline from './WaveformTimeline';
+import SectionNameModal from './SectionNameModal';
+import NullVideoPage from './NullVideoPage';
+
+const VideoPage = () => {
+  const { videoId } = useParams();
+  // The route always supplies an ID; this only guards against a mis-wired route.
+  if (!videoId) return <NullVideoPage />;
+  return <VideoPageContent videoId={videoId} />;
+};
+
+const VideoPageContent = ({ videoId }: { videoId: string }) => {
+  const { user } = useAuth();
+  const toast = useToast();
+  const apiKey = env.VITE_YOUTUBE_API_KEY;
+
+  // Process URL parameters first for timestamp sharing
+  const { hasSectionsInUrl, isLoading, importSectionsFromUrl, hasImported } = useSharingUrl(videoId);
+
+  // Initialize hooks
+  const {
+    player,
+    isPlaying,
+    currentTime,
+    videoLength,
+    videoTitle,
+    videoThumbnail,
+    controls
+  } = useYouTubePlayer(videoId, apiKey);
+
+  const {
+    startTime,
+    endTime,
+    handleRangeChange,
+    handleRangeChangeEnd,
+    jumpToSection
+  } = useLoopManager(videoLength, { player });
+
+  const {
+    savedSections,
+    isAddingSectionName,
+    isEditingSection,
+    newSectionName,
+    setIsAddingSectionName,
+    setNewSectionName,
+    saveSection,
+    updateSection,
+    deleteSection,
+    startEditingSection,
+    reloadSections
+  } = useSections(videoId, user, videoTitle);
+
+  // Apply loaded sections from URL if available
+  useEffect(() => {
+    if (!isLoading && hasSectionsInUrl && !hasImported) {
+      // Import sections from URL and then reload the local sections hook
+      const success = importSectionsFromUrl();
+
+      if (success) {
+        // Trigger useLocalSections to reload from localStorage
+        reloadSections();
+      }
+    }
+  }, [hasSectionsInUrl, isLoading, importSectionsFromUrl, reloadSections, hasImported]);
+
+  // Event handlers
+  const handlePlayPause = () => {
+    if (!player) return;
+
+    if (isPlaying) {
+      player.pauseVideo();
+    } else {
+      player.playVideo();
+    }
+  };
+
+  const handleNewLoop = () => {
+    if (endTime - startTime < MIN_LOOP) {
+      toast({
+        title: "Invalid loop",
+        description: "Please select a valid loop to save",
+        status: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+    setIsAddingSectionName(true);
+  };
+
+  const handleSaveSection = async () => {
+    try {
+      if (isEditingSection) {
+        await updateSection();
+      } else {
+        // Rounded here rather than in either backend, so localStorage and
+        // Supabase store the same value for the same loop.
+        await saveSection(roundSeconds(startTime), roundSeconds(endTime));
+      }
+
+      toast({
+        title: isEditingSection ? "Loop updated!" : "Loop saved!",
+        status: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: errorMessage(error),
+        status: "error",
+        duration: 3000,
+      });
+    }
+  };
+
+  return (
+    <VideoLayout>
+      <Box id="player" display="none" />
+      <VideoDisplay videoThumbnail={videoThumbnail} />
+      {videoLength ? (
+        <WaveformTimeline
+          videoLength={videoLength}
+          currentTime={currentTime}
+          startTime={startTime}
+          endTime={endTime}
+          savedSections={savedSections}
+          onSeek={controls.seekTo}
+          onRangeChange={handleRangeChange}
+          onRangeChangeEnd={handleRangeChangeEnd}
+          onJumpToSection={jumpToSection}
+          onEditSection={startEditingSection}
+          onDeleteSection={deleteSection}
+        />
+      ) : null}
+      <Box>
+        <VideoControls
+          isPlaying={isPlaying}
+          onPlayPause={handlePlayPause}
+          onRestartLoop={() => player && player.seekTo(startTime, true)}
+          player={player}
+          onNewLoop={handleNewLoop}
+          videoId={videoId}
+          savedSections={savedSections}
+        />
+      </Box>
+      <SectionNameModal
+        isOpen={isAddingSectionName}
+        onClose={() => {
+          setIsAddingSectionName(false);
+          setNewSectionName('');
+        }}
+        isEditing={isEditingSection}
+        sectionName={newSectionName}
+        onSectionNameChange={setNewSectionName}
+        onSave={handleSaveSection}
+      />
+    </VideoLayout>
+  );
+};
+
+export default VideoPage;
