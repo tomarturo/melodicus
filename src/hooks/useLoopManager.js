@@ -3,12 +3,16 @@ import { useState, useEffect } from 'react';
 const useLoopManager = (videoLength, currentTime, playerControls) => {
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(videoLength || 0);
-  const [sliderValue, setSliderValue] = useState([null, null]);
+  // Until the user picks a loop, it spans the whole video - so it has to follow
+  // videoLength as that gets refined from the player's exact duration, not just
+  // seed itself once while endTime is still 0.
+  const [hasCustomLoop, setHasCustomLoop] = useState(false);
+
   useEffect(() => {
-    if (videoLength && endTime === 0) {
+    if (videoLength && !hasCustomLoop) {
       setEndTime(videoLength);
     }
-  }, [videoLength, endTime]);
+  }, [videoLength, hasCustomLoop]);
 
   useEffect(() => {
     if (!playerControls?.player) return;
@@ -18,8 +22,8 @@ const useLoopManager = (videoLength, currentTime, playerControls) => {
     const checkProgress = () => {
       if (player && player.getCurrentTime && typeof player.getCurrentTime === 'function') {
         try {
-          const currentTime = player.getCurrentTime();
-          if (currentTime >= endTime) {
+          // A zero-length loop would seek on every tick and pin playback in place.
+          if (endTime > startTime && player.getCurrentTime() >= endTime) {
             player.seekTo(startTime, true);
           }
         } catch (error) {
@@ -46,19 +50,21 @@ const useLoopManager = (videoLength, currentTime, playerControls) => {
   };
   }, [playerControls?.player, endTime, startTime]);
 
-  const handleRangeChange = (values) => {
+  // Called continuously while a loop region is dragged or resized. Muting keeps
+  // the scrub from sounding like a stutter; handleRangeChangeEnd unmutes.
+  const handleRangeChange = (start, end) => {
     if (playerControls?.player?.mute) {
       playerControls.player.mute();
     }
-    setStartTime(Number(values[0]));
-    setEndTime(Number(values[1]));
+    setStartTime(start);
+    setEndTime(end);
+    setHasCustomLoop(true);
   };
 
   const handleRangeChangeEnd = () => {
     if (playerControls?.player?.unMute) {
       playerControls.player.unMute();
     }
-    setSliderValue([Number(startTime), Number(endTime)]);
 };
 
   const jumpToSection = (start, end) => {
@@ -66,7 +72,7 @@ const useLoopManager = (videoLength, currentTime, playerControls) => {
     const endNum = Number(end);
     setStartTime(startNum);
     setEndTime(endNum);
-    setSliderValue([startNum, endNum]);
+    setHasCustomLoop(true);
     if (playerControls?.player?.seekTo) {
       playerControls.player.seekTo(startNum, true);
     }
@@ -75,7 +81,6 @@ const useLoopManager = (videoLength, currentTime, playerControls) => {
   return {
     startTime,
     endTime,
-    sliderValue,
     handleRangeChange,
     handleRangeChangeEnd,
     jumpToSection

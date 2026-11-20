@@ -22,8 +22,13 @@ const useLocalSections = (videoId, videoTitle) => {
           // Parse and normalize sections to ensure consistent format
           const parsedSections = JSON.parse(savedData);
           
-          // Ensure all sections have the required properties
-          const normalizedSections = parsedSections.map(section => ({
+          // Ensure all sections have the required properties. Falsy entries are
+          // dropped first: reading .id off one used to throw, and the catch
+          // below then swallowed it, so a single bad row silently lost the
+          // whole set rather than just itself.
+          const normalizedSections = (Array.isArray(parsedSections) ? parsedSections : [])
+            .filter(Boolean)
+            .map(section => ({
             ...section,
             id: section.id || Date.now() + Math.floor(Math.random() * 1000),
             name: section.name || '',
@@ -116,7 +121,9 @@ const useLocalSections = (videoId, videoTitle) => {
   // Update sections from external source (like URL parameters)
   const updateSectionsFromExternal = useCallback((sections) => {
     // Normalize incoming sections to ensure consistent format
-    const normalizedSections = sections.map(section => ({
+    const normalizedSections = (Array.isArray(sections) ? sections : [])
+      .filter(Boolean)
+      .map(section => ({
       ...section,
       id: section.id || Date.now() + Math.floor(Math.random() * 1000),
       name: section.name || '',
