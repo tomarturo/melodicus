@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Box, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text } from '@chakra-ui/react';
 import { MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
 import useWaveformTimeline, { ZOOM_LEVELS } from './hooks/useWaveformTimeline';
-import type { Section, SectionId } from './types/section';
+import type { Section } from './features/sections/types';
 
 interface WaveformTimelineProps {
   videoLength: number;
@@ -15,7 +15,7 @@ interface WaveformTimelineProps {
   onRangeChangeEnd: () => void;
   onJumpToSection: (start: number, end: number) => void;
   onEditSection: (section: Section) => void;
-  onDeleteSection: (sectionId: SectionId) => void;
+  onDeleteSection: (sectionId: string) => void;
 }
 
 const WaveformTimeline = ({
@@ -94,7 +94,8 @@ const WaveformTimeline = ({
           aria-hidden
         />
         <Portal>
-          <MenuList minW="0" w="120px" py="1" boxShadow="md" borderColor="transparent">
+          {/* wavesurfer's regions are stacked above Chakra's default menu z-index, which hid the top of the menu. */}
+          <MenuList minW="0" w="120px" py="1" boxShadow="md" borderColor="transparent" rootProps={{ zIndex: 'dropdown' }}>
             <MenuItem
               fontSize="14px"
               fontWeight="medium"

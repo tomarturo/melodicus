@@ -3,7 +3,7 @@ import PlaybackControls from './PlaybackControls';
 import PlaybackRateSelector from './PlaybackRateSelector';
 import ShareTimestamps from './ShareTimestamps';
 import { PlusCircle } from '@phosphor-icons/react';
-import type { Section } from './types/section';
+import type { Section } from './features/sections/types';
 
 interface VideoControlsProps {
   isPlaying: boolean;

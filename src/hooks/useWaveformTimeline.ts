@@ -4,7 +4,7 @@ import RegionsPlugin, { type Region } from 'wavesurfer.js/plugins/regions';
 import TimelinePlugin from 'wavesurfer.js/plugins/timeline';
 import HoverPlugin from 'wavesurfer.js/plugins/hover';
 import { formatSecondsToDuration } from '../utils/formatTime';
-import type { Section } from '../types/section';
+import type { Section } from '../features/sections/types';
 
 // blackAlpha.500 and blackAlpha.800 from the slider this replaces, but flattened
 // against the #FAF9F6 panel rather than left translucent. They have to be opaque:

@@ -1,132 +1,138 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, useToast } from '@chakra-ui/react';
-import { useAuth } from './contexts/AuthContext';
-// Custom Hooks
 import useYouTubePlayer from './hooks/useYouTubePlayer';
 import useLoopManager from './hooks/useLoopManager';
-import useSections from './hooks/useSections';
-import useSharingUrl from './hooks/useSharingUrl';
 import { MIN_LOOP } from './hooks/useWaveformTimeline';
 import { roundSeconds } from './utils/formatTime';
 import { env } from './lib/env';
 import { errorMessage } from './lib/errors';
+import { useSectionMutations, useSectionsQuery } from './features/sections/queries';
+import { useSectionsRepository } from './features/sections/useSectionsRepository';
+import type { Section } from './features/sections/types';
+import { useIncomingShare } from './features/sharing/useIncomingShare';
+import ImportSharedLoopsDialog from './features/sharing/ImportSharedLoopsDialog';
 
-// Components
-import VideoLayout from './VideoLayout'
+import VideoLayout from './VideoLayout';
 import VideoDisplay from './VideoDisplay';
 import VideoControls from './VideoControls';
 import WaveformTimeline from './WaveformTimeline';
 import SectionNameModal from './SectionNameModal';
 import NullVideoPage from './NullVideoPage';
 
+const EMPTY: Section[] = [];
+
 const VideoPage = () => {
   const { videoId } = useParams();
   // The route always supplies an ID; this only guards against a mis-wired route.
   if (!videoId) return <NullVideoPage />;
-  return <VideoPageContent videoId={videoId} />;
+  // Keyed so that moving to another video starts with fresh state.
+  return <VideoPageContent key={videoId} videoId={videoId} />;
 };
 
+type NameDialog = { mode: 'create' } | { mode: 'edit'; section: Section } | null;
+
 const VideoPageContent = ({ videoId }: { videoId: string }) => {
-  const { user } = useAuth();
   const toast = useToast();
-  const apiKey = env.VITE_YOUTUBE_API_KEY;
+  const { repo } = useSectionsRepository();
 
-  // Process URL parameters first for timestamp sharing
-  const { hasSectionsInUrl, isLoading, importSectionsFromUrl, hasImported } = useSharingUrl(videoId);
-
-  // Initialize hooks
-  const {
+  const { player, isPlaying, currentTime, videoLength, videoTitle, videoThumbnail, controls } = useYouTubePlayer(
+    videoId,
+    env.VITE_YOUTUBE_API_KEY,
+  );
+  const { startTime, endTime, handleRangeChange, handleRangeChangeEnd, jumpToSection } = useLoopManager(videoLength, {
     player,
-    isPlaying,
-    currentTime,
-    videoLength,
-    videoTitle,
-    videoThumbnail,
-    controls
-  } = useYouTubePlayer(videoId, apiKey);
+  });
 
-  const {
-    startTime,
-    endTime,
-    handleRangeChange,
-    handleRangeChangeEnd,
-    jumpToSection
-  } = useLoopManager(videoLength, { player });
+  const sectionsQuery = useSectionsQuery(videoId);
+  const savedSections = sectionsQuery.data ?? EMPTY;
+  const { create, rename, remove, importLoops } = useSectionMutations(videoId);
+  const video = { videoId, title: videoTitle ?? '' };
 
-  const {
-    savedSections,
-    isAddingSectionName,
-    isEditingSection,
-    newSectionName,
-    setIsAddingSectionName,
-    setNewSectionName,
-    saveSection,
-    updateSection,
-    deleteSection,
-    startEditingSection,
-    reloadSections
-  } = useSections(videoId, user, videoTitle);
+  const [nameDialog, setNameDialog] = useState<NameDialog>(null);
+  const [nameDraft, setNameDraft] = useState('');
+  const incomingShare = useIncomingShare();
 
-  // Apply loaded sections from URL if available
+  const showError = (title: string, error: unknown) =>
+    toast({ title, description: errorMessage(error), status: 'error', duration: 5000 });
+
   useEffect(() => {
-    if (!isLoading && hasSectionsInUrl && !hasImported) {
-      // Import sections from URL and then reload the local sections hook
-      const success = importSectionsFromUrl();
-
-      if (success) {
-        // Trigger useLocalSections to reload from localStorage
-        reloadSections();
-      }
+    if (sectionsQuery.error) {
+      toast({
+        title: 'Could not load your loops',
+        description: errorMessage(sectionsQuery.error),
+        status: 'error',
+        duration: 5000,
+      });
     }
-  }, [hasSectionsInUrl, isLoading, importSectionsFromUrl, reloadSections, hasImported]);
+  }, [sectionsQuery.error, toast]);
 
-  // Event handlers
   const handlePlayPause = () => {
     if (!player) return;
-
-    if (isPlaying) {
-      player.pauseVideo();
-    } else {
-      player.playVideo();
-    }
+    if (isPlaying) player.pauseVideo();
+    else player.playVideo();
   };
 
   const handleNewLoop = () => {
     if (endTime - startTime < MIN_LOOP) {
       toast({
-        title: "Invalid loop",
-        description: "Please select a valid loop to save",
-        status: "warning",
+        title: 'Invalid loop',
+        description: 'Please select a valid loop to save',
+        status: 'warning',
         duration: 3000,
       });
       return;
     }
-    setIsAddingSectionName(true);
+    setNameDraft('');
+    setNameDialog({ mode: 'create' });
+  };
+
+  const handleEditSection = (section: Section) => {
+    setNameDraft(section.name ?? '');
+    setNameDialog({ mode: 'edit', section });
+  };
+
+  const handleDeleteSection = (sectionId: string) => {
+    remove.mutate(sectionId, { onError: (error) => showError('Could not delete the loop', error) });
+  };
+
+  const closeNameDialog = () => {
+    setNameDialog(null);
+    setNameDraft('');
   };
 
   const handleSaveSection = async () => {
+    if (!nameDialog) return;
+    const name = nameDraft.trim() || null;
     try {
-      if (isEditingSection) {
-        await updateSection();
+      if (nameDialog.mode === 'edit') {
+        await rename.mutateAsync({ sectionId: nameDialog.section.id, name });
       } else {
-        // Rounded here rather than in either backend, so localStorage and
-        // Supabase store the same value for the same loop.
-        await saveSection(roundSeconds(startTime), roundSeconds(endTime));
+        // Rounded here so both backends store the same value for the same loop.
+        await create.mutateAsync({
+          video,
+          loop: { name, start_time: roundSeconds(startTime), end_time: roundSeconds(endTime) },
+        });
       }
-
-      toast({
-        title: isEditingSection ? "Loop updated!" : "Loop saved!",
-        status: "success",
-        duration: 3000,
-      });
+      toast({ title: nameDialog.mode === 'edit' ? 'Loop updated!' : 'Loop saved!', status: 'success', duration: 3000 });
+      closeNameDialog();
     } catch (error) {
+      showError('Error', error);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!incomingShare.loops) return;
+    try {
+      const added = await importLoops.mutateAsync({ video, loops: incomingShare.loops });
       toast({
-        title: "Error",
-        description: errorMessage(error),
-        status: "error",
+        title: added === 0 ? 'You already have these loops' : added === 1 ? '1 loop added' : `${added} loops added`,
+        status: 'success',
         duration: 3000,
       });
+      incomingShare.dismiss();
+    } catch (error) {
+      showError('Could not import the loops', error);
     }
   };
 
@@ -145,15 +151,15 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
           onRangeChange={handleRangeChange}
           onRangeChangeEnd={handleRangeChangeEnd}
           onJumpToSection={jumpToSection}
-          onEditSection={startEditingSection}
-          onDeleteSection={deleteSection}
+          onEditSection={handleEditSection}
+          onDeleteSection={handleDeleteSection}
         />
       ) : null}
       <Box>
         <VideoControls
           isPlaying={isPlaying}
           onPlayPause={handlePlayPause}
-          onRestartLoop={() => player && player.seekTo(startTime, true)}
+          onRestartLoop={() => player?.seekTo(startTime, true)}
           player={player}
           onNewLoop={handleNewLoop}
           videoId={videoId}
@@ -161,16 +167,23 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         />
       </Box>
       <SectionNameModal
-        isOpen={isAddingSectionName}
-        onClose={() => {
-          setIsAddingSectionName(false);
-          setNewSectionName('');
-        }}
-        isEditing={isEditingSection}
-        sectionName={newSectionName}
-        onSectionNameChange={setNewSectionName}
+        isOpen={nameDialog !== null}
+        onClose={closeNameDialog}
+        isEditing={nameDialog?.mode === 'edit'}
+        sectionName={nameDraft}
+        onSectionNameChange={setNameDraft}
         onSave={handleSaveSection}
       />
+      {incomingShare.loops && (
+        <ImportSharedLoopsDialog
+          loops={incomingShare.loops}
+          // Supabase requires the song title; localStorage can do without it.
+          canImport={repo.kind === 'local' || Boolean(videoTitle)}
+          isImporting={importLoops.isPending}
+          onImport={handleImport}
+          onDismiss={incomingShare.dismiss}
+        />
+      )}
     </VideoLayout>
   );
 };
