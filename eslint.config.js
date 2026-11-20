@@ -26,6 +26,11 @@ export default tseslint.config(
     },
   },
   {
+    // Injected into the page in place of YouTube's script.
+    files: ['e2e/fakeYouTubeIframeApi.js'],
+    languageOptions: { globals: { ...globals.browser } },
+  },
+  {
     files: ['*.config.{js,ts}'],
     languageOptions: { globals: { ...globals.node } },
   },

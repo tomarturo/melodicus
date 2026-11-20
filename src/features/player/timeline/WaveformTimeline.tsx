@@ -1,32 +1,24 @@
 import { useCallback, useState } from 'react';
-import { Box, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text } from '@chakra-ui/react';
-import { MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
-import useWaveformTimeline, { ZOOM_LEVELS } from './hooks/useWaveformTimeline';
-import type { Section } from './features/sections/types';
+import { Box, Button, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text } from '@chakra-ui/react';
+import { Crosshair, MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
+import useWaveformTimeline from './useWaveformTimeline';
+import { ZOOM_LEVELS } from './timelineLogic';
+import type { PlayerController } from '../playerController';
+import type { Section } from '../../sections/types';
 
 interface WaveformTimelineProps {
+  controller: PlayerController;
   videoLength: number;
-  currentTime: number;
-  startTime: number;
-  endTime: number;
   savedSections: Section[];
-  onSeek: (time: number) => void;
-  onRangeChange: (start: number, end: number) => void;
-  onRangeChangeEnd: () => void;
   onJumpToSection: (start: number, end: number) => void;
   onEditSection: (section: Section) => void;
   onDeleteSection: (sectionId: string) => void;
 }
 
 const WaveformTimeline = ({
+  controller,
   videoLength,
-  currentTime,
-  startTime,
-  endTime,
   savedSections,
-  onSeek,
-  onRangeChange,
-  onRangeChangeEnd,
   onJumpToSection,
   onEditSection,
   onDeleteSection,
@@ -41,15 +33,10 @@ const WaveformTimeline = ({
     setMenu({ section, x, y });
   }, []);
 
-  const { containerRef, zoomIndex, setZoomIndex } = useWaveformTimeline({
+  const { containerRef, zoomIndex, setZoomIndex, isFollowing, follow } = useWaveformTimeline({
+    controller,
     duration: videoLength,
-    currentTime,
-    loopStart: startTime,
-    loopEnd: endTime,
     sections: savedSections,
-    onSeek,
-    onLoopChange: onRangeChange,
-    onLoopChangeEnd: onRangeChangeEnd,
     onJumpToSection,
     onSectionMenu: handleSectionMenu,
   });
@@ -59,6 +46,17 @@ const WaveformTimeline = ({
   return (
     <Box py={4} px={8} bg="#FAF9F6">
       <Flex justify="flex-end" align="center" gap={1} mb={1}>
+        {!isFollowing && (
+          <Button
+            size="xs"
+            variant="ghost"
+            leftIcon={<Icon as={Crosshair} boxSize="14px" />}
+            onClick={follow}
+            mr={2}
+          >
+            Follow playhead
+          </Button>
+        )}
         <IconButton
           size="xs"
           variant="ghost"

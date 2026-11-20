@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, useToast } from '@chakra-ui/react';
-import useYouTubePlayer from './hooks/useYouTubePlayer';
-import useLoopManager from './hooks/useLoopManager';
-import { MIN_LOOP } from './hooks/useWaveformTimeline';
 import { roundSeconds } from './utils/formatTime';
-import { env } from './lib/env';
 import { errorMessage } from './lib/errors';
+import { isSaveableLoop } from './features/player/loopLogic';
+import { usePlayerController, usePlayerState, useVideoDetails } from './features/player/usePlayer';
+import WaveformTimeline from './features/player/timeline/WaveformTimeline';
 import { useSectionMutations, useSectionsQuery } from './features/sections/queries';
 import { useSectionsRepository } from './features/sections/useSectionsRepository';
 import type { Section } from './features/sections/types';
@@ -16,7 +15,6 @@ import ImportSharedLoopsDialog from './features/sharing/ImportSharedLoopsDialog'
 import VideoLayout from './VideoLayout';
 import VideoDisplay from './VideoDisplay';
 import VideoControls from './VideoControls';
-import WaveformTimeline from './WaveformTimeline';
 import SectionNameModal from './SectionNameModal';
 import NullVideoPage from './NullVideoPage';
 
@@ -36,13 +34,9 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   const toast = useToast();
   const { repo } = useSectionsRepository();
 
-  const { player, isPlaying, currentTime, videoLength, videoTitle, videoThumbnail, controls } = useYouTubePlayer(
-    videoId,
-    env.VITE_YOUTUBE_API_KEY,
-  );
-  const { startTime, endTime, handleRangeChange, handleRangeChangeEnd, jumpToSection } = useLoopManager(videoLength, {
-    player,
-  });
+  const { controller, hostRef } = usePlayerController(videoId);
+  const { isPlaying, duration: videoLength, loop } = usePlayerState(controller);
+  const { title: videoTitle, thumbnailUrl: videoThumbnail } = useVideoDetails(videoId, controller);
 
   const sectionsQuery = useSectionsQuery(videoId);
   const savedSections = sectionsQuery.data ?? EMPTY;
@@ -67,14 +61,8 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
     }
   }, [sectionsQuery.error, toast]);
 
-  const handlePlayPause = () => {
-    if (!player) return;
-    if (isPlaying) player.pauseVideo();
-    else player.playVideo();
-  };
-
   const handleNewLoop = () => {
-    if (endTime - startTime < MIN_LOOP) {
+    if (!isSaveableLoop(loop)) {
       toast({
         title: 'Invalid loop',
         description: 'Please select a valid loop to save',
@@ -111,7 +99,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         // Rounded here so both backends store the same value for the same loop.
         await create.mutateAsync({
           video,
-          loop: { name, start_time: roundSeconds(startTime), end_time: roundSeconds(endTime) },
+          loop: { name, start_time: roundSeconds(loop.start), end_time: roundSeconds(loop.end) },
         });
       }
       toast({ title: nameDialog.mode === 'edit' ? 'Loop updated!' : 'Loop saved!', status: 'success', duration: 3000 });
@@ -138,19 +126,14 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
 
   return (
     <VideoLayout>
-      <Box id="player" display="none" />
+      <Box ref={hostRef} display="none" />
       <VideoDisplay videoThumbnail={videoThumbnail} />
       {videoLength ? (
         <WaveformTimeline
+          controller={controller}
           videoLength={videoLength}
-          currentTime={currentTime}
-          startTime={startTime}
-          endTime={endTime}
           savedSections={savedSections}
-          onSeek={controls.seekTo}
-          onRangeChange={handleRangeChange}
-          onRangeChangeEnd={handleRangeChangeEnd}
-          onJumpToSection={jumpToSection}
+          onJumpToSection={(start, end) => controller.jumpToLoop(start, end)}
           onEditSection={handleEditSection}
           onDeleteSection={handleDeleteSection}
         />
@@ -158,9 +141,9 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
       <Box>
         <VideoControls
           isPlaying={isPlaying}
-          onPlayPause={handlePlayPause}
-          onRestartLoop={() => player?.seekTo(startTime, true)}
-          player={player}
+          onPlayPause={() => controller.togglePlay()}
+          onRestartLoop={() => controller.restartLoop()}
+          onPlaybackRateChange={(rate) => controller.setPlaybackRate(rate)}
           onNewLoop={handleNewLoop}
           videoId={videoId}
           savedSections={savedSections}

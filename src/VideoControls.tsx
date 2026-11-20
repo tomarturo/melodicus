@@ -9,7 +9,7 @@ interface VideoControlsProps {
   isPlaying: boolean;
   onPlayPause: () => void;
   onRestartLoop: () => void;
-  player: YT.Player | null;
+  onPlaybackRateChange: (rate: number) => void;
   onNewLoop: () => void;
   videoId: string;
   savedSections: Section[];
@@ -19,7 +19,7 @@ const VideoControls = ({
   isPlaying,
   onPlayPause,
   onRestartLoop,
-  player,
+  onPlaybackRateChange,
   onNewLoop,
   videoId,
   savedSections,
@@ -51,7 +51,7 @@ const VideoControls = ({
       display={["flex", "flex", "none"]} // Hide on tablet+
       justifyContent="center"
     >
-      <PlaybackRateSelector player={player} />
+      <PlaybackRateSelector onRateChange={onPlaybackRateChange} />
     </Flex>
 
     {/* 320px+ and 480px+: Add Loop/Save row */}
@@ -106,7 +106,7 @@ const VideoControls = ({
           restartLoop={onRestartLoop}
         />
         <Flex justify="center">
-          <PlaybackRateSelector player={player} />
+          <PlaybackRateSelector onRateChange={onPlaybackRateChange} />
         </Flex>
       </Flex>
 
@@ -154,7 +154,7 @@ const VideoControls = ({
           playPauseClick={onPlayPause}
           restartLoop={onRestartLoop}
         />
-        <PlaybackRateSelector player={player} />
+        <PlaybackRateSelector onRateChange={onPlaybackRateChange} />
       </Flex>
       <Flex gap={3} align="center">
         <Button
