@@ -20,4 +20,4 @@ npm install
 npm run dev                  # http://localhost:3000
 ```
 
-Other scripts: `npm test` (Vitest, watch mode), `npm run lint`, `npm run build`, `npm run preview`.
+Other scripts: `npm test` (Vitest, watch mode), `npm run lint`, `npm run typecheck`, `npm run build`, `npm run preview`.
