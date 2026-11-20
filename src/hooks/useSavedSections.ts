@@ -5,9 +5,13 @@ import type { User } from '@supabase/supabase-js';
 import type { Section, SectionId } from '../types/section';
 import type { SectionsApi } from './useSections';
 
+// saved_songs.title is required, and the title arrives from the YouTube API a
+// moment after the page loads.
+const TITLE_NOT_LOADED = 'The video is still loading. Try again in a moment.';
+
 const useSavedSections = (videoId: string, user: User | null, videoTitle: string | null) => {
   const [isSaved, setIsSaved] = useState(false);
-  const [savedSongId, setSavedSongId] = useState<SectionId | null>(null);
+  const [savedSongId, setSavedSongId] = useState<string | null>(null);
   const [savedSections, setSavedSections] = useState<Section[]>([]);
   const [isAddingSectionName, setIsAddingSectionName] = useState(false);
   const [isEditingSection, setIsEditingSection] = useState(false);
@@ -56,6 +60,7 @@ const useSavedSections = (videoId: string, user: User | null, videoTitle: string
         setSavedSongId(null);
         setSavedSections([]);
       } else {
+        if (!videoTitle) throw new Error(TITLE_NOT_LOADED);
         const { data, error } = await supabase
           .from('saved_songs')
           .insert([{ video_id: videoId, title: videoTitle }])
@@ -80,6 +85,7 @@ const useSavedSections = (videoId: string, user: User | null, videoTitle: string
 
       // Auto-save video if not already saved
       if (!isSaved) {
+        if (!videoTitle) throw new Error(TITLE_NOT_LOADED);
         const { data, error } = await supabase
           .from('saved_songs')
           .insert([{ video_id: videoId, title: videoTitle }])
@@ -119,7 +125,7 @@ const useSavedSections = (videoId: string, user: User | null, videoTitle: string
     if (!currentEditingSection) return;
 
     try {
-      const { data, error } = await updateSavedSection(supabase, currentEditingSection.id, {
+      const { data, error } = await updateSavedSection(supabase, String(currentEditingSection.id), {
         name: newSectionName.trim() || null
       });
 
@@ -144,7 +150,7 @@ const useSavedSections = (videoId: string, user: User | null, videoTitle: string
 
   const deleteSection = async (sectionId: SectionId) => {
     try {
-      const { error } = await deleteSavedSection(supabase, sectionId);
+      const { error } = await deleteSavedSection(supabase, String(sectionId));
       if (error) throw error;
       setSavedSections(sections =>
         sections.filter(section => section.id !== sectionId)
@@ -170,7 +176,7 @@ const useSavedSections = (videoId: string, user: User | null, videoTitle: string
 
   const api: SectionsApi & {
     isSaved: boolean;
-    savedSongId: SectionId | null;
+    savedSongId: string | null;
     handleSaveVideo: () => Promise<void>;
     setSavedSections: typeof setSavedSections;
   } = {

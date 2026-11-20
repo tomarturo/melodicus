@@ -1,6 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
-import type { SectionId } from '../types/section';
 
 type Client = SupabaseClient<Database>;
 type SectionInsert = Database['public']['Tables']['saved_sections']['Insert'];
@@ -18,7 +17,7 @@ export const createSavedSection = async (supabase: Client, { saved_song_id, star
 };
 
 // Get all saved sections for a specific saved song
-export const getSavedSections = async (supabase: Client, saved_song_id: SectionId) => {
+export const getSavedSections = async (supabase: Client, saved_song_id: string) => {
   const { data, error } = await supabase
     .from('saved_sections')
     .select('*')
@@ -29,7 +28,7 @@ export const getSavedSections = async (supabase: Client, saved_song_id: SectionI
 };
 
 // Update a saved section
-export const updateSavedSection = async (supabase: Client, sectionId: SectionId, { start_time, end_time, name }: SectionUpdate) => {
+export const updateSavedSection = async (supabase: Client, sectionId: string, { start_time, end_time, name }: SectionUpdate) => {
   const updates: SectionUpdate = {};
   if (start_time !== undefined) updates.start_time = start_time;
   if (end_time !== undefined) updates.end_time = end_time;
@@ -46,7 +45,7 @@ export const updateSavedSection = async (supabase: Client, sectionId: SectionId,
 };
 
 // Delete a saved section
-export const deleteSavedSection = async (supabase: Client, sectionId: SectionId) => {
+export const deleteSavedSection = async (supabase: Client, sectionId: string) => {
   const { error } = await supabase
     .from('saved_sections')
     .delete()

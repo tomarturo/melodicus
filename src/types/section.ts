@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-// Local sections use Date.now() numbers; links and older localStorage data may
-// carry strings. Phase 3 replaces this with one ID scheme.
+// Supabase IDs are UUID strings; local sections use Date.now() numbers, and
+// older share links may carry either. Phase 3 replaces this with one scheme.
 export const SectionIdSchema = z.union([z.string(), z.number()]);
 export type SectionId = z.infer<typeof SectionIdSchema>;
 
@@ -17,7 +17,8 @@ export const SectionSchema = z.object({
   end_time: z.number(),
   video_id: z.string().optional(),
   video_title: z.string().nullable().optional(),
-  saved_song_id: SectionIdSchema.optional(),
+  saved_song_id: z.string().optional(),
+  user_id: z.string().optional(),
   created_at: z.string().optional(),
 });
 export type Section = z.infer<typeof SectionSchema>;

@@ -21,3 +21,10 @@ npm run dev                  # http://localhost:3000
 ```
 
 Other scripts: `npm test` (Vitest, watch mode), `npm run lint`, `npm run typecheck`, `npm run build`, `npm run preview`.
+
+## Database
+
+The Supabase schema lives in `supabase/migrations/`. Production predates the
+migrations, so apply new ones by running their SQL in the Supabase SQL Editor.
+After a schema change, regenerate the TypeScript types with `npm run db:types`
+(requires `npx supabase login`).
