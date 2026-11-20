@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   IconButton,
@@ -35,7 +35,7 @@ const SearchResults = ({ searchQuery }) => {
       q: query,
       type: 'video',
       part: 'snippet',
-      key: process.env.REACT_APP_YOUTUBE_API_KEY,
+      key: import.meta.env.VITE_YOUTUBE_API_KEY,
     });
     fetch(`https://www.googleapis.com/youtube/v3/search?${params}`)
       .then(async (response) => {

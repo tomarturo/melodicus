@@ -1,4 +1,3 @@
-import React from 'react';
 import { HStack, Button, Icon } from '@chakra-ui/react';
 import { Play, Pause, Repeat } from '@phosphor-icons/react';
 

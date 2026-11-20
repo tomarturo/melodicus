@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, useToast } from '@chakra-ui/react';
 import { useAuth } from './contexts/AuthContext';
@@ -21,7 +21,7 @@ const VideoPage = () => {
   const { videoId } = useParams();
   const { user } = useAuth();
   const toast = useToast();
-  const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
+  const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
 
   // Process URL parameters first for timestamp sharing
   const { hasSectionsInUrl, isLoading, importSectionsFromUrl, hasImported } = useSharingUrl(videoId);

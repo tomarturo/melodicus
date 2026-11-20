@@ -1,4 +1,4 @@
-import {useState, React} from 'react';
+import { useState } from 'react';
 import { Select, HStack, IconButton } from "@chakra-ui/react";
 import { Plus, Minus } from '@phosphor-icons/react';
 function PlaybackRateSelector({ player }) {

@@ -6,7 +6,6 @@ import Footer from './Footer';
 const VideoLayout = ({
   children,
   videoLength,
-  savedSections,
   onJumpToSection,
   onEditSection,
   onDeleteSection,

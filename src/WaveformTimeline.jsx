@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Box, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text } from '@chakra-ui/react';
 import { MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
 import useWaveformTimeline, { ZOOM_LEVELS } from './hooks/useWaveformTimeline';

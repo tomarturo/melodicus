@@ -1,4 +1,3 @@
-import React from 'react';
 import { Flex, Button, Icon } from '@chakra-ui/react';
 import PlaybackControls from './PlaybackControls';
 import PlaybackRateSelector from './PlaybackRateSelector';
@@ -11,7 +10,6 @@ const VideoControls = ({
   onRestartLoop,
   player,
   onNewLoop,
-  canSaveLoop,
   videoId,
   savedSections,
 }) => (

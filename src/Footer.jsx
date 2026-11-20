@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowSquareOut } from '@phosphor-icons/react';
 import { Icon, Link, Flex, Text, Image } from '@chakra-ui/react'
 
@@ -9,7 +8,7 @@ return (
       <Text fontSize='sm' color='white'>© 2025&nbsp;</Text>
       <Link display='inline-flex' alignItems='center' gap='2px' fontSize='sm' fontWeight='bold' color='gray.50' href='https://www.heytk.net' isExternal>HeyTK&nbsp;<Icon as={ArrowSquareOut}></Icon></Link>
     </Flex>
-    <Link display='inline-flex' alignItems='center' gap='2px' color='gray.50' fontSize='sm' href='https://github.com/tomarturo/melodicus' isExternal><Image src={process.env.PUBLIC_URL + '/github-mark.svg'} boxSize='24px'></Image></Link>
+    <Link display='inline-flex' alignItems='center' gap='2px' color='gray.50' fontSize='sm' href='https://github.com/tomarturo/melodicus' isExternal><Image src={'/github-mark.svg'} boxSize='24px'></Image></Link>
   </Flex>
   );
 };
