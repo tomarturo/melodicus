@@ -1,170 +1,95 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
- Container,
- Stack,
- Heading,
- Text,
- Image,
- Card,
- CardBody,
- Flex,
- Button,
- useToast,
-} from '@chakra-ui/react';
-import { supabase } from './supabaseClient';
-import { useAuth } from './contexts/AuthContext';
+import { Container, Stack, Heading, Text, Image, Card, CardBody, Flex, Button, useToast } from '@chakra-ui/react';
 import Header from './Header';
 import Footer from './Footer';
+import { useAuth } from './contexts/AuthContext';
 import { errorMessage } from './lib/errors';
-
-interface SavedSongItem {
- id: { videoId: string };
- created_at: string;
- snippet: { title: string | null };
-}
+import { useDeleteSavedSong, useSavedSongsQuery } from './features/sections/queries';
 
 const SavedSongs = () => {
- const [songs, setSongs] = useState<SavedSongItem[]>([]);
- const [loading, setLoading] = useState(true);
- const { user } = useAuth();
- const toast = useToast();
+  const { user } = useAuth();
+  const toast = useToast();
+  const songsQuery = useSavedSongsQuery();
+  const deleteSong = useDeleteSavedSong();
+  const songs = songsQuery.data ?? [];
 
- useEffect(() => {
-   const fetchSavedSongs = async () => {
-     try {
-       const { data, error } = await supabase
-         .from('saved_songs')
-         .select('*')
-         .order('created_at', { ascending: false });
+  const handleRemove = (videoId: string) => {
+    deleteSong.mutate(videoId, {
+      onSuccess: () => toast({ title: 'Song removed', status: 'success', duration: 3000 }),
+      onError: (error) =>
+        toast({ title: 'Error removing song', description: errorMessage(error), status: 'error', duration: 5000 }),
+    });
+  };
 
-       if (error) throw error;
+  let content;
+  if (songsQuery.isPending) {
+    content = <Text>Loading...</Text>;
+  } else if (songsQuery.isError) {
+    content = <Text>Could not load your saved songs: {errorMessage(songsQuery.error)}</Text>;
+  } else if (songs.length === 0) {
+    content = <Text>No saved songs yet. Songs appear here when you save a loop.</Text>;
+  } else {
+    content = (
+      <Stack spacing="8">
+        {!user && (
+          <Text fontSize="sm" color="blackAlpha.700">
+            These are saved in this browser. Log in to keep them in your account.
+          </Text>
+        )}
+        {songs.map((song) => (
+          <Card
+            key={song.videoId}
+            variant="unstyled"
+            bg="transparent"
+            direction={{ base: 'column', sm: 'row' }}
+            alignItems="center"
+          >
+            <Link to={`/video/${song.videoId}`} style={{ flex: 1 }}>
+              <Flex direction={{ base: 'column', sm: 'row' }} alignItems="center">
+                <Image
+                  borderRadius="xl"
+                  boxSize={['100%', 180]}
+                  maxW={{ base: '100%', sm: '200px' }}
+                  src={`https://img.youtube.com/vi/${song.videoId}/mqdefault.jpg`}
+                  objectFit="cover"
+                />
+                <Stack mt={[2, 0]} spacing="3" ml={{ base: '2', sm: '8' }} mr={{ base: '2', sm: '0' }}>
+                  <CardBody>
+                    <Heading size="md">{song.title || 'Untitled video'}</Heading>
+                    <Text size="xs" color="gray.500">
+                      Saved on {new Date(song.savedAt).toLocaleDateString()}
+                    </Text>
+                  </CardBody>
+                </Stack>
+              </Flex>
+            </Link>
+            <Button
+              colorScheme="red"
+              variant="ghost"
+              isLoading={deleteSong.isPending && deleteSong.variables === song.videoId}
+              onClick={() => handleRemove(song.videoId)}
+              ml={4}
+              mr={2}
+            >
+              Remove
+            </Button>
+          </Card>
+        ))}
+      </Stack>
+    );
+  }
 
-       // Format the data to match your list view structure
-       const formattedSongs = data.map(song => ({
-         id: { videoId: song.video_id },
-         created_at: song.created_at,
-         snippet: {
-           title: song.title,
-         }
-       }));
-
-       setSongs(formattedSongs);
-     } catch (error) {
-       toast({
-         title: 'Error fetching saved songs',
-         description: errorMessage(error),
-         status: 'error',
-         duration: 5000,
-       });
-     } finally {
-       setLoading(false);
-     }
-   };
-
-   if (user) {
-     fetchSavedSongs();
-   }
- }, [user, toast]);
-
- if (!user) {
-   return (
-     <Flex direction="column" minH="100vh" bg='#FAF9F6'> 
-       <Flex direction="column" flex="1">
-           <Header />
-           <Container centerContent py={10}>
-             <Text>Please log in to view your saved songs.</Text>
-           </Container>
-       </Flex>
-       <Footer />
-     </Flex>
-   );
- }
-
- if (loading) {
-   return (
-     <Flex direction="column" minH="100vh" bg="white">
-       <Flex direction="column" flex="1">
-           <Header />
-           <Container centerContent py={10}>
-             <Text>Loading...</Text>
-           </Container>
-       </Flex>
-       <Footer />
-     </Flex>
-   );
- }
-
- return (
-   <Flex direction="column" minH="100vh">
-         <Header />
-     <Flex direction="column" flex="1" bg='#FAF9F6' borderRadius={['none', 'none', 'xl']} overflow='hidden' >
-         <Container w="100%" pt="12" pb="8" >
-           {songs.length === 0 ? (
-             <Text>No saved songs yet.</Text>
-           ) : (
-             <Stack spacing='8'>
-               {songs.map((video) => (
-                 <Card key={video.id.videoId} variant='unstyled' bg='transparent' direction={{ base: 'column', sm: 'row' }} alignItems='center'>
-                   <Link to={`/video/${video.id.videoId}`} style={{ flex: 1 }}>
-                     <Flex direction={{ base: 'column', sm: 'row' }} alignItems='center'>
-                       <Image
-                         borderRadius='xl'
-                         boxSize={['100%', 180]}
-                         maxW={{base:'100%', sm:'200px'}}
-                         src={`https://img.youtube.com/vi/${video.id.videoId}/mqdefault.jpg`}
-                         objectFit='cover'
-                       />
-                       <Stack mt={[2, 0]} spacing='3' ml={{base:'2', sm:'8'}} mr={{base:'2', sm:'0'}}>
-                         <CardBody>
-                           <Heading size='md'>{video.snippet.title}</Heading>
-                           <Text size='xs' color='gray.500'>
-                             Saved on {new Date(video.created_at).toLocaleDateString()}
-                           </Text>
-                         </CardBody>
-                       </Stack>
-                     </Flex>
-                   </Link>
-                   <Button
-                     colorScheme='red'
-                     variant='ghost'
-                     onClick={async (e) => {
-                       e.preventDefault();
-                       try {
-                         const { error } = await supabase
-                           .from('saved_songs')
-                           .delete()
-                           .eq('video_id', video.id.videoId);
-                         if (error) throw error;
-                         setSongs(songs.filter(song => song.id.videoId !== video.id.videoId));
-                         toast({
-                           title: "Song removed",
-                           status: "success",
-                           duration: 3000,
-                         });
-                       } catch (error) {
-                         toast({
-                           title: "Error removing song",
-                           description: errorMessage(error),
-                           status: "error",
-                           duration: 5000,
-                         });
-                       }
-                     }}
-                     ml={4}
-                     mr={2}
-                   >
-                     Remove
-                   </Button>
-                 </Card>
-               ))}
-             </Stack>
-           )}
-         </Container>
-     </Flex>
-     <Footer />
-   </Flex>
- );
+  return (
+    <Flex direction="column" minH="100vh">
+      <Header />
+      <Flex direction="column" flex="1" bg="#FAF9F6" borderRadius={['none', 'none', 'xl']} overflow="hidden">
+        <Container w="100%" pt="12" pb="8">
+          {content}
+        </Container>
+      </Flex>
+      <Footer />
+    </Flex>
+  );
 };
 
 export default SavedSongs;

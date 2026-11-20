@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Button,
   Modal,
@@ -17,7 +17,8 @@ import {
   VStack
 } from '@chakra-ui/react';
 import { Paperclip } from '@phosphor-icons/react';
-import type { Section } from './types/section';
+import type { Section } from './features/sections/types';
+import { buildShareUrl } from './features/sharing/shareFormat';
 
 interface ShareTimestampsProps {
   videoId: string;
@@ -26,21 +27,15 @@ interface ShareTimestampsProps {
 
 const ShareTimestamps = ({ videoId, savedSections }: ShareTimestampsProps) => {
   const toast = useToast();
-  const [shareableLink, setShareableLink] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  
+  const shareableLink = useMemo(
+    () => (savedSections.length > 0 ? buildShareUrl(window.location.origin, videoId, savedSections) : ''),
+    [videoId, savedSections],
+  );
+
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
-  
-  // Generate the shareable link when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      createShareableLink();
-    }
-  // Share links are rebuilt in the phase 3 refactor; createShareableLink is recreated every render.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-  
+
   // Check if there are sections to share before opening the modal
   const handleOpen = () => {
     if (!savedSections || savedSections.length === 0) {
@@ -56,54 +51,6 @@ const ShareTimestamps = ({ videoId, savedSections }: ShareTimestampsProps) => {
     
     // Open the modal if there are sections
     onOpen();
-  };
-  
-  // Create a shareable link with encoded timestamps
-  const createShareableLink = () => {
-    if (!savedSections || savedSections.length === 0) {
-      setShareableLink('');
-      return null;
-    }
-    
-    try {
-      const simplifiedSections = savedSections.map(section => ({
-        id: section.id,
-        name: section.name,
-        start_time: section.start_time,
-        end_time: section.end_time,
-        video_id: videoId,
-        video_title: section.video_title || ''
-      }));
-      
-      // Convert sections to a compressed string representation
-      const sectionsString = JSON.stringify(simplifiedSections);
-      const encodedData = btoa(encodeURIComponent(sectionsString));
-      
-      // Create a URL with the encoded data as a query parameter
-      const url = new URL(window.location.origin);
-      
-      // For direct link to video page
-      url.pathname = `/video/${videoId}`;
-      
-      // Add the encoded sections data
-      url.searchParams.set('sections', encodedData);
-      
-      // Store the full URL
-      const shareableUrl = url.toString();
-      setShareableLink(shareableUrl);
-      
-      return shareableUrl;
-    } catch (error) {
-      console.error('Error creating shareable link:', error);
-      toast({
-        title: 'Error creating link',
-        description: 'There was an error creating your shareable link.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return null;
-    }
   };
   
   // Handle copy to clipboard

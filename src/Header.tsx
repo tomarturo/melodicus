@@ -78,19 +78,17 @@ const Header = ({ query = '' }: { query?: string }) => {
         </InputGroup>
       )}
       <Flex gap='3' align='center'>
-        {user && (
-          <Link as={ReactRouterLink} to="/saved-songs">
-            <Button
-              size='sm'
-              rounded='full'
-              variant='ghost'
-              color='whiteAlpha.800'
-              _hover={{ color: 'white', bg: 'whiteAlpha.200' }}
-            >
-              My songs
-            </Button>
-          </Link>
-        )}
+        <Link as={ReactRouterLink} to="/saved-songs">
+          <Button
+            size='sm'
+            rounded='full'
+            variant='ghost'
+            color='whiteAlpha.800'
+            _hover={{ color: 'white', bg: 'whiteAlpha.200' }}
+          >
+            My songs
+          </Button>
+        </Link>
         {user ? (
           <Button
             onClick={logout}
