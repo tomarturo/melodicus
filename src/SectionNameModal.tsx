@@ -20,6 +20,8 @@ interface SectionNameModalProps {
   sectionName: string;
   onSectionNameChange: (value: string) => void;
   onSave: () => void;
+  /** While true the save button shows progress and further saves are ignored. */
+  isSaving: boolean;
 }
 
 const SectionNameModal = ({
@@ -29,6 +31,7 @@ const SectionNameModal = ({
   sectionName,
   onSectionNameChange,
   onSave,
+  isSaving,
 }: SectionNameModalProps) => {
   const musicTerms = ['lick', 'riff', 'solo', 'melody', 'chorus', 'verse', 'bridge', 'refrain', 'intro', 'outro', ];
   const numbersAndLetters = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g'];
@@ -60,7 +63,7 @@ const SectionNameModal = ({
             value={sectionName}
             onChange={(e) => onSectionNameChange(e.target.value)}
             onKeyPress={(e) => {
-              if (e.key === 'Enter') onSave();
+              if (e.key === 'Enter' && !isSaving) onSave();
             }}
           />
 
@@ -134,6 +137,8 @@ const SectionNameModal = ({
           color="blackAlpha.800"
           borderColor="blackAlpha.100"
           _hover={{ bg:"blackAlpha.200", borderColor:"blackAlpha.700", border:"2px", color:"blackAlpha.900"}}
+          isLoading={isSaving}
+          loadingText={isEditing ? 'Updating' : 'Saving'}
           onClick={onSave}>
             {isEditing ? 'Update' : 'Save Loop'}
           </Button>

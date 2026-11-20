@@ -31,10 +31,18 @@ export async function mockYouTube(page: Page, { player = false }: { player?: boo
   );
 }
 
-/** Routes the app's Supabase traffic to an in-memory database. */
-export async function mockSupabase(page: Page, fake = new FakePostgrest(USER_ID)) {
+/**
+ * Routes the app's Supabase traffic to an in-memory database. writeDelayMs
+ * holds back inserts and updates, like a slow connection.
+ */
+export async function mockSupabase(
+  page: Page,
+  fake = new FakePostgrest(USER_ID),
+  { writeDelayMs = 0 }: { writeDelayMs?: number } = {},
+) {
   await page.route('https://e2e.supabase.co/rest/v1/**', async (route) => {
     const request = route.request();
+    if (writeDelayMs > 0 && request.method() !== 'GET') await new Promise((resolve) => setTimeout(resolve, writeDelayMs));
     const response = fake.handle({
       method: request.method(),
       url: request.url(),
