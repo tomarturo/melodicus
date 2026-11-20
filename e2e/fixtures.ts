@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import type { Page } from '@playwright/test';
 import { FakePostgrest } from '../src/test/fakePostgrest';
 
@@ -5,11 +6,14 @@ export const VIDEO_ID = 'e2eVideo001';
 export const VIDEO_TITLE = 'E2E song';
 export const USER_ID = '11111111-1111-4111-8111-111111111111';
 
+const fakeIframeApi = readFileSync(new URL('./fakeYouTubeIframeApi.js', import.meta.url), 'utf8');
+
 /**
- * Answers the YouTube Data API with a 3:30 video and blocks the IFrame player,
- * so the page runs on the API's details alone.
+ * Answers the YouTube Data API with a 3:30 video. The IFrame player is either
+ * blocked (the page runs on the API's details alone) or replaced with a fake
+ * that plays on a simulated clock.
  */
-export async function mockYouTube(page: Page) {
+export async function mockYouTube(page: Page, { player = false }: { player?: boolean } = {}) {
   await page.route('**/youtube/v3/videos**', (route) =>
     route.fulfill({
       json: {
@@ -22,7 +26,9 @@ export async function mockYouTube(page: Page) {
       },
     }),
   );
-  await page.route('**/iframe_api', (route) => route.abort());
+  await page.route('**/iframe_api', (route) =>
+    player ? route.fulfill({ contentType: 'text/javascript', body: fakeIframeApi }) : route.abort(),
+  );
 }
 
 /** Routes the app's Supabase traffic to an in-memory database. */

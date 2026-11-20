@@ -12,7 +12,13 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     trace: 'off',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // Safari's engine, which is what the iPad runs. CI installs it; it can't be
+    // downloaded in every development environment, so it runs there only
+    // unless PLAYWRIGHT_WEBKIT=1.
+    ...(process.env.CI || process.env.PLAYWRIGHT_WEBKIT ? [{ name: 'webkit', use: { ...devices['Desktop Safari'] } }] : []),
+  ],
   webServer: {
     // Built against a fake Supabase host; every request to it is intercepted in the tests.
     command: `npm run build && npx vite preview --port ${PORT} --strictPort`,

@@ -1,16 +1,14 @@
 import { useState, type ChangeEvent } from 'react';
 import { Select, HStack, IconButton } from "@chakra-ui/react";
 import { Plus, Minus } from '@phosphor-icons/react';
-function PlaybackRateSelector({ player }: { player: YT.Player | null }) {
+function PlaybackRateSelector({ onRateChange }: { onRateChange: (rate: number) => void }) {
   const rates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   const [currentRate, setCurrentRate] = useState(1);
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const numericValue = parseFloat(event.target.value);
     setCurrentRate(numericValue);
-    if (player) {
-      player.setPlaybackRate(numericValue);
-    }
+    onRateChange(numericValue);
   };
 
   const onPlusClick = () => {
@@ -18,9 +16,7 @@ function PlaybackRateSelector({ player }: { player: YT.Player | null }) {
     if (currentIndex < rates.length -1) {
       const newRate = rates[currentIndex + 1];
       setCurrentRate(newRate);
-      if (player) {
-        player.setPlaybackRate(newRate)
-    }   
+      onRateChange(newRate);   
     }
   };
 
@@ -29,9 +25,7 @@ function PlaybackRateSelector({ player }: { player: YT.Player | null }) {
     if (currentIndex > 0) {
       const newRate = rates[currentIndex - 1];
       setCurrentRate(newRate);
-      if (player) {
-        player.setPlaybackRate(newRate);
-      }
+      onRateChange(newRate);
     }
   };
 
