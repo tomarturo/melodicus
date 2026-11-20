@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, useToast } from '@chakra-ui/react';
 import { useAuth } from './contexts/AuthContext';
@@ -21,7 +21,7 @@ const VideoPage = () => {
   const { videoId } = useParams();
   const { user } = useAuth();
   const toast = useToast();
-  const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
+  const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
 
   // Process URL parameters first for timestamp sharing
   const { hasSectionsInUrl, isLoading, importSectionsFromUrl, hasImported } = useSharingUrl(videoId);
@@ -56,22 +56,15 @@ const VideoPage = () => {
     updateSection,
     deleteSection,
     startEditingSection,
-    setSavedSections,
     reloadSections
   } = useSections(videoId, user, videoTitle);
 
   // Apply loaded sections from URL if available
   useEffect(() => {
-    console.log('VideoPage useEffect - isLoading:', isLoading, 'hasSectionsInUrl:', hasSectionsInUrl, 'hasImported:', hasImported);
-    
     if (!isLoading && hasSectionsInUrl && !hasImported) {
-      console.log('Attempting to import sections from URL...');
-      
       // Import sections from URL and then reload the local sections hook
       const success = importSectionsFromUrl();
-      
-      console.log('importSectionsFromUrl success:', success);
-      
+
       if (success) {
         // Trigger useLocalSections to reload from localStorage
         reloadSections();

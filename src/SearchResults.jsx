@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   IconButton,
@@ -32,23 +31,25 @@ const SearchResults = ({ searchQuery }) => {
   const [hasSearchSubmitAttempt, setHasSearchSubmitAttempt] = useState(false);
 
   useEffect(() => {
-    axios
-      .get('https://www.googleapis.com/youtube/v3/search', {
-        params: {
-          q: query,
-          type: 'video',
-          part: 'snippet',
-          key: process.env.REACT_APP_YOUTUBE_API_KEY
-          // key:'AIzaSyCz_FUhutA28tmaBM-_EGIuFFfPxuA_irQ'
-        },
-      })
-      .then((response) => {
-        setSearchResults(response.data.items);
+    const params = new URLSearchParams({
+      q: query,
+      type: 'video',
+      part: 'snippet',
+      key: import.meta.env.VITE_YOUTUBE_API_KEY,
+    });
+    fetch(`https://www.googleapis.com/youtube/v3/search?${params}`)
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          if (response.status === 403 && data?.error?.errors?.[0]?.reason === 'quotaExceeded') {
+            setQuotaExceeded(true);
+          }
+          return;
+        }
+        setSearchResults(data.items);
       })
       .catch((error) => {
-        if (error.response && error.response.status === 403 && error.response.data.error.errors[0].reason === 'quotaExceeded') {
-          setQuotaExceeded(true);
-        }
+        console.error('Error searching YouTube:', error);
       });
       setCurrentSearchQuery(searchQuery);
       // Reset validation state when query changes

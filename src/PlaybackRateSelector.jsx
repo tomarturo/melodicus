@@ -1,7 +1,6 @@
-import {useState, React} from 'react';
+import { useState } from 'react';
 import { Select, HStack, IconButton } from "@chakra-ui/react";
-import { PlusIcon, MinusIcon } from '@heroicons/react/16/solid';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus } from '@phosphor-icons/react';
 function PlaybackRateSelector({ player }) {
   const rates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
   const [currentRate, setCurrentRate] = useState(1);
@@ -53,7 +52,7 @@ function PlaybackRateSelector({ player }) {
         }}
         isDisabled={currentRate === rates[0]}
         onClick={onMinusClick}
-        icon={<Minus style={{ width: '20px', height: '20px' }} />}
+        icon={<Minus size={20} />}
         aria-label='Increase playback rate'
       />
       <Select
@@ -88,7 +87,7 @@ function PlaybackRateSelector({ player }) {
           _hover={{
             boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
           }}
-          icon={<Plus style={{ width: '20px', height: '20px' }} />}
+          icon={<Plus size={20} />}
           onClick={onPlusClick}
           isDisabled={currentRate === rates[rates.length - 1]}
           aria-label='Increase playback rate'

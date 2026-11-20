@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -11,8 +10,7 @@ import {
   Input,
   HStack,
   VStack,
-  Box,
-  Text
+  Box
 } from '@chakra-ui/react';
 
 const SectionNameModal = ({

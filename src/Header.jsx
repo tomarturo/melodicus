@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { Image, Link, Flex, Box, Input, InputGroup, InputRightElement, IconButton, Button, useDisclosure } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
@@ -41,7 +41,7 @@ const Header = ({ query = '' }) => {
     <Flex justify='space-between' gap='4' h="48px" py={["2","2","4"]} px={["3", "3", 0]} align='center'>
       <Box>
         <Link as={ReactRouterLink} to='/'>
-          <Image src={process.env.PUBLIC_URL + '/wordmark.svg'} w='120px'/>
+          <Image src={'/wordmark.svg'} w='120px'/>
         </Link>
       </Box>
       {isVideoPage && (

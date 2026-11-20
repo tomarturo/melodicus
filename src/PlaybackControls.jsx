@@ -1,7 +1,5 @@
-import React from 'react';
 import { HStack, Button, Icon } from '@chakra-ui/react';
-import { PlayIcon, PauseIcon } from '@heroicons/react/20/solid';
-import { Repeat } from 'lucide-react';
+import { Play, Pause, Repeat } from '@phosphor-icons/react';
 
 const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
   return (
@@ -19,7 +17,7 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }) => {
           boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
         }}
         aria-label='Play or Pause'
-        leftIcon={isPlaying ? <Icon as={PauseIcon} /> : <Icon as={PlayIcon} />}
+        leftIcon={isPlaying ? <Icon as={Pause} weight="fill" /> : <Icon as={Play} weight="fill" />}
         onClick={playPauseClick}
       >
         {isPlaying ? 'Pause' : 'Play'}

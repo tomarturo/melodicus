@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, AbsoluteCenter } from '@chakra-ui/react';
 
 const VideoDisplay = ({ videoThumbnail }) => {

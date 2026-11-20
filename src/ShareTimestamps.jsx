@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Button,
   Modal,
@@ -16,7 +16,7 @@ import {
   Box,
   VStack
 } from '@chakra-ui/react';
-import { Paperclip } from 'lucide-react';
+import { Paperclip } from '@phosphor-icons/react';
 
 const ShareTimestamps = ({ videoId, savedSections }) => {
   const toast = useToast();
@@ -31,6 +31,8 @@ const ShareTimestamps = ({ videoId, savedSections }) => {
     if (isOpen) {
       createShareableLink();
     }
+  // Share links are rebuilt in the phase 3 refactor; createShareableLink is recreated every render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
   
   // Check if there are sections to share before opening the modal
@@ -124,19 +126,6 @@ const ShareTimestamps = ({ videoId, savedSections }) => {
     }
   };
   
-  // Handle email share
-  const handleEmailShare = () => {
-    if (shareableLink) {
-      // Create email content
-      const subject = encodeURIComponent('YouTube Video Sections');
-      const body = encodeURIComponent(`Check out these sections I found in this video:\n\n${shareableLink}`);
-      
-      // Open default email client
-      window.location.href = `mailto:?subject=${subject}&body=${body}`;
-      
-    }
-  };
-
   // Handle open in new tab
   const handleOpenInNewTab = () => {
     if (shareableLink) {

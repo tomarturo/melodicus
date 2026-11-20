@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Box, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text } from '@chakra-ui/react';
-import { ZoomIn, ZoomOut } from 'lucide-react';
+import { MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
 import useWaveformTimeline, { ZOOM_LEVELS } from './hooks/useWaveformTimeline';
 
 const WaveformTimeline = ({
@@ -48,7 +48,7 @@ const WaveformTimeline = ({
           size="xs"
           variant="ghost"
           aria-label="Zoom out"
-          icon={<Icon as={ZoomOut} boxSize="16px" />}
+          icon={<Icon as={MagnifyingGlassMinus} boxSize="16px" />}
           isDisabled={zoomIndex === 0}
           onClick={() => setZoomIndex((index) => Math.max(0, index - 1))}
         />
@@ -59,7 +59,7 @@ const WaveformTimeline = ({
           size="xs"
           variant="ghost"
           aria-label="Zoom in"
-          icon={<Icon as={ZoomIn} boxSize="16px" />}
+          icon={<Icon as={MagnifyingGlassPlus} boxSize="16px" />}
           isDisabled={zoomIndex === ZOOM_LEVELS.length - 1}
           onClick={() => setZoomIndex((index) => Math.min(ZOOM_LEVELS.length - 1, index + 1))}
         />

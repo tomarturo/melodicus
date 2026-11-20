@@ -23,7 +23,6 @@ const useSharingUrl = (videoId) => {
         const sectionsString = decodeURIComponent(atob(encodedSections));
         const sections = JSON.parse(sectionsString);
         
-        console.log('Decoded sections from URL:', sections);
         
         // Store the sections but don't apply them automatically
         setUrlSections(sections);
@@ -42,7 +41,6 @@ const useSharingUrl = (videoId) => {
   // Function to apply the sections from URL
   const importSectionsFromUrl = () => {
     if (!urlSections || hasImported) {
-      console.log('No URL sections to import or already imported');
       return false;
     }
     
@@ -59,13 +57,11 @@ const useSharingUrl = (videoId) => {
         video_title: section.video_title || section.videoTitle || ''
       }));
       
-      console.log('Normalized sections for storage:', normalizedSections);
       
       // Save to localStorage
       const storageKey = `video_sections_${videoId}`;
       localStorage.setItem(storageKey, JSON.stringify(normalizedSections));
       
-      console.log('Sections saved to localStorage with key:', storageKey);
       
       // Mark as imported to prevent re-importing
       setHasImported(true);

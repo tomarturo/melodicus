@@ -1,9 +1,8 @@
-import React from 'react';
-import { Flex, HStack, Button, Icon } from '@chakra-ui/react';
+import { Flex, Button, Icon } from '@chakra-ui/react';
 import PlaybackControls from './PlaybackControls';
 import PlaybackRateSelector from './PlaybackRateSelector';
 import ShareTimestamps from './ShareTimestamps';
-import { CirclePlus } from 'lucide-react';
+import { PlusCircle } from '@phosphor-icons/react';
 
 const VideoControls = ({
   isPlaying,
@@ -11,7 +10,6 @@ const VideoControls = ({
   onRestartLoop,
   player,
   onNewLoop,
-  canSaveLoop,
   videoId,
   savedSections,
 }) => (
@@ -58,7 +56,7 @@ const VideoControls = ({
       />
       <Button
         onClick={onNewLoop}
-        leftIcon={<Icon as={CirclePlus} w="20px" h="20px" />}
+        leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
         variant='filled'
         size='lg'
         rounded='full'
@@ -110,7 +108,7 @@ const VideoControls = ({
       >
         <Button
           onClick={onNewLoop}
-          leftIcon={<Icon as={CirclePlus} w="20px" h="20px" />}
+          leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
           variant='filled'
           size='lg'
           rounded='full'
@@ -151,7 +149,7 @@ const VideoControls = ({
       <Flex gap={3} align="center">
         <Button
           onClick={onNewLoop}
-          leftIcon={<Icon as={CirclePlus} w="20px" h="20px" />}
+          leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
           variant='filled'
           size='lg'
           rounded='full'

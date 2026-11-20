@@ -9,3 +9,15 @@ The heart of Melodicus is a looping function enabling users (musicians, music te
 I designed Melodicus for optimal use in my transcribing situation - an iPad resting on a music stand and a guitar in my hands. I strove to make all of the controls easy to interact with on a touch screen and visible from a couple feet away. 
 
 I hope others find it useful too.
+
+## Development
+
+Requires Node 22.12 or newer.
+
+```bash
+cp .env.example .env.local   # then fill in the Supabase and YouTube keys
+npm install
+npm run dev                  # http://localhost:3000
+```
+
+Other scripts: `npm test` (Vitest, watch mode), `npm run lint`, `npm run build`, `npm run preview`.
