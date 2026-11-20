@@ -17,6 +17,7 @@ src/ToggleVideoImage.js
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store

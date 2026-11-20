@@ -6,10 +6,6 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-  build: {
-    // Matches the Create React App output directory Vercel is configured for.
-    outDir: 'build',
-  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
