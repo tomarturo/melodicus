@@ -10,20 +10,24 @@ const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => 
       // Lets the album art size itself from this box's width and height.
       sx={{ containerType: 'size' }}
       data-testid="video-display"
-      backgroundImage={videoThumbnail ?? undefined}
-      backgroundSize="11px 11px"
-      backgroundRepeat="repeat"
-      _before={{
-        content: '""',
-        position: 'absolute',
-        inset: 0,
-        backdropFilter: 'auto',
-        backdropBlur: '8px',
-        backdropInvert: '0.175',
-        backdropContrast: '0.8',
-        backdropSaturate: '1.7',
-      }}
+      overflow="hidden"
+      // Shown until a thumbnail loads, or if there is none.
+      bg="#4B4B4E"
     >
+      {/* The backdrop: the thumbnail scaled to cover the area and blurred.
+          It extends past the edges so the blur doesn't fade out at them. */}
+      {videoThumbnail && (
+        <Box
+          position="absolute"
+          inset="-15%"
+          backgroundImage={videoThumbnail}
+          backgroundSize="cover"
+          backgroundPosition="center"
+          filter="blur(40px) saturate(1.3) brightness(0.8)"
+          aria-hidden
+          data-testid="video-backdrop"
+        />
+      )}
       {/* The album art: a square sized from this box's own dimensions (cq
           units), so it always fits whatever height the video area gets. */}
       <Box
