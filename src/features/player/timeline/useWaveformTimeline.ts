@@ -3,7 +3,7 @@ import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin, { type Region } from 'wavesurfer.js/plugins/regions';
 import TimelinePlugin from 'wavesurfer.js/plugins/timeline';
 import HoverPlugin from 'wavesurfer.js/plugins/hover';
-import { formatClockTime } from '../../../utils/formatTime';
+import { formatSecondsToDuration } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
 import { MIN_LOOP } from '../loopLogic';
 import type { PlayerController } from '../playerController';
@@ -29,7 +29,7 @@ const SECTION_ID_PREFIX = 'section-';
 // Saved loops are named in a list of pills above the timeline (LoopPills),
 // not on the track, so the band stays free for dragging out a loop.
 const TRACK_HEIGHT = 48;
-const RULER_HEIGHT = 22;
+const RULER_HEIGHT = 20;
 const TRACK_RADIUS = 8;
 
 /**
@@ -71,32 +71,11 @@ const TRACK_STYLES = `
   [part~="loop"] [part~="region-handle-left"]::after { left: -5px; }
   [part~="loop"] [part~="region-handle-right"]::after { right: -5px; }
 
-  /* The ruler: a small gap below the track, short ticks along its top, one
-     grey for labels, which sit just right of their tick. */
+  /* A small gap between the track and the ruler. */
   [part="timeline-wrapper"] { margin-top: 4px; }
-  [part~="timeline-notch"] {
-    border-left: none !important;
-    opacity: 1 !important;
-    height: 100% !important;
-    text-indent: 4px !important;
-    color: var(--chakra-colors-fg-muted);
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-    padding-bottom: 3px;
-  }
-  [part~="timeline-notch"]::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 1px;
-    height: 4px;
-    background: var(--chakra-colors-border-strong);
-  }
-  [part~="timeline-notch-primary"]::before { height: 7px; background: var(--chakra-colors-border-emphasis); }
-  /* Labels at the primary interval only (every 30s fitted, 10s zoomed in). */
-  [part~="timeline-notch-secondary"] { color: transparent; }
+
+  /* No grips while the loop is the whole song: nothing has been picked yet. */
+  [part~="loop"][data-whole-song] [part~="region-handle"]::after { display: none; }
 `;
 
 // A region drag reports positions continuously, and those come back from the
@@ -137,6 +116,11 @@ const styleRegion = (region: Region, edgeColor?: string) => {
     handle.style[isLeft ? 'borderLeft' : 'borderRight'] = `2px solid ${edgeColor}`;
     handle.style.borderRadius = '0';
   });
+};
+
+/** Flags the loop region while it spans the whole song, before any selection. */
+const markWholeSong = (region: Region, wholeSong: boolean) => {
+  region.element?.toggleAttribute('data-whole-song', wholeSong);
 };
 
 /**
@@ -251,7 +235,7 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
         // width, so ruler and track always agree about where a second is.
         TimelinePlugin.create({
           height: RULER_HEIGHT,
-          formatTimeCallback: formatClockTime,
+          formatTimeCallback: formatSecondsToDuration,
         }),
         HoverPlugin.create({
           lineColor: HOVER_LINE_COLOR,
@@ -259,7 +243,7 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
           labelBackground: PLAYHEAD_COLOR,
           labelColor: '#FFFFFF',
           labelSize: 11,
-          formatTimeCallback: formatClockTime,
+          formatTimeCallback: formatSecondsToDuration,
         }),
       ],
     });
@@ -318,6 +302,7 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
           minLength: MIN_LOOP,
         });
         styleRegion(loopRegionRef.current, LOOP_EDGE_COLOR);
+        markWholeSong(loopRegionRef.current, !controller.getState().hasCustomLoop);
       }
       wavesurfer.setTime(controller.getTime());
       readyCount.current += 1;
@@ -413,6 +398,7 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
       ) {
         loop.setOptions({ start: state.loop.start, end: state.loop.end });
       }
+      if (loop) markWholeSong(loop, !state.hasCustomLoop);
       if (state.followRequest !== lastFollowRequest) {
         lastFollowRequest = state.followRequest;
         setFollowing(true);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { convertDurationToSeconds, formatClockTime, formatSecondsToDuration, roundSeconds } from './formatTime';
+import { convertDurationToSeconds, formatSecondsToDuration, roundSeconds } from './formatTime';
 
 describe('convertDurationToSeconds', () => {
   it.each([
@@ -29,16 +29,5 @@ describe('roundSeconds', () => {
 
   it('accepts numeric strings', () => {
     expect(roundSeconds('12.3456')).toBe(12.346);
-  });
-});
-
-describe('formatClockTime', () => {
-  it.each([
-    [0, '0:00'],
-    [30.9, '0:30'],
-    [245, '4:05'],
-    [3723, '1:02:03'],
-  ])('formats %f as %s', (input, expected) => {
-    expect(formatClockTime(input)).toBe(expected);
   });
 });
