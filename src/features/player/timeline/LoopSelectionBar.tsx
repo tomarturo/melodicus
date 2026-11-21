@@ -20,18 +20,22 @@ interface LoopSelectionBarProps {
 
 const quiet = { variant: 'quiet', size: 'sm' } as const;
 
+const Hint = ({ children }: { children: string }) => (
+  <Text fontSize="sm" color="fg.muted">
+    {children}
+  </Text>
+);
+
 /**
  * The row under the track: what can be done with the selection, centered
- * under it. Empty while a saved loop is selected as is; its pill shows which.
+ * under it. With nothing to act on yet, a hint on how to start.
  * Always the same height, so the video area above doesn't jump as it changes.
  */
 const LoopSelectionBar = ({ status, isBusy, onSaveNew, onUpdate, onCancel, onReset }: LoopSelectionBarProps) => (
   <Flex h="40px" mt={3} align="center" justify="center" gap={2} data-testid="loop-selection">
-    {status.kind === 'none' && (
-      <Text fontSize="sm" color="fg.muted">
-        Drag on the track to make a loop
-      </Text>
-    )}
+    {status.kind === 'none' && <Hint>Drag on the track to make a loop</Hint>}
+    {/* A saved loop, as saved: nothing to do yet, so say what can be. */}
+    {status.kind === 'saved' && <Hint>Drag the edges to adjust this loop</Hint>}
 
     {status.kind === 'new' && (
       <>

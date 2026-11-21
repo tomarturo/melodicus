@@ -142,11 +142,13 @@ test('past 1600px the app, rail included, stays together and centers in the wind
   await page.mouse.move(1800, 300);
   // Polled: whether there's a mouse (and so whether the touch toggle needs room)
   // is known only once the app has checked, just after the first render.
+  // Null until both have rendered, so the poll waits rather than failing.
   const gaps = () => page.evaluate(() => {
-    const nav = document.querySelector('nav')!.getBoundingClientRect();
+    const nav = document.querySelector('nav')?.getBoundingClientRect();
     const panel = [...document.querySelectorAll<HTMLElement>('div')]
-      .find((d) => getComputedStyle(d).borderTopLeftRadius === '12px' && d.getBoundingClientRect().width > 600)!
-      .getBoundingClientRect();
+      .find((d) => getComputedStyle(d).borderTopLeftRadius === '12px' && d.getBoundingClientRect().width > 600)
+      ?.getBoundingClientRect();
+    if (!nav || !panel) return null;
     return { beforeRail: nav.left, railToPanel: panel.left - nav.right, afterPanel: window.innerWidth - panel.right };
   });
   // 1920 - 1600 leaves 160px each side; the panel keeps its 20px frame inside that.

@@ -53,11 +53,46 @@ test('the row under the track hints, then offers Save loop for a new selection',
   await page.getByPlaceholder('Loop name (optional)').fill('Bridge');
   await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
 
-  // Once saved, the selection is that loop: its pill is selected and there's nothing to save.
+  // Once saved, the selection is that loop: its pill is selected, and the row says how to change it.
   await expect(activePill(page)).toHaveText('Bridge');
-  await expect(row(page)).toHaveText('');
+  await expect(row(page)).toHaveText('Drag the edges to adjust this loop');
   await expect(page.getByRole('button', { name: 'Save loop', exact: true })).toHaveCount(0);
   expect(await storedLoops(page)).toHaveLength(1);
+});
+
+const loopFill = (page: Page) =>
+  page.locator('[part~="region"][part~="loop"]').first().evaluate((el) => getComputedStyle(el).backgroundColor);
+
+test('with no saved loops, the Add a loop pill selects the first ten seconds to save or cancel', async ({ page }) => {
+  await openWith(page, []);
+  const addLoop = page.getByRole('button', { name: 'Add a loop' });
+  await addLoop.click();
+  await expect(page.getByRole('button', { name: 'Save loop', exact: true })).toBeVisible();
+  await expect.poll(() => loopFill(page)).not.toBe('rgba(0, 0, 0, 0)');
+
+  await page.getByRole('button', { name: 'Save loop', exact: true }).click();
+  await page.getByPlaceholder('Loop name (optional)').fill('Intro');
+  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+
+  // Its place goes to the saved loop's pill.
+  await expect(page.getByRole('button', { name: 'Intro', exact: true })).toBeVisible();
+  await expect(addLoop).toHaveCount(0);
+  expect(await storedLoops(page)).toEqual([expect.objectContaining({ name: 'Intro', start_time: 0, end_time: 10 })]);
+});
+
+test('Cancel after Add a loop goes back to no selection', async ({ page }) => {
+  await openWith(page, []);
+  await page.getByRole('button', { name: 'Add a loop' }).click();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(row(page)).toHaveText('Drag on the track to make a loop');
+  await expect(page.getByRole('button', { name: 'Add a loop' })).toBeVisible();
+});
+
+test('the loop isn’t drawn until one is picked', async ({ page }) => {
+  await openWith(page, [SOLO]);
+  await expect.poll(() => loopFill(page)).toBe('rgba(0, 0, 0, 0)');
+  await page.getByRole('button', { name: 'Solo', exact: true }).click();
+  await expect.poll(() => loopFill(page)).not.toBe('rgba(0, 0, 0, 0)');
 });
 
 test('Cancel drops a new selection, back to the hint', async ({ page }) => {
@@ -65,6 +100,7 @@ test('Cancel drops a new selection, back to the hint', async ({ page }) => {
   await dragSelection(page, 0.5, 0.6);
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(row(page)).toHaveText('Drag on the track to make a loop');
+  await expect.poll(() => loopFill(page)).toBe('rgba(0, 0, 0, 0)');
   // The loop spans the whole video again.
   const region = await page.locator('[part~="region"][part~="loop"]').first().boundingBox();
   const track = await page.locator('[part~="canvases"]').first().boundingBox();
@@ -97,7 +133,7 @@ test('Cancel puts an edited saved loop back to its saved edges', async ({ page }
   await page.getByRole('button', { name: 'Solo', exact: true }).click();
   await dragRightEdge(page, 60);
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-  await expect(row(page)).toHaveText('');
+  await expect(row(page)).toHaveText('Drag the edges to adjust this loop');
   await expect(activePill(page)).toHaveText('Solo');
   await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);
   expect(await storedLoops(page)).toEqual([SOLO]);

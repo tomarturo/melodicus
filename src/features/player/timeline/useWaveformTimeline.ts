@@ -9,28 +9,77 @@ import { MIN_LOOP } from '../loopLogic';
 import type { PlayerController } from '../playerController';
 import { drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
 
-// blackAlpha.500 and blackAlpha.800 from the slider this replaced, flattened
-// against the #FAF9F6 panel rather than left translucent. They have to be
-// opaque: the progress canvas is the main canvas recomposited with
-// 'source-in', which multiplies the two alphas, so a translucent waveColor
-// drags progressColor down with it.
-const TRACK_COLOR = '#A09F9D'; // blackAlpha.500 over #FAF9F6
-const PLAYED_COLOR = '#323231'; // blackAlpha.800 over #FAF9F6
-const PLAYHEAD_COLOR = '#C53030'; // red.600
-// The loop needs its own hue: as another shade of black it was
-// indistinguishable from the played-portion darkening it overlaps.
-const LOOP_COLOR = 'rgba(128, 90, 213, 0.30)'; // purple.500
+// The track is quiet so the loop leads. Light warm greys, flattened against
+// the #FAF9F6 panel rather than left translucent. They have to be opaque: the
+// progress canvas is the main canvas recomposited with 'source-in', which
+// multiplies the two alphas, so a translucent waveColor drags progressColor
+// down with it.
+const TRACK_COLOR = '#E4E2DD'; // about blackAlpha.100 over #FAF9F6
+const PLAYED_COLOR = '#CBC8C1'; // a step darker: played, without shouting
+const PLAYHEAD_COLOR = '#161719'; // ink
+const HOVER_LINE_COLOR = 'rgba(22, 23, 25, 0.35)'; // ink, faint
+const LOOP_COLOR = 'rgba(128, 90, 213, 0.28)'; // purple.500
 const LOOP_EDGE_COLOR = '#553C9A'; // purple.700
-const SECTION_COLOR = 'rgba(85, 60, 154, 0.13)'; // purple.700, well under the loop
+const SECTION_COLOR = 'rgba(85, 60, 154, 0.12)'; // purple.700, well under the loop
 // A saved loop's span while its pill is hovered.
-const SECTION_HIGHLIGHT_COLOR = 'rgba(85, 60, 154, 0.32)';
+const SECTION_HIGHLIGHT_COLOR = 'rgba(85, 60, 154, 0.28)';
 const LOOP_REGION_ID = 'loop';
 const SECTION_ID_PREFIX = 'section-';
 
 // Saved loops are named in a list of pills above the timeline (LoopPills),
 // not on the track, so the band stays free for dragging out a loop.
-const TRACK_HEIGHT = 48;
+const TRACK_HEIGHT = 68;
 const RULER_HEIGHT = 20;
+const TRACK_RADIUS = 8;
+
+/**
+ * Styles for wavesurfer's own elements, which live in its shadow DOM and only
+ * take inline styles through their options. Hence the !important.
+ */
+const TRACK_STYLES = `
+  /* A rounded track. The overlays are clipped to it, so they never spill onto
+     the ruler and the loop's corners follow the track's. */
+  [part~="canvases"] { border-radius: ${TRACK_RADIUS}px; overflow: hidden; }
+  /* The played part ends square at the playhead. */
+  [part="progress"] {
+    height: ${TRACK_HEIGHT}px !important;
+    border-radius: ${TRACK_RADIUS}px 0 0 ${TRACK_RADIUS}px;
+    overflow: hidden;
+  }
+  [part="regions-container"] {
+    height: ${TRACK_HEIGHT}px !important;
+    border-radius: ${TRACK_RADIUS}px;
+    overflow: hidden;
+  }
+  [part="cursor"], [part="hover"] { height: ${TRACK_HEIGHT}px !important; }
+  [part="cursor"] { border-radius: 1px; }
+  [part="hover-label"] { border-radius: 4px; padding: 1px 5px !important; font-variant-numeric: tabular-nums; }
+
+  /* The loop's edges get a grip, so they read as something to drag. */
+  [part~="loop"] [part~="region-handle"]::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 20px;
+    transform: translateY(-50%);
+    background: #FFFFFF;
+    border: 1.5px solid ${LOOP_EDGE_COLOR};
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  [part~="loop"] [part~="region-handle-left"]::after { left: -5px; }
+  [part~="loop"] [part~="region-handle-right"]::after { right: -5px; }
+
+  /* A small gap between the track and the ruler. */
+  [part="timeline-wrapper"] { margin-top: 4px; }
+
+  /* Until a loop is picked it spans the whole song, and isn't drawn: no fill,
+     no edges, no grips. Hidden handles also leave the track's ends free for
+     dragging out a selection. */
+  [part~="loop"][data-whole-song] { background-color: transparent !important; }
+  [part~="loop"][data-whole-song] [part~="region-handle"] { visibility: hidden; }
+`;
 
 // A region drag reports positions continuously, and those come back from the
 // controller a moment later. Only push the controller's value into the region
@@ -60,12 +109,21 @@ const styleRegion = (region: Region, edgeColor?: string) => {
   const element = region.element;
   if (!element) return;
   element.style.pointerEvents = 'none';
+  element.style.borderRadius = '0';
   element.querySelectorAll<HTMLElement>('[part~="region-handle"]').forEach((handle) => {
     handle.style.pointerEvents = 'auto';
+    // A wider hit area than the 2px edge it draws, for fingers.
+    handle.style.width = '12px';
     if (!edgeColor) return;
     const isLeft = handle.getAttribute('part')?.includes('handle-left');
-    handle.style[isLeft ? 'borderLeft' : 'borderRight'] = `3px solid ${edgeColor}`;
+    handle.style[isLeft ? 'borderLeft' : 'borderRight'] = `2px solid ${edgeColor}`;
+    handle.style.borderRadius = '0';
   });
+};
+
+/** Flags the loop region while it spans the whole song, before any selection, so it isn't drawn. */
+const markWholeSong = (region: Region, wholeSong: boolean) => {
+  region.element?.toggleAttribute('data-whole-song', wholeSong);
 };
 
 /**
@@ -164,7 +222,7 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
       waveColor: TRACK_COLOR,
       progressColor: PLAYED_COLOR,
       cursorColor: PLAYHEAD_COLOR,
-      cursorWidth: 3,
+      cursorWidth: 2,
       renderFunction: renderTrackBar,
       interact: true,
       dragToSeek: false,
@@ -183,10 +241,10 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
           formatTimeCallback: formatSecondsToDuration,
         }),
         HoverPlugin.create({
-          lineColor: PLAYHEAD_COLOR,
+          lineColor: HOVER_LINE_COLOR,
           lineWidth: 1,
-          labelBackground: 'rgba(0, 0, 0, 0.80)',
-          labelColor: '#FAF9F6',
+          labelBackground: PLAYHEAD_COLOR,
+          labelColor: '#FFFFFF',
           labelSize: 11,
           formatTimeCallback: formatSecondsToDuration,
         }),
@@ -197,6 +255,12 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
     const wrapper = wavesurfer.getWrapper();
     const scroller = wrapper.parentElement;
     disableNativeTouchGestures(wrapper);
+    const root = wrapper.getRootNode();
+    if (root instanceof ShadowRoot) {
+      const style = document.createElement('style');
+      style.textContent = TRACK_STYLES;
+      root.appendChild(style);
+    }
 
     // 'interaction' fires only for real clicks on the waveform. Not
     // 'timeupdate': setTime() emits that too, which would loop back into a seek.
@@ -241,6 +305,7 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
           minLength: MIN_LOOP,
         });
         styleRegion(loopRegionRef.current, LOOP_EDGE_COLOR);
+        markWholeSong(loopRegionRef.current, !controller.getState().hasCustomLoop);
       }
       wavesurfer.setTime(controller.getTime());
       readyCount.current += 1;
@@ -336,6 +401,7 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
       ) {
         loop.setOptions({ start: state.loop.start, end: state.loop.end });
       }
+      if (loop) markWholeSong(loop, !state.hasCustomLoop);
       if (state.followRequest !== lastFollowRequest) {
         lastFollowRequest = state.followRequest;
         setFollowing(true);
