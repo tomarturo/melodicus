@@ -223,9 +223,11 @@ const HomePage = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              Open YouTube in a new tab<Icon as={ArrowUpRight}></Icon>
-                            </Link>&nbsp;
-                            find your next song, then paste the link here.
+                              Open YouTube
+                              {/* Bold, to match the link's weight. */}
+                              <Icon as={ArrowUpRight} weight="bold" />
+                            </Link>
+                            , find your next song, then paste the link here.
                           </>
                         ) : (
                           linkErrorMessage
