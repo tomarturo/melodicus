@@ -89,7 +89,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         if (!section) return;
         notify({
           title: `Deleted “${section.name || 'Unnamed'}”`,
-          icon: { as: Trash, color: 'red.300' },
+          icon: { as: Trash, color: 'white' },
           duration: 5000,
           action: { label: 'Undo', onClick: () => restoreSection(section) },
         });

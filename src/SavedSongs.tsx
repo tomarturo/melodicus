@@ -220,6 +220,7 @@ const SavedSongs = () => {
     );
     notify({
       title: `Removed “${song.title || 'Untitled video'}”`,
+      icon: { as: Trash, color: 'white' },
       duration: UNDO_MS,
       action: {
         label: 'Undo',
