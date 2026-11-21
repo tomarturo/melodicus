@@ -7,9 +7,9 @@ const config: ThemeConfig = {
 };
 
 /**
- * Named colors for the content panels, so each has one place to get a dark
- * value later. The page chrome (header and footer around the panels) is
- * replaced by the sidebar rail and isn't tokenised here.
+ * Named colors, so each has one place to get a dark value later. Panel tokens
+ * cover the light content areas; chrome tokens cover the dark frame around
+ * them (page background, sidebar).
  */
 const semanticTokens = {
   colors: {
@@ -42,6 +42,15 @@ const semanticTokens = {
     'border.emphasis': { default: 'blackAlpha.700' },
     'border.focus': { default: 'blackAlpha.900' },
     'border.inverse': { default: 'black' },
+
+    // The dark frame around the panels: page background and sidebar.
+    'chrome.bg': { default: '#161719' },
+    'chrome.raised': { default: '#1F2023' },
+    'chrome.fg': { default: 'whiteAlpha.900' },
+    'chrome.fgMuted': { default: 'whiteAlpha.600' },
+    'chrome.hover': { default: 'whiteAlpha.100' },
+    'chrome.active': { default: 'whiteAlpha.200' },
+    'chrome.border': { default: 'whiteAlpha.200' },
   },
 };
 

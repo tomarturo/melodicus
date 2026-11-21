@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
 import { ArrowForwardIcon, SearchIcon } from '@chakra-ui/icons';
 import { Icon, Center, Badge, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, HStack, Link } from '@chakra-ui/react'
-import Header from './Header';
-import Footer from './Footer';
 import { ArrowSquareOut } from '@phosphor-icons/react';
 
 const HomePage = () => {
@@ -108,8 +106,7 @@ const HomePage = () => {
   };
 
   return (
-    <Flex direction='column' minH='100vh'>
-      <Header />
+    <>
       <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} overflow="hidden">
         <Container maxW='3xl'>
           <VStack>
@@ -252,8 +249,7 @@ const HomePage = () => {
           </VStack>
         </Container>
       </Flex>
-      <Footer />
-    </Flex>
+    </>
   );
 };
 

@@ -1,7 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Container, Stack, Heading, Text, Image, Card, CardBody, Flex, Button, useToast } from '@chakra-ui/react';
-import Header from './Header';
-import Footer from './Footer';
 import { useAuth } from './contexts/AuthContext';
 import { errorMessage } from './lib/errors';
 import { useDeleteSavedSong, useSavedSongsQuery } from './features/sections/queries';
@@ -80,15 +78,13 @@ const SavedSongs = () => {
   }
 
   return (
-    <Flex direction="column" minH="100vh">
-      <Header />
+    <>
       <Flex direction="column" flex="1" bg="bg.panel" borderRadius={['none', 'none', 'xl']} overflow="hidden">
         <Container w="100%" pt="12" pb="8">
           {content}
         </Container>
       </Flex>
-      <Footer />
-    </Flex>
+    </>
   );
 };
 

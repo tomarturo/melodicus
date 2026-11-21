@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, useToast } from '@chakra-ui/react';
+import { Box, Flex, useToast } from '@chakra-ui/react';
 import { roundSeconds } from './utils/formatTime';
 import { errorMessage } from './lib/errors';
 import { isSaveableLoop } from './features/player/loopLogic';
@@ -12,7 +12,6 @@ import type { Section } from './features/sections/types';
 import { useIncomingShare } from './features/sharing/useIncomingShare';
 import ImportSharedLoopsDialog from './features/sharing/ImportSharedLoopsDialog';
 
-import VideoLayout from './VideoLayout';
 import VideoDisplay from './VideoDisplay';
 import VideoControls from './VideoControls';
 import SectionNameModal from './SectionNameModal';
@@ -131,7 +130,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   };
 
   return (
-    <VideoLayout>
+    <Flex direction="column" flex="1">
       <Box ref={hostRef} display="none" />
       <VideoDisplay videoThumbnail={videoThumbnail} />
       {videoLength ? (
@@ -174,7 +173,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
           onDismiss={incomingShare.dismiss}
         />
       )}
-    </VideoLayout>
+    </Flex>
   );
 };
 
