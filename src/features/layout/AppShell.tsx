@@ -167,10 +167,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isPhone = useBreakpointValue({ base: true, md: false }, { ssr: false });
   const fitsScreen = scrollsInPanel(useLocation().pathname);
   const [canHover] = useMediaQuery(HOVER_QUERY);
-  // The rail's icons sit 20px in from its left edge; the panel starts the same
-  // 20px past their right edge. A touch screen keeps room for the rail's toggle,
-  // which straddles that edge.
-  const panelLeft = isPhone ? 0 : canHover ? 0 : 6;
+  // A 20px frame on every side of the panel, matching the rail: its icons sit
+  // 20px in from its left edge, and the panel starts 20px past their right
+  // edge. A touch screen adds room on the left for the rail's toggle, which
+  // straddles that edge.
+  const frame = isPhone ? 0 : 5;
+  const panelLeft = isPhone || canHover ? 0 : 5;
 
   return (
     <Flex
@@ -186,7 +188,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         : { minH: '100dvh', sx: { '@supports not (height: 100dvh)': { minHeight: '100vh' } } })}
     >
       {isPhone ? <PhoneBar /> : <Rail />}
-      <Flex direction="column" flex="1" minH="0" py={isPhone ? 0 : 4} pl={panelLeft} pr={isPhone ? 0 : 6}>
+      <Flex direction="column" flex="1" minH="0" py={frame} pl={panelLeft} pr={frame}>
         <Box maxW="1400px" w="100%" mx="auto" display="flex" flexDirection="column" flex="1" minH="0">
           {children}
         </Box>
