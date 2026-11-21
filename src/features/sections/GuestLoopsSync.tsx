@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@chakra-ui/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabaseClient';
 import { copyGuestLoopsToAccount } from './copyGuestLoops';
 import { SupabaseSectionsRepo } from './supabaseSectionsRepo';
 import { getLocalSectionsRepo } from './useSectionsRepository';
+import { useNotify } from '../../lib/notify';
 
 /**
  * When someone is signed in and this browser still holds loops they saved as a
@@ -14,7 +14,7 @@ import { getLocalSectionsRepo } from './useSectionsRepository';
  */
 const GuestLoopsSync = () => {
   const { user } = useAuth();
-  const toast = useToast();
+  const notify = useNotify();
   const queryClient = useQueryClient();
   const syncedFor = useRef<string | null>(null);
 
@@ -32,22 +32,21 @@ const GuestLoopsSync = () => {
       const { added, failed } = await copyGuestLoopsToAccount(local, new SupabaseSectionsRepo(supabase, user.id));
       await queryClient.invalidateQueries();
       if (added > 0) {
-        toast({
+        notify({
+          tone: 'success',
           title: added === 1 ? '1 loop added to your account' : `${added} loops added to your account`,
-          status: 'success',
-          duration: 4000,
         });
       }
       if (failed > 0) {
-        toast({
-          title: 'Some loops could not be added to your account',
-          description: 'They are still saved in this browser and will be tried again next time.',
-          status: 'warning',
+        notify({
+          tone: 'warning',
+          title: 'Some loops couldn’t be added to your account',
+          description: 'They’re still saved in this browser, and will be tried again next time you log in.',
           duration: 6000,
         });
       }
     })();
-  }, [user, toast, queryClient]);
+  }, [user, notify, queryClient]);
 
   return null;
 };
