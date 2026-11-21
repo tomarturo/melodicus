@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
 import { ArrowForwardIcon, SearchIcon } from '@chakra-ui/icons';
 import { Icon, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, Link } from '@chakra-ui/react'
-import { ArrowSquareOut } from '@phosphor-icons/react';
+import { ArrowUpRight } from '@phosphor-icons/react';
 import { searchPath } from './lib/youtube';
 import HintRow from './components/HintRow';
 
@@ -223,7 +223,7 @@ const HomePage = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              Open YouTube in a new tab<Icon as={ArrowSquareOut}></Icon>
+                              Open YouTube in a new tab<Icon as={ArrowUpRight}></Icon>
                             </Link>&nbsp;
                             find your next song, then paste the link here.
                           </>

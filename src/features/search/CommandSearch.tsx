@@ -14,7 +14,7 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react';
-import { MagnifyingGlass, YoutubeLogo, ArrowSquareOut } from '@phosphor-icons/react';
+import { MagnifyingGlass, YoutubeLogo, ArrowUpRight } from '@phosphor-icons/react';
 import { useSavedSongsQuery } from '../sections/queries';
 import { actionPath, commandActions, type CommandAction } from './commandSearch';
 
@@ -69,7 +69,7 @@ function ActionRow({ action }: { action: CommandAction }) {
     case 'open-video':
       return (
         <>
-          <Icon as={ArrowSquareOut} boxSize="20px" mx="14px" />
+          <Icon as={ArrowUpRight} boxSize="20px" mx="14px" />
           <Text>Open this YouTube video</Text>
         </>
       );
