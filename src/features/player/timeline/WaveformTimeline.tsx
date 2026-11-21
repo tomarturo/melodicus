@@ -1,8 +1,10 @@
-import { useCallback, useState } from 'react';
-import { Box, Button, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text } from '@chakra-ui/react';
-import { Crosshair, MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
+import { useState } from 'react';
+import { Box, Flex, Icon, IconButton } from '@chakra-ui/react';
+import { MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
 import useWaveformTimeline from './useWaveformTimeline';
-import { ZOOM_LEVELS } from './timelineLogic';
+import LoopPills from './LoopPills';
+import { ZOOM_LEVELS, activeLoopId, drawableSections } from './timelineLogic';
+import { usePlayerState } from '../usePlayer';
 import type { PlayerController } from '../playerController';
 import type { Section } from '../../sections/types';
 
@@ -15,6 +17,20 @@ interface WaveformTimelineProps {
   onDeleteSection: (sectionId: string) => void;
 }
 
+const zoomButtonStyle = {
+  size: 'xs',
+  minW: '24px',
+  h: '24px',
+  bg: 'ink',
+  color: 'white',
+  borderRadius: 'md',
+  _hover: { bg: 'ink.hover' },
+  _active: { bg: 'ink.active' },
+  // Disabled: the white icon stays, the dark square lightens.
+  _disabled: { opacity: 1, bg: 'blackAlpha.400', color: 'white', cursor: 'not-allowed' },
+  sx: { '&:disabled:hover': { bg: 'blackAlpha.400' } },
+} as const;
+
 const WaveformTimeline = ({
   controller,
   videoLength,
@@ -23,102 +39,51 @@ const WaveformTimeline = ({
   onEditSection,
   onDeleteSection,
 }: WaveformTimelineProps) => {
-  // Section labels live inside the renderer's shadow root, where a Chakra Menu
-  // can't follow them. They report the caret's viewport position instead, and
-  // one menu out here is anchored to it - a single instance rather than one per
-  // section, keeping the Edit/Delete affordance the pills used to provide.
-  const [menu, setMenu] = useState<{ section: Section; x: number; y: number } | null>(null);
-
-  const handleSectionMenu = useCallback((section: Section, x: number, y: number) => {
-    setMenu({ section, x, y });
-  }, []);
-
-  const { containerRef, zoomIndex, setZoomIndex, isFollowing, follow } = useWaveformTimeline({
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const { loop } = usePlayerState(controller);
+  const { containerRef, zoomIndex, setZoomIndex } = useWaveformTimeline({
     controller,
     duration: videoLength,
     sections: savedSections,
-    onJumpToSection,
-    onSectionMenu: handleSectionMenu,
+    highlightedSectionId: highlightedId,
   });
 
-  const closeMenu = useCallback(() => setMenu(null), []);
+  const hasLoops = drawableSections(savedSections).length > 0;
 
   return (
     <Box py={4} px={8} bg="bg.panel">
-      <Flex justify="flex-end" align="center" gap={1} mb={1}>
-        {!isFollowing && (
-          <Button
-            size="xs"
-            variant="ghost"
-            leftIcon={<Icon as={Crosshair} boxSize="14px" />}
-            onClick={follow}
-            mr={2}
-          >
-            Follow playhead
-          </Button>
-        )}
-        <IconButton
-          size="xs"
-          variant="ghost"
-          aria-label="Zoom out"
-          icon={<Icon as={MagnifyingGlassMinus} boxSize="16px" />}
-          isDisabled={zoomIndex === 0}
-          onClick={() => setZoomIndex((index) => Math.max(0, index - 1))}
-        />
-        <Text fontSize="xs" color="fg.muted" minW="26px" textAlign="center">
-          {ZOOM_LEVELS[zoomIndex]}x
-        </Text>
-        <IconButton
-          size="xs"
-          variant="ghost"
-          aria-label="Zoom in"
-          icon={<Icon as={MagnifyingGlassPlus} boxSize="16px" />}
-          isDisabled={zoomIndex === ZOOM_LEVELS.length - 1}
-          onClick={() => setZoomIndex((index) => Math.min(ZOOM_LEVELS.length - 1, index + 1))}
-        />
-      </Flex>
-      <Box ref={containerRef} />
-
-      <Menu isOpen={!!menu} onClose={closeMenu} placement="bottom-start" gutter={4}>
-        <MenuButton
-          as={Box}
-          position="fixed"
-          left={`${menu?.x ?? 0}px`}
-          top={`${menu?.y ?? 0}px`}
-          w="1px"
-          h="1px"
-          opacity={0}
-          pointerEvents="none"
-          aria-hidden
-        />
-        <Portal>
-          {/* wavesurfer's regions are stacked above Chakra's default menu z-index, which hid the top of the menu. */}
-          <MenuList minW="0" w="120px" py="1" boxShadow="md" borderColor="transparent" rootProps={{ zIndex: 'dropdown' }}>
-            <MenuItem
-              fontSize="14px"
-              fontWeight="medium"
-              onClick={() => {
-                if (menu) onEditSection(menu.section);
-                closeMenu();
-              }}
-            >
-              Edit
-            </MenuItem>
-            <MenuItem
-              fontSize="14px"
-              fontWeight="medium"
-              color="red.700"
-              _hover={{ bg: 'red.50', color: 'red.800' }}
-              onClick={() => {
-                if (menu) onDeleteSection(menu.section.id);
-                closeMenu();
-              }}
-            >
-              Delete
-            </MenuItem>
-          </MenuList>
-        </Portal>
-      </Menu>
+      {hasLoops && (
+        <Flex align="flex-start" gap={4} mb={2}>
+          <LoopPills
+            sections={savedSections}
+            activeSectionId={activeLoopId(savedSections, loop)}
+            onJumpToSection={onJumpToSection}
+            onEditSection={onEditSection}
+            onDeleteSection={onDeleteSection}
+            onHighlight={setHighlightedId}
+          />
+        </Flex>
+      )}
+      <Box position="relative">
+        <Box ref={containerRef} />
+        {/* Over the track's top-right corner, above wavesurfer's layers. */}
+        <Flex position="absolute" top="1" right="1" gap="1" zIndex="docked">
+          <IconButton
+            {...zoomButtonStyle}
+            aria-label="Zoom out"
+            icon={<Icon as={MagnifyingGlassMinus} boxSize="14px" />}
+            isDisabled={zoomIndex === 0}
+            onClick={() => setZoomIndex((index) => Math.max(0, index - 1))}
+          />
+          <IconButton
+            {...zoomButtonStyle}
+            aria-label="Zoom in"
+            icon={<Icon as={MagnifyingGlassPlus} boxSize="14px" />}
+            isDisabled={zoomIndex === ZOOM_LEVELS.length - 1}
+            onClick={() => setZoomIndex((index) => Math.min(ZOOM_LEVELS.length - 1, index + 1))}
+          />
+        </Flex>
+      </Box>
     </Box>
   );
 };

@@ -25,16 +25,21 @@ export function drawableSections(sections: Section[]): Section[] {
 }
 
 /**
- * Which row each section's label chip sits on. Neighbours alternate rows so
- * they don't cover each other, which means ordering by time: sections arrive
- * in creation order, and two loops adjacent on the track could otherwise land
- * on the same row.
+ * Saved loops in the order they're listed: by start, then end, then id so
+ * ties stay put. Unusable entries are left out.
  */
-export function chipRows(sections: Section[], rowCount: number): Map<string, number> {
-  return new Map(
-    [...sections]
-      .sort((a, b) => a.start_time - b.start_time)
-      .map((section, order) => [section.id, order % rowCount]),
+export function orderedLoops(sections: Section[]): Section[] {
+  return drawableSections(sections).sort(
+    (a, b) => a.start_time - b.start_time || a.end_time - b.end_time || a.id.localeCompare(b.id),
+  );
+}
+
+/** The saved loop that matches the current loop exactly, if any. */
+export function activeLoopId(sections: Section[], loop: { start: number; end: number }, epsilon = 0.01): string | null {
+  return (
+    sections.find(
+      (section) => Math.abs(section.start_time - loop.start) < epsilon && Math.abs(section.end_time - loop.end) < epsilon,
+    )?.id ?? null
   );
 }
 
@@ -65,3 +70,4 @@ export function followScrollLeft({
 /** A wheel or trackpad gesture that scrolls the track sideways. */
 export const isHorizontalWheel = (event: { deltaX: number; deltaY: number; shiftKey: boolean }) =>
   Math.abs(event.deltaX) > Math.abs(event.deltaY) || (event.shiftKey && event.deltaY !== 0);
+

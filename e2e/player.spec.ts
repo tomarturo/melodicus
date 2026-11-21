@@ -76,7 +76,7 @@ const mouseDrag = async (page: Page, from: { x: number; y: number }, to: { x: nu
 
 const zoomTo8x = async (page: Page) => {
   for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Zoom in' }).click();
-  await expect(page.getByText('8x')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Zoom in' })).toBeDisabled();
 };
 
 const playheadInView = async (page: Page) => {
@@ -97,7 +97,31 @@ test('playback jumps back to the loop start at the loop end', async ({ page }) =
   expect(time).toBeLessThan(11.6);
 });
 
-test('dragging the ruler scrolls without moving the loop, and stops following until asked', async ({ page }) => {
+test('dragging the ruler scrolls and stops following; tapping the loop pill brings the playhead back', async ({ page }) => {
+  await openVideo(page, [{ id: 'r1', name: 'Riff', start_time: 150, end_time: 200 }]);
+  await zoomTo8x(page);
+  await page.getByText('Riff', { exact: true }).click();
+  await page.getByRole('button', { name: 'Play or Pause' }).click();
+  await fakeYt(page, (fake) => fake.player.setPlaybackRate(4));
+
+  const ruler = await visibleBox(page, '[part="timeline-wrapper"]');
+  const y = ruler.y + ruler.height / 2;
+  const before = await timelineScroll(page);
+  // Drag the view back towards the start, away from the loop.
+  await mouseDrag(page, { x: ruler.x + ruler.width * 0.2, y }, { x: ruler.x + ruler.width * 0.8, y });
+  const afterDrag = await timelineScroll(page);
+  expect(afterDrag.left).toBeLessThan(before.left - ruler.width * 0.4);
+
+  // Playback keeps going, but the view stays where it was put.
+  await page.waitForTimeout(1500);
+  expect((await timelineScroll(page)).left).toBe(afterDrag.left);
+  expect(await playheadInView(page)).toBe(false);
+
+  await page.getByText('Riff', { exact: true }).click();
+  await expect.poll(() => playheadInView(page)).toBe(true);
+});
+
+test('dragging the ruler scrolls the zoomed track', async ({ page }) => {
   await openVideo(page);
   await zoomTo8x(page);
   await page.getByRole('button', { name: 'Play or Pause' }).click();
@@ -108,29 +132,21 @@ test('dragging the ruler scrolls without moving the loop, and stops following un
   const before = await timelineScroll(page);
   await mouseDrag(page, { x: ruler.x + ruler.width * 0.8, y }, { x: ruler.x + ruler.width * 0.2, y });
 
-  await expect(page.getByRole('button', { name: 'Follow playhead' })).toBeVisible();
-  const afterDrag = await timelineScroll(page);
-  expect(afterDrag.left).toBeGreaterThan(before.left + ruler.width * 0.4);
-
-  // Playback keeps going, but the view stays where it was put.
-  await page.waitForTimeout(1500);
-  expect((await timelineScroll(page)).left).toBe(afterDrag.left);
-
-  await page.getByRole('button', { name: 'Follow playhead' }).click();
-  await expect(page.getByRole('button', { name: 'Follow playhead' })).toHaveCount(0);
-  await expect.poll(() => playheadInView(page)).toBe(true);
+  expect((await timelineScroll(page)).left).toBeGreaterThan(before.left + ruler.width * 0.4);
 });
 
-test('a sideways wheel scroll stops following, and Play resumes it', async ({ page }) => {
+test('a sideways wheel scroll stops following, and Play brings the playhead back', async ({ page }) => {
   await openVideo(page);
   await zoomTo8x(page);
   const track = await visibleBox(page, '[part~="canvases"]');
   await page.mouse.move(track.x + track.width / 2, track.y + track.height / 2);
-  await page.mouse.wheel(400, 0);
-  await expect(page.getByRole('button', { name: 'Follow playhead' })).toBeVisible();
+  await page.mouse.wheel(2000, 0);
+  await expect.poll(() => playheadInView(page)).toBe(false);
+  await page.waitForTimeout(500);
+  expect(await playheadInView(page)).toBe(false);
 
   await page.getByRole('button', { name: 'Play or Pause' }).click();
-  await expect(page.getByRole('button', { name: 'Follow playhead' })).toHaveCount(0);
+  await expect.poll(() => playheadInView(page)).toBe(true);
 });
 
 test.describe('on a touch screen', () => {
@@ -167,7 +183,6 @@ test.describe('on a touch screen', () => {
     await touchDrag(page, { x: ruler.x + ruler.width * 0.8, y }, { x: ruler.x + ruler.width * 0.2, y });
 
     expect((await timelineScroll(page)).left).toBeGreaterThan(before.left + ruler.width * 0.4);
-    await expect(page.getByRole('button', { name: 'Follow playhead' })).toBeVisible();
     // Scrolling isn't a loop edit.
     expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toBe('');
   });

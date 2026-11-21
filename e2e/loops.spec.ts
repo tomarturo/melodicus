@@ -48,3 +48,53 @@ test('tapping Save twice while a slow save is in flight saves the loop once', as
   expect(db.tables.saved_sections).toHaveLength(1);
   expect(db.tables.saved_songs).toHaveLength(1);
 });
+
+test('loop name pills sit above the track, leaving all of it free for dragging', async ({ page }) => {
+  await mockYouTube(page);
+  await mockSupabase(page);
+  await page.addInitScript(
+    (videoId) =>
+      localStorage.setItem(
+        `melodicus:v1:sections:${videoId}`,
+        JSON.stringify([
+          { id: 'a', name: 'Intro', start_time: 0, end_time: 12 },
+          { id: 'b', name: 'Verse', start_time: 14, end_time: 40 },
+        ]),
+      ),
+    VIDEO_ID,
+  );
+  await page.goto(`/video/${VIDEO_ID}`);
+
+  const track = await page.locator('[part~="canvases"]').boundingBox();
+  for (const name of ['Intro', 'Verse']) {
+    const pill = await page.getByRole('button', { name: `Options for ${name}` }).boundingBox();
+    expect(pill, name).not.toBeNull();
+    expect(track).not.toBeNull();
+    expect(pill!.y + pill!.height, `${name} pill bottom`).toBeLessThanOrEqual(track!.y);
+  }
+});
+
+test('saved loops are listed in start-time order, and the playing one is marked', async ({ page }) => {
+  await mockYouTube(page, { player: true });
+  await mockSupabase(page);
+  await page.addInitScript(
+    (videoId) =>
+      localStorage.setItem(
+        `melodicus:v1:sections:${videoId}`,
+        JSON.stringify([
+          { id: 'c', name: 'Outro', start_time: 190, end_time: 209 },
+          { id: 'a', name: 'Intro', start_time: 0, end_time: 12 },
+          { id: 'b', name: 'Solo', start_time: 30, end_time: 45 },
+        ]),
+      ),
+    VIDEO_ID,
+  );
+  await page.goto(`/video/${VIDEO_ID}`);
+
+  const pills = page.getByRole('list', { name: 'Saved loops' }).getByRole('listitem');
+  await expect(pills).toHaveText(['Intro', 'Solo', 'Outro']);
+
+  await page.getByText('Solo', { exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Solo', exact: true })).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[aria-current="true"]')).toHaveCount(1);
+});

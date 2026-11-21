@@ -11,8 +11,15 @@ const config: ThemeConfig = {
  * cover the light content areas; chrome tokens cover the dark frame around
  * them (page background, sidebar).
  */
+// The app's black: the near-black of the page frame and sidebar. Used for
+// strong fills and text in place of pure black.
+const INK = '#161719';
+
 const semanticTokens = {
   colors: {
+    ink: { default: INK },
+    'ink.hover': { default: '#2B2C30' },
+    'ink.active': { default: '#3A3B40' },
     // Surfaces
     'bg.panel': { default: '#FAF9F6' },
     'bg.surface': { default: 'white' },
@@ -22,14 +29,14 @@ const semanticTokens = {
     // Dark fills for emphasis: primary buttons, icon buttons on hover.
     'bg.inverse': { default: 'blackAlpha.800' },
     'bg.inverseHover': { default: 'blackAlpha.900' },
-    'bg.inverseStrong': { default: 'black' },
+    'bg.inverseStrong': { default: 'ink' },
 
     // Text and icons
     'fg.default': { default: 'blackAlpha.800' },
     'fg.strong': { default: 'blackAlpha.900' },
     'fg.muted': { default: 'blackAlpha.700' },
     'fg.placeholder': { default: 'blackAlpha.600' },
-    'fg.max': { default: 'black' },
+    'fg.max': { default: 'ink' },
     // On the dark inverse fills.
     'fg.inverse': { default: 'white' },
     'fg.onInverse': { default: 'whiteAlpha.900' },
@@ -41,10 +48,10 @@ const semanticTokens = {
     'border.strongHover': { default: 'blackAlpha.400' },
     'border.emphasis': { default: 'blackAlpha.700' },
     'border.focus': { default: 'blackAlpha.900' },
-    'border.inverse': { default: 'black' },
+    'border.inverse': { default: 'ink' },
 
     // The dark frame around the panels: page background and sidebar.
-    'chrome.bg': { default: '#161719' },
+    'chrome.bg': { default: INK },
     'chrome.raised': { default: '#1F2023' },
     'chrome.fg': { default: 'whiteAlpha.900' },
     'chrome.fgMuted': { default: 'whiteAlpha.600' },
