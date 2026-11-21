@@ -15,11 +15,11 @@ import {
   Text,
   VStack,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react';
 import { ShareFat } from '@phosphor-icons/react';
 import type { Section } from '../sections/types';
 import { buildShareUrl } from './shareFormat';
+import { useNotify } from '../../lib/notify';
 
 interface ShareButtonProps {
   videoId: string;
@@ -35,15 +35,15 @@ export const shareLinkFor = (origin: string, videoId: string, sections: Section[
  * brings them along; without, it shares the song on its own.
  */
 const ShareButton = ({ videoId, savedSections }: ShareButtonProps) => {
-  const toast = useToast();
+  const notify = useNotify();
   const dialog = useDisclosure();
   const link = useMemo(() => shareLinkFor(window.location.origin, videoId, savedSections), [videoId, savedSections]);
   const count = savedSections.length;
 
   const copy = () =>
     navigator.clipboard.writeText(link).then(
-      () => toast({ title: 'Link copied', status: 'success', duration: 3000 }),
-      () => toast({ title: 'Could not copy the link', description: 'Select it and copy it instead.', status: 'error', duration: 4000 }),
+      () => notify({ tone: 'success', title: 'Link copied' }),
+      () => notify({ tone: 'error', title: 'Couldn’t copy the link', description: 'Select it and copy it instead.' }),
     );
 
   return (

@@ -17,11 +17,11 @@ import {
   Stack,
   Text,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react';
 import { DotsThree, Trash } from '@phosphor-icons/react';
 import { useAuth } from './contexts/AuthContext';
-import { errorMessage } from './lib/errors';
+import { errorCause, errorMessage } from './lib/errors';
+import { useNotify } from './lib/notify';
 import { useDeleteSavedSong, useSavedSongsQuery } from './features/sections/queries';
 import type { SavedSongWithLoops } from './features/sections/types';
 import AuthModal from './AuthModal';
@@ -178,7 +178,7 @@ const SongRow = ({ song, onRemove }: { song: SavedSongWithLoops; onRemove: () =>
 
 const SavedSongs = () => {
   const { user } = useAuth();
-  const toast = useToast();
+  const notify = useNotify();
   const authDialog = useDisclosure();
   const songsQuery = useSavedSongsQuery();
   const deleteSong = useDeleteSavedSong();
@@ -192,7 +192,12 @@ const SavedSongs = () => {
     deleteSong.mutate(videoId, {
       onSettled: () => setPending((ids) => ids.filter((id) => id !== videoId)),
       onError: (error) =>
-        toast({ title: 'Could not remove the song', description: errorMessage(error), status: 'error', duration: 5000 }),
+        notify({
+          tone: 'error',
+          title: 'Couldn’t remove the song',
+          description: errorCause(error),
+          action: { label: 'Try again', onClick: () => commitRef.current(videoId) },
+        }),
     });
   };
 
@@ -213,29 +218,17 @@ const SavedSongs = () => {
       song.videoId,
       setTimeout(() => commitRef.current(song.videoId), UNDO_MS),
     );
-    toast({
+    notify({
+      title: `Removed “${song.title || 'Untitled video'}”`,
       duration: UNDO_MS,
-      render: ({ onClose }) => (
-        <Flex align="center" gap={4} bg="ink" color="white" px={4} py={3} borderRadius="lg" boxShadow="lg">
-          <Text fontSize="sm" flex="1" noOfLines={1}>
-            Removed “{song.title || 'Untitled video'}”
-          </Text>
-          <Button
-            size="sm"
-            variant="link"
-            color="white"
-            fontWeight="semibold"
-            onClick={() => {
-              clearTimeout(timers.current.get(song.videoId));
-              timers.current.delete(song.videoId);
-              setPending((ids) => ids.filter((id) => id !== song.videoId));
-              onClose();
-            }}
-          >
-            Undo
-          </Button>
-        </Flex>
-      ),
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          clearTimeout(timers.current.get(song.videoId));
+          timers.current.delete(song.videoId);
+          setPending((ids) => ids.filter((id) => id !== song.videoId));
+        },
+      },
     });
   };
 

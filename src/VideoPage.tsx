@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Flex, useToast } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 import { roundSeconds } from './utils/formatTime';
-import { errorMessage } from './lib/errors';
+import { errorCause } from './lib/errors';
+import { useNotify } from './lib/notify';
 import { isSaveableLoop } from './features/player/loopLogic';
 import { usePlayerController, usePlayerState, useVideoDetails } from './features/player/usePlayer';
 import WaveformTimeline from './features/player/timeline/WaveformTimeline';
@@ -31,7 +32,7 @@ const VideoPage = () => {
 type NameDialog = { mode: 'create' } | { mode: 'edit'; section: Section } | null;
 
 const VideoPageContent = ({ videoId }: { videoId: string }) => {
-  const toast = useToast();
+  const notify = useNotify();
   const { repo } = useSectionsRepository();
 
   const { controller, hostRef } = usePlayerController(videoId);
@@ -50,28 +51,24 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   const isSavingRef = useRef(false);
   const incomingShare = useIncomingShare();
 
-  const showError = (title: string, error: unknown) =>
-    toast({ title, description: errorMessage(error), status: 'error', duration: 5000 });
+  const showError = (title: string, error: unknown, retry?: () => void) =>
+    notify({
+      tone: 'error',
+      title,
+      description: errorCause(error),
+      action: retry ? { label: 'Try again', onClick: retry } : undefined,
+    });
 
+  const { error: loadError, refetch: refetchSections } = sectionsQuery;
   useEffect(() => {
-    if (sectionsQuery.error) {
-      toast({
-        title: 'Could not load your loops',
-        description: errorMessage(sectionsQuery.error),
-        status: 'error',
-        duration: 5000,
-      });
-    }
-  }, [sectionsQuery.error, toast]);
+    if (loadError) showError('Couldn’t load your loops', loadError, () => void refetchSections());
+    // Once per failure, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadError]);
 
   const handleNewLoop = () => {
     if (!isSaveableLoop(loop)) {
-      toast({
-        title: 'Invalid loop',
-        description: 'Please select a valid loop to save',
-        status: 'warning',
-        duration: 3000,
-      });
+      notify({ tone: 'warning', title: 'Drag on the track to pick a loop first' });
       return;
     }
     setNameDraft('');
@@ -83,8 +80,27 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
     setNameDialog({ mode: 'edit', section });
   };
 
+  // Deletes straight away; Undo saves the loop again with the same name and times.
   const handleDeleteSection = (sectionId: string) => {
-    remove.mutate(sectionId, { onError: (error) => showError('Could not delete the loop', error) });
+    const section = savedSections.find((candidate) => candidate.id === sectionId);
+    remove.mutate(sectionId, {
+      onSuccess: () => {
+        if (!section) return;
+        notify({
+          title: `Deleted “${section.name || 'Unnamed'}”`,
+          duration: 5000,
+          action: { label: 'Undo', onClick: () => restoreSection(section) },
+        });
+      },
+      onError: (error) => showError('Couldn’t delete the loop', error, () => handleDeleteSection(sectionId)),
+    });
+  };
+
+  const restoreSection = (section: Section) => {
+    create.mutate(
+      { video, loop: { name: section.name, start_time: section.start_time, end_time: section.end_time } },
+      { onError: (error) => showError('Couldn’t bring the loop back', error, () => restoreSection(section)) },
+    );
   };
 
   const closeNameDialog = () => {
@@ -108,10 +124,12 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         // Dragging this loop's edges from now on offers to update it.
         controller.setLoopOrigin(created.id);
       }
-      toast({ title: nameDialog.mode === 'edit' ? 'Loop renamed' : 'Loop saved!', status: 'success', duration: 3000 });
+      // A new loop shows up as its pill; a rename only changes a label, so say so.
+      if (nameDialog.mode === 'edit') notify({ tone: 'success', title: 'Loop renamed' });
       closeNameDialog();
     } catch (error) {
-      showError('Error', error);
+      // The dialog stays open, so its button is the way to try again.
+      showError(nameDialog.mode === 'edit' ? 'Couldn’t rename the loop' : 'Couldn’t save the loop', error);
     } finally {
       isSavingRef.current = false;
     }
@@ -125,9 +143,9 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         sectionId: section.id,
         times: { start_time: roundSeconds(loop.start), end_time: roundSeconds(loop.end) },
       });
-      toast({ title: `“${section.name || 'Unnamed'}” updated`, status: 'success', duration: 3000 });
+      notify({ tone: 'success', title: `“${section.name || 'Unnamed'}” updated` });
     } catch (error) {
-      showError('Could not update the loop', error);
+      showError('Couldn’t update the loop', error, () => void handleUpdateLoop(section));
     } finally {
       isSavingRef.current = false;
     }
@@ -137,14 +155,14 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
     if (!incomingShare.loops) return;
     try {
       const added = await importLoops.mutateAsync({ video, loops: incomingShare.loops });
-      toast({
+      notify({
+        tone: 'success',
         title: added === 0 ? 'You already have these loops' : added === 1 ? '1 loop added' : `${added} loops added`,
-        status: 'success',
-        duration: 3000,
       });
       incomingShare.dismiss();
     } catch (error) {
-      showError('Could not import the loops', error);
+      // The import dialog stays open, so its button is the way to try again.
+      showError('Couldn’t import the loops', error);
     }
   };
 

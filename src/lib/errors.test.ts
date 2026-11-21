@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { errorMessage } from './errors';
+import { errorCause, errorMessage } from './errors';
 
 describe('errorMessage', () => {
   it('reads Error instances', () => {
@@ -12,5 +12,12 @@ describe('errorMessage', () => {
 
   it('stringifies anything else', () => {
     expect(errorMessage('offline')).toBe('offline');
+  });
+});
+
+describe('errorCause', () => {
+  it('drops a leading "Could not …:" so it doesn’t repeat the toast title', () => {
+    expect(errorCause(new Error('Could not delete the loop: database is down'))).toBe('Database is down');
+    expect(errorCause(new Error('network unreachable'))).toBe('Network unreachable');
   });
 });
