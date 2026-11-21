@@ -28,7 +28,7 @@ const SECTION_ID_PREFIX = 'section-';
 
 // Saved loops are named in a list of pills above the timeline (LoopPills),
 // not on the track, so the band stays free for dragging out a loop.
-const TRACK_HEIGHT = 48;
+const TRACK_HEIGHT = 68;
 const RULER_HEIGHT = 20;
 const TRACK_RADIUS = 8;
 
