@@ -18,7 +18,7 @@ interface LoopSelectionBarProps {
   onReset: (section: Section) => void;
 }
 
-const textButton = { variant: 'ghost', size: 'sm', rounded: 'full' } as const;
+const quiet = { variant: 'quiet', size: 'sm' } as const;
 
 /**
  * The row under the track: what can be done with the selection, centered
@@ -35,10 +35,11 @@ const LoopSelectionBar = ({ status, isBusy, onSaveNew, onUpdate, onCancel, onRes
 
     {status.kind === 'new' && (
       <>
-        <Button variant="pill" size="sm" leftIcon={<Icon as={PlusCircle} boxSize="18px" />} isLoading={isBusy} onClick={onSaveNew}>
+        {/* Loud: it answers the drag the person just made. */}
+        <Button variant="loud" size="sm" leftIcon={<Icon as={PlusCircle} boxSize="18px" />} isLoading={isBusy} onClick={onSaveNew}>
           Save loop
         </Button>
-        <Button {...textButton} isDisabled={isBusy} onClick={onCancel}>
+        <Button {...quiet} isDisabled={isBusy} onClick={onCancel}>
           Cancel
         </Button>
       </>
@@ -62,10 +63,10 @@ const LoopSelectionBar = ({ status, isBusy, onSaveNew, onUpdate, onCancel, onRes
             Update
           </Box>
         </Button>
-        <Button {...textButton} isDisabled={isBusy} onClick={onSaveNew} aria-label="Save as new loop">
+        <Button {...quiet} isDisabled={isBusy} onClick={onSaveNew} aria-label="Save as new loop">
           Save as new
         </Button>
-        <Button {...textButton} isDisabled={isBusy} onClick={() => onReset(status.section)}>
+        <Button {...quiet} isDisabled={isBusy} onClick={() => onReset(status.section)}>
           Cancel
         </Button>
       </>

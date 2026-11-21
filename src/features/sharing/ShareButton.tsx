@@ -87,7 +87,7 @@ const ShareButton = ({ videoId, savedSections }: ShareButtonProps) => {
           </ModalBody>
           <ModalFooter>
             <HStack spacing={3}>
-              <Button rounded="full" variant="ghost" onClick={() => window.open(link, '_blank')}>
+              <Button variant="quiet" onClick={() => window.open(link, '_blank')}>
                 Open in new tab
               </Button>
               <Button variant="pill" onClick={copy}>

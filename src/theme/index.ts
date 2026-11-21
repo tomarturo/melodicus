@@ -61,13 +61,31 @@ const semanticTokens = {
   },
 };
 
+/*
+ * Three button styles, all rounded. Each works at any Chakra size: sm in the
+ * row under the timeline, md in dialogs.
+ *   loud:  black fill. The action answering what the person just did (Save loop).
+ *   pill:  soft fill. Standing controls and dialog actions.
+ *   quiet: hairline outline. Secondary choices beside a louder one (Cancel).
+ * Hover thickens the outline with a 1px shadow rather than a wider border, so
+ * nothing shifts.
+ */
 const components = {
   Button: {
     variants: {
-      /**
-       * The app's rounded, softly filled button: playback controls, Add loop,
-       * Save and the playback-rate steppers.
-       */
+      loud: {
+        rounded: 'full',
+        bg: 'ink',
+        border: '1px',
+        borderColor: 'ink',
+        color: 'fg.inverse',
+        _hover: {
+          bg: 'ink.hover',
+          borderColor: 'ink.hover',
+          _disabled: { bg: 'ink', borderColor: 'ink' },
+        },
+        _active: { bg: 'ink.active', borderColor: 'ink.active' },
+      },
       pill: {
         rounded: 'full',
         bg: 'bg.muted',
@@ -82,6 +100,22 @@ const components = {
           color: 'fg.strong',
           _disabled: { bg: 'bg.muted', boxShadow: 'none', borderColor: 'border.default', color: 'fg.default' },
         },
+      },
+      quiet: {
+        rounded: 'full',
+        bg: 'transparent',
+        border: '1px',
+        borderColor: 'border.strong',
+        color: 'fg.default',
+        _hover: {
+          boxShadow: '0 0 0 1px',
+          boxShadowColor: 'border.strongHover',
+          bg: 'bg.mutedHover',
+          borderColor: 'border.strongHover',
+          color: 'fg.strong',
+          _disabled: { bg: 'transparent', boxShadow: 'none', borderColor: 'border.strong', color: 'fg.default' },
+        },
+        _active: { bg: 'bg.muted' },
       },
     },
   },
