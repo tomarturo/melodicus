@@ -48,8 +48,7 @@ const LoopPills = ({
             color={active ? 'bg.panel' : 'purple.800'}
             borderWidth="1px"
             borderColor={active ? 'purple.700' : 'purple.200'}
-            fontSize="13px"
-            fontWeight="500"
+            fontSize="xs"
             whiteSpace="nowrap"
             onMouseEnter={() => onHighlight(section.id)}
             onMouseLeave={() => onHighlight(null)}
@@ -62,6 +61,8 @@ const LoopPills = ({
               align="center"
               h="100%"
               pl="3"
+              // Set on the button itself: buttons don't inherit font weight.
+              fontWeight="medium"
               pr="1"
               onClick={() => onJumpToSection(section.start_time, section.end_time)}
             >
