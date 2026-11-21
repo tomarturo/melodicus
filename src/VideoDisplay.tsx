@@ -1,4 +1,4 @@
-import { Box, AbsoluteCenter } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 
 const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => {
   return (
@@ -7,6 +7,9 @@ const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => 
       // Takes whatever height the timeline and controls leave, down to a minimum.
       flex='1 1 0'
       minH='180px'
+      // Lets the album art size itself from this box's width and height.
+      sx={{ containerType: 'size' }}
+      data-testid="video-display"
       backgroundImage={videoThumbnail ?? undefined}
       backgroundSize="11px 11px"
       backgroundRepeat="repeat"
@@ -21,15 +24,22 @@ const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => 
         backdropSaturate: '1.7',
       }}
     >
-      <AbsoluteCenter
-        h={[240, 280, 280, 320, 320, 400, 700 ]}
-        w={[240, 280, 280, 320, 320, 400, 700 ]}
-        borderRadius='xl'
+      {/* The album art: a square sized from this box's own dimensions (cq
+          units), so it always fits whatever height the video area gets. */}
+      <Box
+        position="absolute"
+        top="50%"
+        left="50%"
+        transform="translate(-50%, -50%)"
+        w="min(80cqh, 80cqw, 700px)"
+        sx={{ aspectRatio: '1' }}
+        borderRadius="xl"
         backgroundImage={videoThumbnail ?? undefined}
         backgroundPosition="center"
-        backgroundSize='cover'
-        backgroundRepeat='no-repeat'
-        boxShadow='xl'
+        backgroundSize="cover"
+        backgroundRepeat="no-repeat"
+        boxShadow="xl"
+        data-testid="album-art"
       />
     </Box>
   );
