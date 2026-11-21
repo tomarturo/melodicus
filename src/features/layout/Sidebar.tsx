@@ -249,9 +249,9 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
         target="_blank"
         rel="noopener noreferrer"
         expanded={expanded}
-        label="2025 Tom Kurzeka"
+        label="2026 Tom Kurzeka"
         // The © is the icon, so the name spells it out.
-        aria-label="© 2025 Tom Kurzeka"
+        aria-label="© 2026 Tom Kurzeka"
         icon={<Icon as={Copyright} boxSize="22px" />}
         trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
       />
