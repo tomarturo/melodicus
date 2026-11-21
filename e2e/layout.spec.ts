@@ -46,7 +46,7 @@ for (const [name, path, lastItem] of [
   ['search results', '/search/test', 'Result 20'],
   ['saved songs', '/saved-songs', 'Saved song 15'],
 ] as const) {
-  test(`${name}: the content scrolls inside the panel, keeping its corners and the footer in view`, async ({ page }) => {
+  test(`${name}: the content scrolls inside the panel, keeping its corners in view`, async ({ page }) => {
     await page.goto(path);
     await expect(page.getByText(lastItem)).toBeAttached();
 
@@ -62,17 +62,15 @@ for (const [name, path, lastItem] of [
     expect(after.scrollTop).toBeGreaterThan(0);
     expect(after.top).toBe(before.top);
     expect(after.bottom).toBeLessThanOrEqual(after.viewportHeight);
-    await expect(page.getByRole('link', { name: 'Melodicus on GitHub' }).or(page.getByText('© 2025'))).toBeInViewport();
   });
 }
 
-test('home: the panel and footer fit the screen', async ({ page }) => {
+test('home: the panel fits the screen', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /learn the songs/i })).toBeVisible();
   const metrics = await panelMetrics(page);
   expect(metrics.windowScrollable).toBe(false);
   expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
-  await expect(page.getByText('© 2025')).toBeInViewport();
 });
 
 test.describe('video page', () => {
@@ -99,7 +97,7 @@ test.describe('video page', () => {
       await expect(page.locator('[part~="canvases"]')).toBeVisible();
 
       expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBe(0);
-      await expect(page.getByText('© 2025')).toBeInViewport();
+      await expect(page.getByRole('button', { name: 'Play or Pause' })).toBeInViewport();
 
       const display = await page.getByTestId('video-display').boundingBox();
       const art = await page.getByTestId('album-art').boundingBox();
@@ -111,4 +109,26 @@ test.describe('video page', () => {
       expect(Math.abs(art!.width - art!.height)).toBeLessThan(1);
     });
   }
+});
+
+test('the copyright and GitHub link sit in the sidebar, not under the page', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  const github = page.getByRole('link', { name: 'GitHub' });
+  await expect(github).toHaveAttribute('href', 'https://github.com/tomarturo/melodicus');
+  // The rail shows the icon; the copyright line appears once it's expanded.
+  await expect(page.getByText('© 2025')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Expand sidebar' }).click();
+  await expect(page.getByText('© 2025')).toBeVisible();
+  // The panel runs to the bottom margin of the window.
+  const metrics = await panelMetrics(page);
+  expect(metrics.viewportHeight - metrics.bottom).toBeLessThanOrEqual(16);
+});
+
+test('on a phone, the drawer holds the copyright and GitHub link', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await expect(page.getByRole('dialog').getByRole('link', { name: 'GitHub' })).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('© 2025')).toBeVisible();
 });

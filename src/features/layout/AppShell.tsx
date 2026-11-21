@@ -14,7 +14,6 @@ import {
   useMediaQuery,
 } from '@chakra-ui/react';
 import { CaretLeft, CaretRight, List } from '@phosphor-icons/react';
-import Footer from '../../Footer';
 import { EXPANDED_WIDTH, RAIL_WIDTH, Sidebar } from './Sidebar';
 
 // 'hover': open while the mouse is over it. 'pinned': opened with the toggle,
@@ -147,14 +146,15 @@ function PhoneBar() {
 }
 
 // Pages whose content panel is the scroll area: the frame fits the screen,
-// so the panel's rounded corners and the footer always stay in view.
+// so the panel's rounded corners always stay in view.
 const SCROLLS_IN_PANEL = [/^\/$/, /^\/search\//, /^\/saved-songs$/, /^\/video\//];
 
 export const scrollsInPanel = (pathname: string) => SCROLLS_IN_PANEL.some((pattern) => pattern.test(pathname));
 
 /**
  * The frame every page sits in: the sidebar (a rail from tablet width up, a
- * drawer on phones), the page itself, and the footer.
+ * drawer on phones) and the page. The copyright and GitHub link live in the
+ * sidebar, so the page gets the full height.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const isPhone = useBreakpointValue({ base: true, md: false }, { ssr: false });
@@ -174,12 +174,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         : { minH: '100dvh', sx: { '@supports not (height: 100dvh)': { minHeight: '100vh' } } })}
     >
       {isPhone ? <PhoneBar /> : <Rail />}
-      <Flex direction="column" flex="1" minH="0" pt={isPhone ? 0 : 4} px={['0', '0', 6]}>
+      <Flex direction="column" flex="1" minH="0" py={isPhone ? 0 : 4} px={['0', '0', 6]}>
         <Box maxW="1400px" w="100%" mx="auto" display="flex" flexDirection="column" flex="1" minH="0">
           {children}
-        </Box>
-        <Box maxW="1400px" w="100%" mx="auto">
-          <Footer />
         </Box>
       </Flex>
     </Flex>
