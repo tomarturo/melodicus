@@ -232,6 +232,8 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
           onClick={authDialog.onOpen}
         />
       )}
+      {/* Separates the account from the project's links below it. */}
+      <Box h="1px" bg="chrome.border" mx="5" my="2" flexShrink={0} aria-hidden />
       <SidebarItem
         as="a"
         href="https://github.com/tomarturo/melodicus"
