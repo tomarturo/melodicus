@@ -123,9 +123,9 @@ test('the copyright and GitHub link sit in the sidebar, not under the page', asy
   await page.mouse.move(700, 300);
   await page.getByRole('navigation', { name: 'Main' }).hover();
   await expect(page.getByText('2025 HeyTK')).toBeVisible();
-  // The panel runs to the bottom margin of the window.
+  // With no footer, the panel runs down to the window's 20px frame.
   const metrics = await panelMetrics(page);
-  expect(metrics.viewportHeight - metrics.bottom).toBeLessThanOrEqual(16);
+  expect(metrics.viewportHeight - metrics.bottom).toBe(20);
 });
 
 test('on a phone, the drawer holds the copyright and GitHub link', async ({ page }) => {
