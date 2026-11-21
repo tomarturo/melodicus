@@ -127,10 +127,10 @@ const components = {
 
 const styles = {
   global: {
-    // Toasts at the bottom sit 16px higher than Chakra's default, so a strip of
-    // the page shows beneath them: the dark ones otherwise run into the dark
-    // frame around the content panel.
-    '[id^="chakra-toast-manager-bottom"]': { marginBottom: '16px !important' },
+    // Toasts at the bottom sit 32px higher than Chakra's default, so a strip of
+    // the content panel shows beneath them: the dark ones otherwise run into
+    // the dark frame around it.
+    '[id^="chakra-toast-manager-bottom"]': { marginBottom: '32px !important' },
   },
 };
 
