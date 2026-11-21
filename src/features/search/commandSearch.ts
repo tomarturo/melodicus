@@ -10,8 +10,9 @@ const normalize = (text: string) => text.toLocaleLowerCase().normalize('NFKD').r
 
 /**
  * What the search dialog offers for the text typed so far: a pasted YouTube
- * link opens that video; otherwise saved songs whose titles match, then a
- * YouTube search. Only that last one uses API quota, and only when chosen.
+ * link opens that video; otherwise a YouTube search first, so typing a title
+ * and pressing Enter searches, then saved songs whose titles match. Only the
+ * YouTube search uses API quota, and only when chosen.
  */
 export function commandActions(input: string, songs: SavedSong[], maxSongs = 6): CommandAction[] {
   const query = input.trim();
@@ -23,9 +24,8 @@ export function commandActions(input: string, songs: SavedSong[], maxSongs = 6):
     const title = normalize(song.title || '');
     return terms.every((term) => title.includes(term));
   });
-  const actions: CommandAction[] = matches.slice(0, maxSongs).map((song) => ({ kind: 'open-song', song }));
-  if (query) actions.push({ kind: 'search-youtube', query });
-  return actions;
+  const songActions: CommandAction[] = matches.slice(0, maxSongs).map((song) => ({ kind: 'open-song', song }));
+  return query ? [{ kind: 'search-youtube', query }, ...songActions] : songActions;
 }
 
 /** Where an action leads. */

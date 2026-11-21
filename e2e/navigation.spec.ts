@@ -88,24 +88,27 @@ test.describe('search dialog', () => {
     }).toPass();
   };
 
-  test('opens from the rail, filters saved songs, and Enter opens the highlighted one', async ({ page }) => {
+  test('opens from the rail, offers a YouTube search first, then matching saved songs', async ({ page }) => {
     await page.goto('/');
     await sidebar(page).getByRole('button', { name: 'Search' }).click();
     await expect(dialog(page)).toBeVisible();
 
     await input(page).fill('wing');
-    await expect(dialog(page).getByRole('option')).toHaveText(['Little Wing', 'Search YouTube for “wing”']);
+    await expect(dialog(page).getByRole('option')).toHaveText(['Search YouTube for “wing”', 'Little Wing']);
+    await expect(dialog(page).getByRole('option', { selected: true })).toHaveText('Search YouTube for “wing”');
+    await input(page).press('ArrowDown');
     await input(page).press('Enter');
     await expect(page).toHaveURL(/\/video\/otherVideo1$/);
     await expect(dialog(page)).toHaveCount(0);
   });
 
-  test('opens with the keyboard shortcut and searches YouTube on request', async ({ page }) => {
+  test('opens with the keyboard shortcut, and Enter on a typed title searches YouTube even when a saved song matches', async ({ page }) => {
     await page.goto(`/video/${VIDEO_ID}`);
     await pressShortcut(page);
-    await input(page).fill('bohemian rhapsody');
+    await input(page).fill('little wing');
+    await expect(dialog(page).getByRole('option', { name: 'Little Wing', exact: true })).toBeVisible();
     await input(page).press('Enter');
-    await expect(page).toHaveURL(/\/search\/bohemian%20rhapsody$/);
+    await expect(page).toHaveURL(/\/search\/little%20wing$/);
   });
 
   test('arrow keys move the highlight', async ({ page }) => {
@@ -113,7 +116,10 @@ test.describe('search dialog', () => {
     await pressShortcut(page);
     await input(page).fill('e');
     await input(page).press('ArrowDown');
+    await input(page).press('ArrowDown');
     await expect(dialog(page).getByRole('option', { selected: true })).toHaveText('Little Wing');
+    await input(page).press('ArrowUp');
+    await expect(dialog(page).getByRole('option', { selected: true })).toHaveText('E2E song');
   });
 
   test('opens a pasted YouTube link directly', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -112,7 +112,7 @@ function CommandSearchDialog({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const hasSongs = actions.some((action) => action.kind === 'open-song');
+  const firstSongIndex = actions.findIndex((action) => action.kind === 'open-song');
   const listId = 'command-search-results';
 
   return (
@@ -145,16 +145,16 @@ function CommandSearchDialog({ onClose }: { onClose: () => void }) {
         </InputGroup>
         {actions.length > 0 && (
           <ModalBody borderTopWidth="1px" borderColor="border.subtle" px="2" py="2">
-            {hasSongs && (
-              <Text fontSize="xs" fontWeight="semibold" color="fg.muted" px="3" pt="1" pb="2">
-                Saved songs
-              </Text>
-            )}
             <Box as="ul" id={listId} role="listbox" listStyleType="none">
               {actions.map((action, index) => (
+                <Fragment key={action.kind === 'open-song' ? action.song.videoId : action.kind}>
+                {index === firstSongIndex && (
+                  <Text as="li" role="presentation" fontSize="xs" fontWeight="semibold" color="fg.muted" px="3" pt={index === 0 ? 1 : 3} pb="2">
+                    Saved songs
+                  </Text>
+                )}
                 <Flex
                   as="li"
-                  key={action.kind === 'open-song' ? action.song.videoId : action.kind}
                   id={`${listId}-${index}`}
                   role="option"
                   aria-selected={index === active}
@@ -171,6 +171,7 @@ function CommandSearchDialog({ onClose }: { onClose: () => void }) {
                 >
                   <ActionRow action={action} />
                 </Flex>
+                </Fragment>
               ))}
             </Box>
           </ModalBody>

@@ -9,12 +9,12 @@ describe('commandActions', () => {
     expect(commandActions('', songs).map((action) => action.kind)).toEqual(['open-song', 'open-song', 'open-song']);
   });
 
-  it('filters saved songs by every word, ignoring case and accents, then offers a YouTube search', () => {
+  it('offers a YouTube search first, then saved songs matching every word, ignoring case and accents', () => {
     expect(commandActions('hendrix wing', songs)).toEqual([
-      { kind: 'open-song', song: songs[0] },
       { kind: 'search-youtube', query: 'hendrix wing' },
+      { kind: 'open-song', song: songs[0] },
     ]);
-    expect(commandActions('cafe', songs)[0]).toEqual({ kind: 'open-song', song: songs[2] });
+    expect(commandActions('cafe', songs)[1]).toEqual({ kind: 'open-song', song: songs[2] });
   });
 
   it('offers only the YouTube search when no saved song matches', () => {
