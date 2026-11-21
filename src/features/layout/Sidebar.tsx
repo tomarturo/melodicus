@@ -87,7 +87,7 @@ function SavedSongsList({ onNavigate }: { onNavigate?: () => void }) {
   let body: ReactNode;
   if (songsQuery.isPending) body = status('Loading…');
   else if (songsQuery.isError) body = status('Couldn’t load your songs.');
-  else if (songs.length === 0) body = status('Songs you save loops for appear here.');
+  else if (songs.length === 0) body = status('Your saved songs appear here.');
   else
     body = (
       <Box as="ul" listStyleType="none">
