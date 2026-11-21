@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chipRows, drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import { chipLeft, chipRows, drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
 
 const section = (id: string, start_time: number, end_time: number) => ({ id, name: null, start_time, end_time });
 
@@ -62,5 +62,19 @@ describe('isHorizontalWheel', () => {
     expect(isHorizontalWheel({ deltaX: 30, deltaY: 2, shiftKey: false })).toBe(true);
     expect(isHorizontalWheel({ deltaX: 0, deltaY: 40, shiftKey: true })).toBe(true);
     expect(isHorizontalWheel({ deltaX: 0, deltaY: 40, shiftKey: false })).toBe(false);
+  });
+});
+
+describe('chipLeft', () => {
+  it('sits at the loop start while that is in view', () => {
+    expect(chipLeft(300, 500, 100)).toBe(300);
+  });
+
+  it('holds at the left edge while the start is scrolled away but the loop is still visible', () => {
+    expect(chipLeft(100, 500, 300)).toBe(300);
+  });
+
+  it('goes with the loop once all of it has scrolled away', () => {
+    expect(chipLeft(100, 250, 300)).toBe(100);
   });
 });

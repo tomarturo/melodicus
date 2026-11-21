@@ -7,7 +7,7 @@ import { formatSecondsToDuration } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
 import { MIN_LOOP } from '../loopLogic';
 import type { PlayerController } from '../playerController';
-import { chipRows, drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import { drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
 
 // blackAlpha.500 and blackAlpha.800 from the slider this replaced, flattened
 // against the #FAF9F6 panel rather than left translucent. They have to be
@@ -22,15 +22,12 @@ const PLAYHEAD_COLOR = '#C53030'; // red.600
 const LOOP_COLOR = 'rgba(128, 90, 213, 0.30)'; // purple.500
 const LOOP_EDGE_COLOR = '#553C9A'; // purple.700
 const SECTION_COLOR = 'rgba(85, 60, 154, 0.13)'; // purple.700, well under the loop
-const SECTION_CHIP_COLOR = '#553C9A'; // purple.700
 const LOOP_REGION_ID = 'loop';
 const SECTION_ID_PREFIX = 'section-';
 
-// Tall enough to hold two staggered rows of section labels inside the band.
-// Labels have to live inside it: the renderer's scroll container is
-// overflow-x: auto, which makes the cross axis clip too.
+// Saved loops' name pills sit in their own row above the timeline
+// (SectionChipLane), so the whole band stays free for dragging out a loop.
 const TRACK_HEIGHT = 48;
-const CHIP_ROWS = 2;
 const RULER_HEIGHT = 20;
 
 // A region drag reports positions continuously, and those come back from the
@@ -55,8 +52,8 @@ const PLACEHOLDER_PEAKS = [[0, 0]];
 // Region bodies swallow drag-to-create: every region wires up its own
 // makeDraggable, whose pointermove calls preventDefault, and the wrapper-level
 // handler that enableDragSelection installs bails out on defaultPrevented. So
-// every region gets an inert body, and only the parts that need clicks
-// (resize handles, section labels) get pointer events back.
+// every region gets an inert body, and only its resize handles get pointer
+// events back.
 const styleRegion = (region: Region, edgeColor?: string) => {
   const element = region.element;
   if (!element) return;
@@ -67,65 +64,6 @@ const styleRegion = (region: Region, edgeColor?: string) => {
     const isLeft = handle.getAttribute('part')?.includes('handle-left');
     handle.style[isLeft ? 'borderLeft' : 'borderRight'] = `3px solid ${edgeColor}`;
   });
-  element.querySelectorAll<HTMLElement>('[data-interactive]').forEach((node) => {
-    node.style.pointerEvents = 'auto';
-  });
-};
-
-interface Handlers {
-  onJumpToSection: (start: number, end: number) => void;
-  onSectionMenu: (section: Section, x: number, y: number) => void;
-}
-
-// Region content lands inside the renderer's shadow root, where Chakra's class
-// names don't reach, hence plain DOM and inline styles. The caret defers to a
-// Chakra menu rendered outside the shadow root by WaveformTimeline.
-const buildSectionChip = (section: Section, row: number, handlers: { current: Handlers }) => {
-  const chip = document.createElement('div');
-  chip.dataset.interactive = 'true';
-  Object.assign(chip.style, {
-    position: 'absolute',
-    top: `${4 + row * 20}px`,
-    left: '0',
-    display: 'inline-flex',
-    alignItems: 'center',
-    background: SECTION_CHIP_COLOR,
-    color: '#FAF9F6',
-    font: '500 11px/1 system-ui, -apple-system, sans-serif',
-    borderRadius: '9999px',
-    whiteSpace: 'nowrap',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.25)',
-  });
-
-  const name = document.createElement('span');
-  name.textContent = section.name || 'Unnamed';
-  name.title = `${formatSecondsToDuration(section.start_time)} – ${formatSecondsToDuration(section.end_time)}`;
-  Object.assign(name.style, { padding: '4px 2px 4px 9px', cursor: 'pointer' });
-  name.addEventListener('click', (event) => {
-    event.stopPropagation();
-    handlers.current.onJumpToSection(section.start_time, section.end_time);
-  });
-
-  const caret = document.createElement('button');
-  caret.type = 'button';
-  caret.setAttribute('aria-label', `Options for ${section.name || 'Unnamed'}`);
-  caret.textContent = '⌄';
-  Object.assign(caret.style, {
-    background: 'none',
-    border: 'none',
-    color: 'inherit',
-    font: 'inherit',
-    lineHeight: '1',
-    padding: '2px 8px 6px 4px',
-    cursor: 'pointer',
-  });
-  caret.addEventListener('click', (event) => {
-    event.stopPropagation();
-    handlers.current.onSectionMenu(section, event.clientX, event.clientY);
-  });
-
-  chip.append(name, caret);
-  return chip;
 };
 
 /**
@@ -142,13 +80,22 @@ const disableNativeTouchGestures = (wrapper: HTMLElement) => {
   });
 };
 
-interface UseWaveformTimelineOptions extends Handlers {
+interface UseWaveformTimelineOptions {
   controller: PlayerController;
   duration: number;
   sections: Section[];
 }
 
-const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, onSectionMenu }: UseWaveformTimelineOptions) => {
+/**
+ * Where the track is scrolled to and how wide it is when zoomed, so content
+ * outside wavesurfer (the loop name pills) can line up with it.
+ */
+export interface TrackLayout {
+  scrollLeft: number;
+  contentWidth: number;
+}
+
+const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTimelineOptions) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const regionsRef = useRef<RegionsPlugin | null>(null);
@@ -167,13 +114,24 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
   const followingRef = useRef(true);
   const [isFollowing, setIsFollowing] = useState(true);
 
-  // Callbacks get a new identity every render. Holding them in a ref keeps
-  // them out of the instance effect's deps, so a re-render never rebuilds the
-  // waveform.
-  const handlers = useRef<Handlers>({ onJumpToSection, onSectionMenu });
-  useEffect(() => {
-    handlers.current = { onJumpToSection, onSectionMenu };
-  });
+  // Published to the pill row as the track scrolls and zooms. A small store
+  // rather than React state, so scrolling re-renders only the pills.
+  const layoutRef = useRef<TrackLayout>({ scrollLeft: 0, contentWidth: 0 });
+  const layoutListeners = useRef(new Set<() => void>());
+  const subscribeLayout = useCallback((listener: () => void) => {
+    layoutListeners.current.add(listener);
+    return () => {
+      layoutListeners.current.delete(listener);
+    };
+  }, []);
+  const getLayout = useCallback(() => layoutRef.current, []);
+  const publishLayout = useCallback((wavesurfer: WaveSurfer) => {
+    const next = { scrollLeft: wavesurfer.getScroll(), contentWidth: wavesurfer.getWrapper().scrollWidth };
+    const current = layoutRef.current;
+    if (next.scrollLeft === current.scrollLeft && next.contentWidth === current.contentWidth) return;
+    layoutRef.current = next;
+    layoutListeners.current.forEach((listener) => listener());
+  }, []);
 
   /** Scrolls so the playhead is in view, if following and it isn't. */
   const keepPlayheadInView = useCallback((time: number) => {
@@ -316,6 +274,13 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
 
     wavesurfer.on('resize', applyZoom);
 
+    const onLayoutChange = () => publishLayout(wavesurfer);
+    wavesurfer.on('scroll', onLayoutChange);
+    wavesurfer.on('zoom', onLayoutChange);
+    wavesurfer.on('redrawcomplete', onLayoutChange);
+    wavesurfer.on('resize', onLayoutChange);
+    wavesurfer.on('ready', onLayoutChange);
+
     // Dragging the ruler scrolls the track. A short press is still a tap,
     // which falls through to wavesurfer's click-to-seek.
     let rulerDrag: { pointerId: number; startX: number; startScroll: number; moved: boolean } | null = null;
@@ -376,7 +341,7 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
       setReadyInstance(0);
       wavesurfer.destroy();
     };
-  }, [duration, applyZoom, controller, setFollowing]);
+  }, [duration, applyZoom, controller, setFollowing, publishLayout]);
 
   // Playback time goes straight from the controller to the renderer, without
   // passing through React state.
@@ -422,9 +387,9 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
     wavesurfer.setScrollTime(controller.getState().loop.start);
   }, [zoomIndex, isReady, readyInstance, applyZoom, controller]);
 
-  // Saved loops are their own regions on the same track, diffed rather than
-  // rebuilt so untouched regions keep their DOM and a rebuild doesn't fight an
-  // in-flight tap on a chip.
+  // Saved loops are shaded spans on the same track (their name pills are in
+  // SectionChipLane), diffed rather than rebuilt so untouched regions keep
+  // their DOM.
   useEffect(() => {
     const regions = regionsRef.current;
     if (!regions || !isReady) return;
@@ -432,7 +397,6 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
     const live = sectionRegionsRef.current;
     const seen = new Set<string>();
     const usable = drawableSections(sections);
-    const rowById = chipRows(usable, CHIP_ROWS);
 
     usable.forEach((section) => {
       const id = `${SECTION_ID_PREFIX}${section.id}`;
@@ -446,11 +410,6 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
         ) {
           existing.setOptions({ start: section.start_time, end: section.end_time });
         }
-        // Renaming is the only edit either backend supports.
-        const label = existing.element?.querySelector('span');
-        if (label && label.textContent !== (section.name || 'Unnamed')) {
-          label.textContent = section.name || 'Unnamed';
-        }
         return;
       }
 
@@ -461,7 +420,6 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
         color: SECTION_COLOR,
         drag: false,
         resize: false,
-        content: buildSectionChip(section, rowById.get(section.id) ?? 0, handlers),
       });
       styleRegion(region);
       live.set(id, region);
@@ -474,7 +432,15 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
     });
   }, [sections, isReady, readyInstance]);
 
-  return { containerRef, zoomIndex, setZoomIndex, isFollowing, follow: () => setFollowing(true) };
+  return {
+    containerRef,
+    zoomIndex,
+    setZoomIndex,
+    isFollowing,
+    follow: () => setFollowing(true),
+    subscribeLayout,
+    getLayout,
+  };
 };
 
 export default useWaveformTimeline;

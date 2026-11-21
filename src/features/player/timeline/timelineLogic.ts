@@ -65,3 +65,13 @@ export function followScrollLeft({
 /** A wheel or trackpad gesture that scrolls the track sideways. */
 export const isHorizontalWheel = (event: { deltaX: number; deltaY: number; shiftKey: boolean }) =>
   Math.abs(event.deltaX) > Math.abs(event.deltaY) || (event.shiftKey && event.deltaY !== 0);
+
+/**
+ * Where a loop's name pill sits, in track pixels. It starts where the loop
+ * starts, but while the loop's start is scrolled out of view and the rest of
+ * it is still visible, the pill holds at the left edge so the loop keeps its
+ * name.
+ */
+export function chipLeft(startPx: number, endPx: number, scrollLeft: number): number {
+  return startPx < scrollLeft && endPx > scrollLeft ? scrollLeft : startPx;
+}
