@@ -63,6 +63,31 @@ test('the row under the track hints, then offers Save loop for a new selection',
 const loopFill = (page: Page) =>
   page.locator('[part~="region"][part~="loop"]').first().evaluate((el) => getComputedStyle(el).backgroundColor);
 
+test('with no saved loops, the Add a loop pill selects the first ten seconds to save or cancel', async ({ page }) => {
+  await openWith(page, []);
+  const addLoop = page.getByRole('button', { name: 'Add a loop' });
+  await addLoop.click();
+  await expect(page.getByRole('button', { name: 'Save loop', exact: true })).toBeVisible();
+  await expect.poll(() => loopFill(page)).not.toBe('rgba(0, 0, 0, 0)');
+
+  await page.getByRole('button', { name: 'Save loop', exact: true }).click();
+  await page.getByPlaceholder('Loop name (optional)').fill('Intro');
+  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+
+  // Its place goes to the saved loop's pill.
+  await expect(page.getByRole('button', { name: 'Intro', exact: true })).toBeVisible();
+  await expect(addLoop).toHaveCount(0);
+  expect(await storedLoops(page)).toEqual([expect.objectContaining({ name: 'Intro', start_time: 0, end_time: 10 })]);
+});
+
+test('Cancel after Add a loop goes back to no selection', async ({ page }) => {
+  await openWith(page, []);
+  await page.getByRole('button', { name: 'Add a loop' }).click();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(row(page)).toHaveText('Drag on the track to make a loop');
+  await expect(page.getByRole('button', { name: 'Add a loop' })).toBeVisible();
+});
+
 test('the loop isn’t drawn until one is picked', async ({ page }) => {
   await openWith(page, [SOLO]);
   await expect.poll(() => loopFill(page)).toBe('rgba(0, 0, 0, 0)');

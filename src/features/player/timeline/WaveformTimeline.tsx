@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Box, Flex, Icon, IconButton } from '@chakra-ui/react';
-import { MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
+import { Box, Button, Flex, Icon, IconButton } from '@chakra-ui/react';
+import { MagnifyingGlassPlus, MagnifyingGlassMinus, PlusCircle } from '@phosphor-icons/react';
 import useWaveformTimeline from './useWaveformTimeline';
 import LoopPills from './LoopPills';
 import LoopSelectionBar from './LoopSelectionBar';
@@ -37,6 +37,10 @@ const zoomButtonStyle = {
   sx: { '&:disabled:hover': { bg: 'blackAlpha.400' } },
 } as const;
 
+// How much of the song the empty-state pill selects: a starting point to
+// adjust, not a guess at a musical phrase.
+const STARTER_LOOP_SECONDS = 10;
+
 const WaveformTimeline = ({
   controller,
   videoLength,
@@ -65,8 +69,8 @@ const WaveformTimeline = ({
   return (
     // Side padding: 20px from tablet up, matching the frame around the panel; 16px on phones.
     <Box py={4} px={{ base: 4, md: 5 }} flexShrink={0}>
-      {hasLoops && (
-        <Flex align="flex-start" gap={4} mb={2}>
+      <Flex align="flex-start" gap={4} mb={2}>
+        {hasLoops ? (
           <LoopPills
             sections={savedSections}
             activeSectionId={activeSectionId}
@@ -75,8 +79,25 @@ const WaveformTimeline = ({
             onDeleteSection={onDeleteSection}
             onHighlight={setHighlightedId}
           />
-        </Flex>
-      )}
+        ) : (
+          // Where the first saved loop will appear. It selects the song's opening
+          // seconds, so the row below offers Save loop and Cancel and the loop's
+          // edges show they can be dragged: a first loop, taught by doing.
+          <Button
+            variant="quiet"
+            borderStyle="dashed"
+            h="30px"
+            px="3"
+            fontSize="xs"
+            fontWeight="medium"
+            leftIcon={<Icon as={PlusCircle} boxSize="16px" />}
+            iconSpacing="1.5"
+            onClick={() => controller.jumpToLoop(0, Math.min(STARTER_LOOP_SECONDS, videoLength))}
+          >
+            Add a loop
+          </Button>
+        )}
+      </Flex>
       <Box position="relative">
         <Box ref={containerRef} />
         {/* Over the track's top-right corner, above wavesurfer's layers. */}
