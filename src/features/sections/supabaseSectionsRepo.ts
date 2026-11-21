@@ -6,7 +6,7 @@ import {
   withoutDuplicates,
   type LoopTimes,
   type NewSection,
-  type SavedSong,
+  type SavedSongWithLoops,
   type Section,
   type SectionsRepository,
   type VideoRef,
@@ -26,6 +26,12 @@ const SectionRowSchema = z.object({
   name: z.string().nullable(),
   start_time: z.number(),
   end_time: z.number(),
+});
+
+const LoopRowSchema = z.object({
+  saved_song_id: z.string(),
+  name: z.string().nullable(),
+  start_time: z.number(),
 });
 
 const toSection = (row: unknown): Section => SectionSchema.parse(SectionRowSchema.parse(row));
@@ -113,19 +119,35 @@ export class SupabaseSectionsRepo implements SectionsRepository {
     return added.length;
   }
 
-  async listSavedSongs(): Promise<SavedSong[]> {
-    const rows = unwrap(
-      await this.client
-        .from('saved_songs')
-        .select('id, video_id, title, created_at')
-        .eq('user_id', this.userId)
-        .order('created_at', { ascending: false }),
-      'load your saved songs',
+  async listSavedSongs(): Promise<SavedSongWithLoops[]> {
+    const songs = z.array(SongRowSchema).parse(
+      unwrap(
+        await this.client
+          .from('saved_songs')
+          .select('id, video_id, title, created_at')
+          .eq('user_id', this.userId)
+          .order('created_at', { ascending: false }),
+        'load your saved songs',
+      ),
     );
-    return z
-      .array(SongRowSchema)
-      .parse(rows)
-      .map((row) => ({ videoId: row.video_id, title: row.title, savedAt: row.created_at }));
+    // All of the user's loops in one query (row-level security scopes it),
+    // grouped onto their songs here.
+    const loopRows = z.array(LoopRowSchema).parse(
+      unwrap(
+        await this.client.from('saved_sections').select('saved_song_id, name, start_time').order('start_time', { ascending: true }),
+        'load your loops',
+      ),
+    );
+    const loopsBySong = new Map<string, SavedSongWithLoops['loops']>();
+    for (const { saved_song_id, name, start_time } of loopRows) {
+      loopsBySong.set(saved_song_id, [...(loopsBySong.get(saved_song_id) ?? []), { name, start_time }]);
+    }
+    return songs.map((row) => ({
+      videoId: row.video_id,
+      title: row.title,
+      savedAt: row.created_at,
+      loops: loopsBySong.get(row.id) ?? [],
+    }));
   }
 
   async deleteSavedSong(videoId: string): Promise<void> {

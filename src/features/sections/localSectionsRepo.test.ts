@@ -38,6 +38,17 @@ describe('LocalSectionsRepo', () => {
     expect(songs[0]).toMatchObject({ videoId: video.videoId, title: 'Song A' });
   });
 
+  it('lists each saved song with its loops in playing order', async () => {
+    const repo = new LocalSectionsRepo();
+    await repo.createSection(video, { name: 'Solo', start_time: 60, end_time: 70 });
+    await repo.createSection(video, { name: null, start_time: 5, end_time: 9 });
+    const [song] = await repo.listSavedSongs();
+    expect(song!.loops).toEqual([
+      { name: null, start_time: 5 },
+      { name: 'Solo', start_time: 60 },
+    ]);
+  });
+
   it('deleting a saved song removes its loops', async () => {
     const repo = new LocalSectionsRepo();
     await repo.createSection(video, { name: null, start_time: 1, end_time: 2 });
