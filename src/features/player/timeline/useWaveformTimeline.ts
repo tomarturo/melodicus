@@ -7,7 +7,7 @@ import { formatSecondsToDuration } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
 import { MIN_LOOP } from '../loopLogic';
 import type { PlayerController } from '../playerController';
-import { drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import { followScrollLeft, isHorizontalWheel, orderedLoops, pixelsPerSecond } from './timelineLogic';
 
 // blackAlpha.500 and blackAlpha.800 from the slider this replaced, flattened
 // against the #FAF9F6 panel rather than left translucent. They have to be
@@ -22,11 +22,15 @@ const PLAYHEAD_COLOR = '#C53030'; // red.600
 const LOOP_COLOR = 'rgba(128, 90, 213, 0.30)'; // purple.500
 const LOOP_EDGE_COLOR = '#553C9A'; // purple.700
 const SECTION_COLOR = 'rgba(85, 60, 154, 0.13)'; // purple.700, well under the loop
+// A saved loop's span while its pill is hovered.
+const SECTION_HIGHLIGHT_COLOR = 'rgba(85, 60, 154, 0.32)';
+const SECTION_BADGE_COLOR = '#553C9A'; // purple.700, matching the pills
 const LOOP_REGION_ID = 'loop';
 const SECTION_ID_PREFIX = 'section-';
 
-// Saved loops' name pills sit in their own row above the timeline
-// (SectionChipLane), so the whole band stays free for dragging out a loop.
+// Saved loops are named in a list of pills above the timeline (LoopPills);
+// on the track they carry only a small number badge, so the band stays free
+// for dragging out a loop.
 const TRACK_HEIGHT = 48;
 const RULER_HEIGHT = 20;
 
@@ -67,6 +71,32 @@ const styleRegion = (region: Region, edgeColor?: string) => {
 };
 
 /**
+ * The number on a saved loop's span, matching its pill. Purely visual: region
+ * bodies take no pointer events, so it never gets in the way of a drag.
+ */
+const buildNumberBadge = (number: number) => {
+  const badge = document.createElement('div');
+  badge.textContent = String(number);
+  badge.dataset.loopNumber = String(number);
+  Object.assign(badge.style, {
+    position: 'absolute',
+    top: '4px',
+    left: '4px',
+    minWidth: '16px',
+    height: '16px',
+    padding: '0 4px',
+    borderRadius: '8px',
+    background: SECTION_BADGE_COLOR,
+    color: '#FAF9F6',
+    font: '600 10px/16px system-ui, -apple-system, sans-serif',
+    textAlign: 'center',
+    pointerEvents: 'none',
+    boxSizing: 'border-box',
+  });
+  return badge;
+};
+
+/**
  * Touch: a drag on the track has to reach wavesurfer as a drag, not become
  * text selection or native scrolling (which is what Safari on iPad did). The
  * ruler underneath scrolls the zoomed track instead, by hand, so both work.
@@ -83,19 +113,14 @@ const disableNativeTouchGestures = (wrapper: HTMLElement) => {
 interface UseWaveformTimelineOptions {
   controller: PlayerController;
   duration: number;
+  /** Saved loops, in the order they're numbered (by start time). */
   sections: Section[];
+  /** A saved loop to emphasise on the track, such as the one whose pill is hovered. */
+  highlightedSectionId?: string | null;
 }
 
-/**
- * Where the track is scrolled to and how wide it is when zoomed, so content
- * outside wavesurfer (the loop name pills) can line up with it.
- */
-export interface TrackLayout {
-  scrollLeft: number;
-  contentWidth: number;
-}
 
-const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTimelineOptions) => {
+const useWaveformTimeline = ({ controller, duration, sections, highlightedSectionId = null }: UseWaveformTimelineOptions) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const regionsRef = useRef<RegionsPlugin | null>(null);
@@ -113,25 +138,6 @@ const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTime
   const isReady = readyInstance > 0;
   const followingRef = useRef(true);
   const [isFollowing, setIsFollowing] = useState(true);
-
-  // Published to the pill row as the track scrolls and zooms. A small store
-  // rather than React state, so scrolling re-renders only the pills.
-  const layoutRef = useRef<TrackLayout>({ scrollLeft: 0, contentWidth: 0 });
-  const layoutListeners = useRef(new Set<() => void>());
-  const subscribeLayout = useCallback((listener: () => void) => {
-    layoutListeners.current.add(listener);
-    return () => {
-      layoutListeners.current.delete(listener);
-    };
-  }, []);
-  const getLayout = useCallback(() => layoutRef.current, []);
-  const publishLayout = useCallback((wavesurfer: WaveSurfer) => {
-    const next = { scrollLeft: wavesurfer.getScroll(), contentWidth: wavesurfer.getWrapper().scrollWidth };
-    const current = layoutRef.current;
-    if (next.scrollLeft === current.scrollLeft && next.contentWidth === current.contentWidth) return;
-    layoutRef.current = next;
-    layoutListeners.current.forEach((listener) => listener());
-  }, []);
 
   /** Scrolls so the playhead is in view, if following and it isn't. */
   const keepPlayheadInView = useCallback((time: number) => {
@@ -274,12 +280,6 @@ const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTime
 
     wavesurfer.on('resize', applyZoom);
 
-    const onLayoutChange = () => publishLayout(wavesurfer);
-    wavesurfer.on('scroll', onLayoutChange);
-    wavesurfer.on('zoom', onLayoutChange);
-    wavesurfer.on('redrawcomplete', onLayoutChange);
-    wavesurfer.on('resize', onLayoutChange);
-    wavesurfer.on('ready', onLayoutChange);
 
     // Dragging the ruler scrolls the track. A short press is still a tap,
     // which falls through to wavesurfer's click-to-seek.
@@ -338,10 +338,11 @@ const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTime
       regionsRef.current = null;
       loopRegionRef.current = null;
       sectionRegionsRef.current = new Map();
+      sectionNumbers.current = new Map();
       setReadyInstance(0);
       wavesurfer.destroy();
     };
-  }, [duration, applyZoom, controller, setFollowing, publishLayout]);
+  }, [duration, applyZoom, controller, setFollowing]);
 
   // Playback time goes straight from the controller to the renderer, without
   // passing through React state.
@@ -387,19 +388,22 @@ const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTime
     wavesurfer.setScrollTime(controller.getState().loop.start);
   }, [zoomIndex, isReady, readyInstance, applyZoom, controller]);
 
-  // Saved loops are shaded spans on the same track (their name pills are in
-  // SectionChipLane), diffed rather than rebuilt so untouched regions keep
-  // their DOM.
+  // Saved loops are shaded spans on the same track, each with the number of
+  // its pill in LoopPills. Diffed rather than rebuilt, so untouched regions
+  // keep their DOM.
+  const sectionNumbers = useRef(new Map<string, number>());
   useEffect(() => {
     const regions = regionsRef.current;
     if (!regions || !isReady) return;
 
     const live = sectionRegionsRef.current;
+    const numbers = sectionNumbers.current;
     const seen = new Set<string>();
-    const usable = drawableSections(sections);
 
-    usable.forEach((section) => {
+    orderedLoops(sections).forEach((section, index) => {
       const id = `${SECTION_ID_PREFIX}${section.id}`;
+      const number = index + 1;
+      const color = section.id === highlightedSectionId ? SECTION_HIGHLIGHT_COLOR : SECTION_COLOR;
       seen.add(id);
       const existing = live.get(id);
 
@@ -410,6 +414,12 @@ const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTime
         ) {
           existing.setOptions({ start: section.start_time, end: section.end_time });
         }
+        // A loop added or removed earlier in the video renumbers the rest.
+        if (numbers.get(id) !== number) {
+          existing.setContent(buildNumberBadge(number));
+          numbers.set(id, number);
+        }
+        if (existing.color !== color) existing.setOptions({ color });
         return;
       }
 
@@ -417,20 +427,23 @@ const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTime
         id,
         start: section.start_time,
         end: section.end_time,
-        color: SECTION_COLOR,
+        color,
         drag: false,
         resize: false,
+        content: buildNumberBadge(number),
       });
       styleRegion(region);
       live.set(id, region);
+      numbers.set(id, number);
     });
 
     live.forEach((region, id) => {
       if (seen.has(id)) return;
       region.remove();
       live.delete(id);
+      numbers.delete(id);
     });
-  }, [sections, isReady, readyInstance]);
+  }, [sections, highlightedSectionId, isReady, readyInstance]);
 
   return {
     containerRef,
@@ -438,8 +451,6 @@ const useWaveformTimeline = ({ controller, duration, sections }: UseWaveformTime
     setZoomIndex,
     isFollowing,
     follow: () => setFollowing(true),
-    subscribeLayout,
-    getLayout,
   };
 };
 

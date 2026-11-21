@@ -73,3 +73,29 @@ test('loop name pills sit above the track, leaving all of it free for dragging',
     expect(pill!.y + pill!.height, `${name} pill bottom`).toBeLessThanOrEqual(track!.y);
   }
 });
+
+test('saved loops are listed in start-time order, numbered to match the badges on the track', async ({ page }) => {
+  await mockYouTube(page, { player: true });
+  await mockSupabase(page);
+  await page.addInitScript(
+    (videoId) =>
+      localStorage.setItem(
+        `melodicus:v1:sections:${videoId}`,
+        JSON.stringify([
+          { id: 'c', name: 'Outro', start_time: 190, end_time: 209 },
+          { id: 'a', name: 'Intro', start_time: 0, end_time: 12 },
+          { id: 'b', name: 'Solo', start_time: 30, end_time: 45 },
+        ]),
+      ),
+    VIDEO_ID,
+  );
+  await page.goto(`/video/${VIDEO_ID}`);
+
+  const pills = page.getByRole('list', { name: 'Saved loops' }).getByRole('listitem');
+  await expect(pills).toHaveText(['1Intro', '2Solo', '3Outro']);
+  await expect(page.locator('[data-loop-number]')).toHaveText(['1', '2', '3']);
+
+  await page.getByText('Solo', { exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Solo', exact: true })).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('[aria-current="true"]')).toHaveCount(1);
+});

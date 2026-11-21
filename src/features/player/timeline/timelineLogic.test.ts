@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chipLeft, chipRows, drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import { activeLoopId, drawableSections, orderedLoops, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
 
 const section = (id: string, start_time: number, end_time: number) => ({ id, name: null, start_time, end_time });
 
@@ -23,12 +23,18 @@ describe('drawableSections', () => {
   });
 });
 
-describe('chipRows', () => {
-  it('alternates rows in time order, not creation order', () => {
-    const rows = chipRows([section('late', 50, 60), section('early', 1, 2), section('middle', 20, 30)], 2);
-    expect(rows.get('early')).toBe(0);
-    expect(rows.get('middle')).toBe(1);
-    expect(rows.get('late')).toBe(0);
+describe('orderedLoops', () => {
+  it('orders by start, then end, and drops unusable loops', () => {
+    const loops = [section('late', 50, 60), section('bad', 5, 5), section('early-long', 1, 9), section('early', 1, 2)];
+    expect(orderedLoops(loops).map((s) => s.id)).toEqual(['early', 'early-long', 'late']);
+  });
+});
+
+describe('activeLoopId', () => {
+  it('finds the saved loop that matches the current loop', () => {
+    const loops = [section('a', 10, 20), section('b', 30, 40)];
+    expect(activeLoopId(loops, { start: 30.001, end: 40 })).toBe('b');
+    expect(activeLoopId(loops, { start: 30, end: 41 })).toBeNull();
   });
 });
 
@@ -65,16 +71,3 @@ describe('isHorizontalWheel', () => {
   });
 });
 
-describe('chipLeft', () => {
-  it('sits at the loop start while that is in view', () => {
-    expect(chipLeft(300, 500, 100)).toBe(300);
-  });
-
-  it('holds at the left edge while the start is scrolled away but the loop is still visible', () => {
-    expect(chipLeft(100, 500, 300)).toBe(300);
-  });
-
-  it('goes with the loop once all of it has scrolled away', () => {
-    expect(chipLeft(100, 250, 300)).toBe(100);
-  });
-});
