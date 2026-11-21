@@ -21,12 +21,12 @@ const zoomButtonStyle = {
   size: 'xs',
   minW: '24px',
   h: '24px',
-  bg: 'black',
+  bg: 'ink',
   color: 'white',
   borderRadius: 'md',
-  _hover: { bg: 'gray.800' },
-  _active: { bg: 'gray.700' },
-  // Disabled: the white icon stays, the black square lightens.
+  _hover: { bg: 'ink.hover' },
+  _active: { bg: 'ink.active' },
+  // Disabled: the white icon stays, the dark square lightens.
   _disabled: { opacity: 1, bg: 'blackAlpha.400', color: 'white', cursor: 'not-allowed' },
   sx: { '&:disabled:hover': { bg: 'blackAlpha.400' } },
 } as const;
