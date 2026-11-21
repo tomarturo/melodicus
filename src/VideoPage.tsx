@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, useToast } from '@chakra-ui/react';
 import { roundSeconds } from './utils/formatTime';
@@ -45,6 +45,9 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
 
   const [nameDialog, setNameDialog] = useState<NameDialog>(null);
   const [nameDraft, setNameDraft] = useState('');
+  // Set synchronously, so a second tap that lands before React re-renders the
+  // button as disabled is still ignored rather than saving the loop twice.
+  const isSavingRef = useRef(false);
   const incomingShare = useIncomingShare();
 
   const showError = (title: string, error: unknown) =>
@@ -90,7 +93,8 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   };
 
   const handleSaveSection = async () => {
-    if (!nameDialog) return;
+    if (!nameDialog || isSavingRef.current) return;
+    isSavingRef.current = true;
     const name = nameDraft.trim() || null;
     try {
       if (nameDialog.mode === 'edit') {
@@ -106,6 +110,8 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
       closeNameDialog();
     } catch (error) {
       showError('Error', error);
+    } finally {
+      isSavingRef.current = false;
     }
   };
 
@@ -156,6 +162,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         sectionName={nameDraft}
         onSectionNameChange={setNameDraft}
         onSave={handleSaveSection}
+        isSaving={create.isPending || rename.isPending}
       />
       {incomingShare.loops && (
         <ImportSharedLoopsDialog

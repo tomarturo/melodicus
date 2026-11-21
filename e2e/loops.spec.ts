@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { VIDEO_ID, VIDEO_TITLE, mockSupabase, mockYouTube } from './fixtures';
+import { VIDEO_ID, VIDEO_TITLE, mockSupabase, mockYouTube, signIn } from './fixtures';
 
 test('a guest saves, renames and deletes a loop, and the song shows under My songs', async ({ page }) => {
   await mockYouTube(page);
@@ -27,4 +27,24 @@ test('a guest saves, renames and deletes a loop, and the song shows under My son
   await page.getByRole('button', { name: 'Options for Last chorus' }).click();
   await page.getByRole('menuitem', { name: 'Delete' }).click();
   await expect(page.getByText('Last chorus', { exact: true })).toHaveCount(0);
+});
+
+test('tapping Save twice while a slow save is in flight saves the loop once', async ({ page }) => {
+  await mockYouTube(page);
+  const db = await mockSupabase(page, undefined, { writeDelayMs: 800 });
+  await signIn(page);
+  await page.goto(`/video/${VIDEO_ID}`);
+
+  await page.getByRole('button', { name: 'Add loop' }).click();
+  await page.getByPlaceholder('Loop name (optional)').fill('Once');
+  // Both clicks land before React can re-render the button as busy.
+  await page.getByRole('button', { name: 'Save Loop' }).evaluate((button: HTMLButtonElement) => {
+    button.click();
+    button.click();
+  });
+  await expect(page.getByRole('button', { name: /Saving/ })).toBeVisible();
+  await expect(page.getByText('Loop saved!')).toBeVisible();
+
+  expect(db.tables.saved_sections).toHaveLength(1);
+  expect(db.tables.saved_songs).toHaveLength(1);
 });
