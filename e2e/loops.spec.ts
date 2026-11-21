@@ -15,7 +15,7 @@ test('a guest saves, renames and deletes a loop, and the song shows under My son
   await expect(page.getByText('Chorus', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Options for Chorus' }).click();
-  await page.getByRole('menuitem', { name: 'Edit' }).click();
+  await page.getByRole('menuitem', { name: 'Rename' }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Last chorus');
   await page.getByRole('button', { name: 'Update' }).click();
   await expect(page.getByText('Last chorus', { exact: true })).toBeVisible();

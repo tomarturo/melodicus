@@ -13,9 +13,15 @@ import {
   Box
 } from '@chakra-ui/react';
 
-const hiddenScrollbar = {
+// The suggestion rows scroll sideways with no scrollbar; a fade at the right
+// edge shows there's more. The rows end with matching padding, so the last
+// suggestion can scroll clear of the fade.
+const FADE_WIDTH = '40px';
+const scrollRow = {
   scrollbarWidth: 'none',
   '&::-webkit-scrollbar': { display: 'none' },
+  maskImage: `linear-gradient(to right, black calc(100% - ${FADE_WIDTH}), transparent)`,
+  WebkitMaskImage: `linear-gradient(to right, black calc(100% - ${FADE_WIDTH}), transparent)`,
 } as const;
 
 interface SectionNameModalProps {
@@ -73,9 +79,8 @@ const SectionNameModal = ({
           />
 
             {/* <Text fontSize="md" color="fg.muted" mb="1">Quick add</Text> */}
-            {/* Scrolls sideways with no visible scrollbar. */}
-            <Box overflowX="auto" pb="1" sx={hiddenScrollbar}>
-              <HStack spacing="1" minW="max-content">
+            <Box overflowX="auto" pb="1" sx={scrollRow}>
+              <HStack spacing="1" minW="max-content" pr={FADE_WIDTH}>
                 {musicTerms.map((term) => (
                   <Button
                     key={term}
@@ -95,8 +100,8 @@ const SectionNameModal = ({
                 ))}
               </HStack>
             </Box>
-            <Box overflowX="auto" pb="2" sx={hiddenScrollbar}>
-              <HStack spacing="1" minW="max-content">
+            <Box overflowX="auto" pb="2" sx={scrollRow}>
+              <HStack spacing="1" minW="max-content" pr={FADE_WIDTH}>
                 {numbersAndLetters.map((item) => (
                   <Button
                     key={item}
