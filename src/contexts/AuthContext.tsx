@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { AuthResponse, Subscription, User } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
-import { useToast } from '@chakra-ui/react';
-import { errorMessage } from '../lib/errors';
+import { useNotify } from '../lib/notify';
+import { errorCause } from '../lib/errors';
 
 type AuthResult = { data: AuthResponse['data'] | null; error: unknown };
 
@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const toast = useToast();
+    const notify = useNotify();
 
     useEffect(() => {
         // Check active sessions and sets the user
@@ -57,19 +57,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 password,
             });
             if (error) throw error;
-            toast({
-                title: "Logged in successfully!",
-                status: "success",
-                duration: 3000,
-            });
+            // No toast: the dialog closes and the sidebar shows the account.
             return { data, error: null };
         } catch (error) {
-            toast({
-                title: "Error logging in",
-                description: errorMessage(error),
-                status: "error",
-                duration: 5000,
-            });
+            notify({ tone: 'error', title: 'Couldn’t log in', description: errorCause(error) });
             return { data: null, error };
         }
     };
@@ -81,20 +72,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 password,
             });
             if (error) throw error;
-            toast({
-                title: "Sign up successful!",
-                description: "Please check your email for verification.",
-                status: "success",
-                duration: 5000,
+            notify({
+                tone: 'success',
+                title: 'Check your email',
+                description: 'We sent you a link to confirm your account.',
+                duration: 8000,
             });
             return { data, error: null };
         } catch (error) {
-            toast({
-                title: "Error signing up",
-                description: errorMessage(error),
-                status: "error",
-                duration: 5000,
-            });
+            notify({ tone: 'error', title: 'Couldn’t create your account', description: errorCause(error) });
             return { data: null, error };
         }
     };
@@ -103,18 +89,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
-            toast({
-                title: "Logged out successfully",
-                status: "success",
-                duration: 3000,
-            });
+            notify({ tone: 'success', title: 'Logged out' });
         } catch (error) {
-            toast({
-                title: "Error logging out",
-                description: errorMessage(error),
-                status: "error",
-                duration: 5000,
-            });
+            notify({ tone: 'error', title: 'Couldn’t log out', description: errorCause(error) });
         }
     };
 

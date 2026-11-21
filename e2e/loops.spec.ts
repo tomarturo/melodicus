@@ -11,7 +11,7 @@ test('a guest saves, renames and deletes a loop, and the song shows under My son
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Chorus');
   await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
-  await expect(page.getByText('Loop saved!')).toBeVisible();
+  // No toast: the new loop's pill is the confirmation.
   await expect(page.getByText('Chorus', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Options for Chorus' }).click();
@@ -46,7 +46,7 @@ test('tapping Save twice while a slow save is in flight saves the loop once', as
     button.click();
   });
   await expect(page.getByRole('button', { name: /Saving/ })).toBeVisible();
-  await expect(page.getByText('Loop saved!')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Once', exact: true })).toBeVisible();
 
   expect(db.tables.saved_sections).toHaveLength(1);
   expect(db.tables.saved_songs).toHaveLength(1);
@@ -100,4 +100,48 @@ test('saved loops are listed in start-time order, and the playing one is marked'
   await page.getByText('Solo', { exact: true }).click();
   await expect(page.getByRole('button', { name: 'Solo', exact: true })).toHaveAttribute('aria-current', 'true');
   await expect(page.locator('[aria-current="true"]')).toHaveCount(1);
+});
+
+test('deleting a loop offers Undo, which brings it back', async ({ page }) => {
+  await mockYouTube(page);
+  await mockSupabase(page);
+  await page.addInitScript(
+    (videoId) =>
+      localStorage.setItem(`melodicus:v1:sections:${videoId}`, JSON.stringify([{ id: 'r1', name: 'Riff', start_time: 10, end_time: 20 }])),
+    VIDEO_ID,
+  );
+  await page.goto(`/video/${VIDEO_ID}`);
+  await page.getByRole('button', { name: 'Options for Riff' }).click();
+  await page.getByRole('menuitem', { name: 'Delete' }).click();
+  await expect(page.getByRole('button', { name: 'Riff', exact: true })).toHaveCount(0);
+
+  await expect(page.getByText('Deleted “Riff”')).toBeVisible();
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await expect(page.getByRole('button', { name: 'Riff', exact: true })).toBeVisible();
+  const stored = await page.evaluate((videoId) => JSON.parse(localStorage.getItem(`melodicus:v1:sections:${videoId}`) ?? '[]'), VIDEO_ID);
+  expect(stored).toEqual([expect.objectContaining({ name: 'Riff', start_time: 10, end_time: 20 })]);
+});
+
+test('a failed save shows an error that stays until it is closed', async ({ page }) => {
+  await mockYouTube(page);
+  await mockSupabase(page);
+  await signIn(page);
+  // Loops can't be written.
+  await page.route('https://e2e.supabase.co/rest/v1/saved_sections**', (route) =>
+    route.request().method() === 'POST'
+      ? route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'database is down' }) })
+      : route.fallback(),
+  );
+  await page.goto(`/video/${VIDEO_ID}`);
+  await expect(page.locator('[part~="canvases"]')).toBeVisible();
+  await dragSelection(page, 0.3, 0.5);
+  await page.getByRole('button', { name: 'Save loop', exact: true }).click();
+  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+
+  const alert = page.getByRole('alert').filter({ hasText: 'Couldn’t save the loop' });
+  await expect(alert).toBeVisible();
+  await page.waitForTimeout(5000);
+  await expect(alert).toBeVisible();
+  await alert.getByRole('button', { name: 'Close' }).click();
+  await expect(alert).toHaveCount(0);
 });
