@@ -25,8 +25,8 @@ export function drawableSections(sections: Section[]): Section[] {
 }
 
 /**
- * Saved loops in the order they're listed and numbered: by start, then end,
- * then id so ties stay put. Unusable entries are left out.
+ * Saved loops in the order they're listed: by start, then end, then id so
+ * ties stay put. Unusable entries are left out.
  */
 export function orderedLoops(sections: Section[]): Section[] {
   return drawableSections(sections).sort(

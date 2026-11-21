@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Box, Flex, Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
+import { Flex, Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
 import { CaretDown } from '@phosphor-icons/react';
 import { formatSecondsToDuration } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
@@ -17,9 +17,9 @@ interface LoopPillsProps {
 }
 
 /**
- * The saved loops as a fixed, numbered list in start-time order. Unlike
- * labels on the track, it doesn't move when the timeline zooms or scrolls;
- * the number on each pill matches the badge on its span.
+ * The saved loops as a fixed list in start-time order. Unlike labels on the
+ * track, it doesn't move when the timeline zooms or scrolls; hovering a pill
+ * highlights its span on the track instead.
  */
 const LoopPills = ({
   sections,
@@ -34,7 +34,7 @@ const LoopPills = ({
 
   return (
     <Flex as="ul" aria-label="Saved loops" listStyleType="none" wrap="wrap" gap="2" flex="1" minW="0">
-      {loops.map((section, index) => {
+      {loops.map((section) => {
         const name = section.name || 'Unnamed';
         const active = section.id === activeSectionId;
         return (
@@ -60,28 +60,11 @@ const LoopPills = ({
               aria-current={active ? 'true' : undefined}
               title={`${formatSecondsToDuration(section.start_time)} – ${formatSecondsToDuration(section.end_time)}`}
               align="center"
-              gap="1.5"
               h="100%"
-              pl="1"
+              pl="3"
               pr="1"
               onClick={() => onJumpToSection(section.start_time, section.end_time)}
             >
-              <Box
-                as="span"
-                minW="20px"
-                h="20px"
-                px="1"
-                borderRadius="full"
-                bg={active ? 'bg.panel' : 'purple.700'}
-                color={active ? 'purple.700' : 'bg.panel'}
-                fontSize="11px"
-                fontWeight="600"
-                lineHeight="20px"
-                textAlign="center"
-                aria-hidden
-              >
-                {index + 1}
-              </Box>
               <span>{name}</span>
             </Flex>
             <Menu isLazy placement="bottom-start" gutter={4}>

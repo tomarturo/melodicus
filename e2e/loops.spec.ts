@@ -74,7 +74,7 @@ test('loop name pills sit above the track, leaving all of it free for dragging',
   }
 });
 
-test('saved loops are listed in start-time order, numbered to match the badges on the track', async ({ page }) => {
+test('saved loops are listed in start-time order, and the playing one is marked', async ({ page }) => {
   await mockYouTube(page, { player: true });
   await mockSupabase(page);
   await page.addInitScript(
@@ -92,8 +92,7 @@ test('saved loops are listed in start-time order, numbered to match the badges o
   await page.goto(`/video/${VIDEO_ID}`);
 
   const pills = page.getByRole('list', { name: 'Saved loops' }).getByRole('listitem');
-  await expect(pills).toHaveText(['1Intro', '2Solo', '3Outro']);
-  await expect(page.locator('[data-loop-number]')).toHaveText(['1', '2', '3']);
+  await expect(pills).toHaveText(['Intro', 'Solo', 'Outro']);
 
   await page.getByText('Solo', { exact: true }).click();
   await expect(page.getByRole('button', { name: 'Solo', exact: true })).toHaveAttribute('aria-current', 'true');
