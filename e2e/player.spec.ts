@@ -204,3 +204,19 @@ test('the playback speed survives rotating an iPad, and each control exists once
   }
   await expect(page.getByRole('combobox', { name: 'Playback rate' })).toHaveCount(1);
 });
+
+test('zooming back out after making a loop leaves nothing to scroll past the end of the song', async ({ page }) => {
+  await openVideo(page);
+  await zoomTo8x(page);
+  const track = await visibleBox(page, '[part~="canvases"]');
+  const y = track.y + track.height / 2;
+  await mouseDrag(page, { x: track.x + track.width * 0.3, y }, { x: track.x + track.width * 0.5, y });
+  await expect(page.getByRole('button', { name: 'Save loop', exact: true })).toBeVisible();
+
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Zoom out' }).click();
+  await expect(page.getByRole('button', { name: 'Zoom out' })).toBeDisabled();
+  await expect.poll(async () => {
+    const scroll = await timelineScroll(page);
+    return scroll.content - scroll.width;
+  }).toBeLessThanOrEqual(1);
+});

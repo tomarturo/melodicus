@@ -57,6 +57,7 @@ const TRACK_STYLES = `
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
     height: ${TRACK_HEIGHT}px;
     z-index: 3;
     pointer-events: none;
@@ -159,7 +160,6 @@ const drawTicks = (svg: SVGSVGElement, widthPx: number, duration: number) => {
     const x = Math.round(time * pxPerSec) + 0.5;
     path += `M${x} ${mid - half}V${mid + half}`;
   }
-  svg.setAttribute('width', String(widthPx));
   svg.setAttribute('viewBox', `0 0 ${widthPx} ${TRACK_HEIGHT}`);
   svg.firstElementChild?.setAttribute('d', path);
 };
@@ -362,6 +362,9 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
     ticks.setAttribute('part', 'ticks');
     ticks.setAttribute('height', String(TRACK_HEIGHT));
     ticks.setAttribute('shape-rendering', 'crispEdges');
+    // Sized by CSS to the wrapper, never by its own width: anything wider than
+    // the wrapper would stretch the scroll area past the end of the song.
+    ticks.setAttribute('preserveAspectRatio', 'none');
     const tickPath = document.createElementNS(SVG_NS, 'path');
     tickPath.setAttribute('stroke', TICK_COLOR);
     tickPath.setAttribute('stroke-width', '1');
@@ -369,7 +372,9 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
     wrapper.appendChild(ticks);
     const redrawTicks = () => {
       const total = wavesurfer.getDuration();
-      if (total > 0 && wrapper.scrollWidth > 0) drawTicks(ticks, wrapper.scrollWidth, total);
+      // The wrapper's own width (wavesurfer sets it to the zoomed width), not
+      // its scrollWidth, which would count anything overflowing it.
+      if (total > 0 && wrapper.clientWidth > 0) drawTicks(ticks, wrapper.clientWidth, total);
     };
     wavesurfer.on('redrawcomplete', redrawTicks);
     wavesurfer.on('ready', redrawTicks);
