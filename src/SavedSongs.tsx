@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -8,7 +7,6 @@ import {
   Heading,
   Icon,
   IconButton,
-  Image,
   Menu,
   MenuButton,
   MenuItem,
@@ -25,6 +23,7 @@ import { useNotify } from './lib/notify';
 import { useDeleteSavedSong, useSavedSongsQuery } from './features/sections/queries';
 import type { SavedSongWithLoops } from './features/sections/types';
 import AuthModal from './AuthModal';
+import SongListRow, { SongPill } from './features/songs/SongListRow';
 
 // How long a removed song can be brought back before it's really deleted.
 const UNDO_MS = 5000;
@@ -86,23 +85,7 @@ const LoopChips = ({ loops }: { loops: SavedSongWithLoops['loops'] }) => {
   return (
     <Flex as="ul" aria-label="Loops" listStyleType="none" wrap="wrap" gap={1.5}>
       {shown.map((loop, index) => (
-        <Flex
-          as="li"
-          key={`${loop.start_time}-${index}`}
-          align="center"
-          h="24px"
-          px={2.5}
-          borderRadius="full"
-          bg="purple.50"
-          color="purple.800"
-          border="1px"
-          borderColor="purple.200"
-          fontSize="xs"
-          fontWeight="medium"
-          whiteSpace="nowrap"
-        >
-          {loop.name || 'Unnamed'}
-        </Flex>
+        <SongPill key={`${loop.start_time}-${index}`}>{loop.name || 'Unnamed'}</SongPill>
       ))}
       {rest > 0 && (
         <Flex as="li" align="center" h="24px" px={1} fontSize="xs" color="fg.muted">
@@ -116,32 +99,12 @@ const LoopChips = ({ loops }: { loops: SavedSongWithLoops['loops'] }) => {
 const SongRow = ({ song, onRemove }: { song: SavedSongWithLoops; onRemove: () => void }) => {
   const title = song.title || 'Untitled video';
   return (
-    <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'stretch', sm: 'center' }} gap={{ base: 3, sm: 6 }}>
-      <Box as={Link} to={`/video/${song.videoId}`} flexShrink={0} aria-hidden tabIndex={-1}>
-        {/* The whole 16:9 thumbnail, uncropped. For music uploads YouTube
-            pads the square cover art with a blurred copy of it, which a
-            square crop would cut away. */}
-        <Image
-          borderRadius="xl"
-          w={{ base: '100%', sm: '240px' }}
-          aspectRatio={16 / 9}
-          src={`https://img.youtube.com/vi/${song.videoId}/mqdefault.jpg`}
-          alt=""
-          objectFit="cover"
-        />
-      </Box>
-      <Flex flex="1" minW="0" align="flex-start" gap={2}>
-        <Stack flex="1" minW="0" spacing={2}>
-          <Box>
-            <Heading as="h2" size="md" noOfLines={2}>
-              <Link to={`/video/${song.videoId}`}>{title}</Link>
-            </Heading>
-            <Text fontSize="sm" color="fg.muted" mt={1}>
-              {countLabel(song.loops.length, 'loop', 'loops')} · Saved {formatSavedDate(song.savedAt)}
-            </Text>
-          </Box>
-          {song.loops.length > 0 && <LoopChips loops={song.loops} />}
-        </Stack>
+    <SongListRow
+      videoId={song.videoId}
+      title={title}
+      thumbnailUrl={`https://img.youtube.com/vi/${song.videoId}/mqdefault.jpg`}
+      meta={`${countLabel(song.loops.length, 'loop', 'loops')} · Saved ${formatSavedDate(song.savedAt)}`}
+      trailing={
         <Menu isLazy placement="bottom-end" gutter={4}>
           <MenuButton
             as={IconButton}
@@ -171,8 +134,10 @@ const SongRow = ({ song, onRemove }: { song: SavedSongWithLoops; onRemove: () =>
             </MenuList>
           </Portal>
         </Menu>
-      </Flex>
-    </Flex>
+      }
+    >
+      {song.loops.length > 0 && <LoopChips loops={song.loops} />}
+    </SongListRow>
   );
 };
 
