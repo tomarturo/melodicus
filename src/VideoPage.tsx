@@ -34,7 +34,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   const { repo } = useSectionsRepository();
 
   const { controller, hostRef } = usePlayerController(videoId);
-  const { isPlaying, duration: videoLength, loop } = usePlayerState(controller);
+  const { isPlaying, duration: videoLength, loop, playbackRate } = usePlayerState(controller);
   const { title: videoTitle, thumbnailUrl: videoThumbnail } = useVideoDetails(videoId, controller);
 
   const sectionsQuery = useSectionsQuery(videoId);
@@ -130,7 +130,19 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   };
 
   return (
-    <Flex direction="column" flex="1">
+    // One panel holds the video area, timeline and controls. It fills the
+    // space the frame leaves; the video area flexes to fit, and on a window too
+    // short for even its minimum, the panel scrolls inside itself.
+    <Flex
+      direction="column"
+      flex="1"
+      minH="0"
+      bg="bg.panel"
+      borderRadius={['none', 'none', 'xl']}
+      overflowX="hidden"
+      overflowY="auto"
+      overscrollBehavior="contain"
+    >
       <Box ref={hostRef} display="none" />
       <VideoDisplay videoThumbnail={videoThumbnail} />
       {videoLength ? (
@@ -143,9 +155,10 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
           onDeleteSection={handleDeleteSection}
         />
       ) : null}
-      <Box>
+      <Box flexShrink={0}>
         <VideoControls
           isPlaying={isPlaying}
+          playbackRate={playbackRate}
           onPlayPause={() => controller.togglePlay()}
           onRestartLoop={() => controller.restartLoop()}
           onPlaybackRateChange={(rate) => controller.setPlaybackRate(rate)}

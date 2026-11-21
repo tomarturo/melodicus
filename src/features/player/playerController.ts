@@ -6,6 +6,8 @@ export interface PlayerState {
   /** Best known length of the video in seconds, or null until something reports it. */
   duration: number | null;
   loop: Loop;
+  /** Playback speed, 1 being normal. */
+  playbackRate: number;
   /** False while the loop is still the default whole-video span. */
   hasCustomLoop: boolean;
   /**
@@ -34,6 +36,7 @@ export class PlayerController {
     isPlaying: false,
     duration: null,
     loop: { start: 0, end: 0 },
+    playbackRate: 1,
     hasCustomLoop: false,
     followRequest: 0,
   };
@@ -66,6 +69,8 @@ export class PlayerController {
     this.player = player;
     const duration = player.getDuration?.();
     if (duration !== undefined && Number.isFinite(duration) && duration > 0) this.setDuration(duration, true);
+    // A speed picked before the player loaded still applies.
+    if (this.state.playbackRate !== 1) player.setPlaybackRate(this.state.playbackRate);
     this.update({ isReady: true });
     this.startTicking();
   }
@@ -141,6 +146,7 @@ export class PlayerController {
 
   setPlaybackRate(rate: number) {
     this.player?.setPlaybackRate(rate);
+    this.update({ playbackRate: rate });
   }
 
   destroy() {

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { mockSupabase, mockYouTube } from './fixtures';
+import { VIDEO_ID, mockSupabase, mockYouTube } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
   await mockYouTube(page);
@@ -73,4 +73,42 @@ test('home: the panel and footer fit the screen', async ({ page }) => {
   expect(metrics.windowScrollable).toBe(false);
   expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
   await expect(page.getByText('© 2025')).toBeInViewport();
+});
+
+test.describe('video page', () => {
+  for (const [width, height] of [
+    [1280, 600],
+    [1280, 720],
+    [1536, 864],
+    [1920, 1080],
+    [1024, 768],
+    [820, 1180],
+    [390, 844],
+  ] as const) {
+    test(`fits a ${width}×${height} screen, with the album art inside the video area`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.addInitScript(
+        (videoId) =>
+          localStorage.setItem(
+            `melodicus:v1:sections:${videoId}`,
+            JSON.stringify([{ id: 'a', name: 'Intro', start_time: 0, end_time: 12 }]),
+          ),
+        VIDEO_ID,
+      );
+      await page.goto(`/video/${VIDEO_ID}`);
+      await expect(page.locator('[part~="canvases"]')).toBeVisible();
+
+      expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBe(0);
+      await expect(page.getByText('© 2025')).toBeInViewport();
+
+      const display = await page.getByTestId('video-display').boundingBox();
+      const art = await page.getByTestId('album-art').boundingBox();
+      expect(display && art).toBeTruthy();
+      expect(art!.y).toBeGreaterThanOrEqual(display!.y);
+      expect(art!.y + art!.height).toBeLessThanOrEqual(display!.y + display!.height + 0.5);
+      expect(art!.x).toBeGreaterThanOrEqual(display!.x);
+      expect(art!.x + art!.width).toBeLessThanOrEqual(display!.x + display!.width + 0.5);
+      expect(Math.abs(art!.width - art!.height)).toBeLessThan(1);
+    });
+  }
 });

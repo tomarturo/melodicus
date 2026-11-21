@@ -99,6 +99,16 @@ describe('PlayerController', () => {
     expect(controller.getState().followRequest).toBe(before + 3);
   });
 
+  it('tracks the playback speed, and applies one picked before the player was ready', () => {
+    controller.setPlaybackRate(1.5);
+    expect(controller.getState().playbackRate).toBe(1.5);
+    const player = attach();
+    expect(player.setPlaybackRate).toHaveBeenCalledWith(1.5);
+    controller.setPlaybackRate(0.75);
+    expect(player.setPlaybackRate).toHaveBeenLastCalledWith(0.75);
+    expect(controller.getState().playbackRate).toBe(0.75);
+  });
+
   it('ignores buffering when tracking whether it is playing', () => {
     attach();
     controller.handlePlayerState(1);

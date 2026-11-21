@@ -1,39 +1,50 @@
-import { Box, AbsoluteCenter } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 
 const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => {
   return (
     <Box
       pos='relative'
-      flexGrow='1'
-      h={["45vh", "50vh", "55vh"]}
-      inset="0"
-      borderTopLeftRadius="xl"
-      borderTopRightRadius="xl"
-      backgroundImage={videoThumbnail ?? undefined}
-      backgroundSize="11px 11px"
-      backgroundRepeat="repeat"
-      _before={{
-        content: '""',
-        position: 'absolute',
-        inset: 0,
-        backdropFilter: 'auto',
-        backdropBlur: '8px',
-        backdropInvert: '0.175',
-        backdropContrast: '0.8',
-        backdropSaturate: '1.7',
-        borderTopLeftRadius: { base: '0', md: 'xl' },
-        borderTopRightRadius: { base: '0', md: 'xl' },
-      }}
+      // Takes whatever height the timeline and controls leave, down to a minimum.
+      flex='1 1 0'
+      minH='180px'
+      // Lets the album art size itself from this box's width and height.
+      sx={{ containerType: 'size' }}
+      data-testid="video-display"
+      overflow="hidden"
+      // Shown until a thumbnail loads, or if there is none.
+      bg="#4B4B4E"
     >
-      <AbsoluteCenter
-        h={[240, 280, 280, 320, 320, 400, 700 ]}
-        w={[240, 280, 280, 320, 320, 400, 700 ]}
-        borderRadius='xl'
+      {/* The backdrop: the thumbnail scaled to cover the area and heavily
+          blurred. It extends well past the edges (further than the blur
+          radius) so the blur doesn't pull in transparency and fade there. */}
+      {videoThumbnail && (
+        <Box
+          position="absolute"
+          inset="-400px"
+          backgroundImage={videoThumbnail}
+          backgroundSize="cover"
+          backgroundPosition="center"
+          filter="blur(350px) saturate(1.3) brightness(0.8)"
+          aria-hidden
+          data-testid="video-backdrop"
+        />
+      )}
+      {/* The album art: a square sized from this box's own dimensions (cq
+          units), so it always fits whatever height the video area gets. */}
+      <Box
+        position="absolute"
+        top="50%"
+        left="50%"
+        transform="translate(-50%, -50%)"
+        w="min(80cqh, 80cqw, 700px)"
+        sx={{ aspectRatio: '1' }}
+        borderRadius="xl"
         backgroundImage={videoThumbnail ?? undefined}
         backgroundPosition="center"
-        backgroundSize='cover'
-        backgroundRepeat='no-repeat'
-        boxShadow='xl'
+        backgroundSize="cover"
+        backgroundRepeat="no-repeat"
+        boxShadow="xl"
+        data-testid="album-art"
       />
     </Box>
   );

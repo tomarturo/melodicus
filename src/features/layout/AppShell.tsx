@@ -147,9 +147,8 @@ function PhoneBar() {
 }
 
 // Pages whose content panel is the scroll area: the frame fits the screen,
-// so the panel's rounded corners and the footer always stay in view. Other
-// pages (the video page) grow with their content and scroll as a whole.
-const SCROLLS_IN_PANEL = [/^\/$/, /^\/search\//, /^\/saved-songs$/];
+// so the panel's rounded corners and the footer always stay in view.
+const SCROLLS_IN_PANEL = [/^\/$/, /^\/search\//, /^\/saved-songs$/, /^\/video\//];
 
 export const scrollsInPanel = (pathname: string) => SCROLLS_IN_PANEL.some((pattern) => pattern.test(pathname));
 
