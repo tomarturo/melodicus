@@ -2,10 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
 import {
-  Badge,
-  Center,
+  Box,
   Container,
-  HStack,
   Heading,
   Icon,
   IconButton,
@@ -17,6 +15,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { ArrowRight, ArrowUpRight } from '@phosphor-icons/react';
+import HintRow from './components/HintRow';
 
 /**
  * Shown when the day's YouTube search quota is used up: search on YouTube
@@ -93,18 +92,12 @@ const SearchQuotaError = ({ query }: { query: string }) => {
               />
             </InputRightElement>
           </InputGroup>
-          {/* The same try-again badge as the search field's empty-search error. */}
           {isInvalid && (
-            <Center mt={3} role="alert">
-              <HStack alignItems={['start', 'start', 'center']}>
-                <Badge colorScheme="red" mt={[1, 1, 0]}>
-                  try again
-                </Badge>
-                <Text fontSize="sm" color="red.500" textAlign={['left', 'left', 'center']}>
-                  That doesn’t look like a YouTube link.
-                </Text>
-              </HStack>
-            </Center>
+            <Box mt={3}>
+              <HintRow tone="error" badge="try again">
+                That doesn’t look like a YouTube link.
+              </HintRow>
+            </Box>
           )}
         </form>
       </Stack>

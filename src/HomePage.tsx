@@ -2,9 +2,10 @@ import { useState, type ChangeEvent, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
 import { ArrowForwardIcon, SearchIcon } from '@chakra-ui/icons';
-import { Icon, Center, Badge, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, HStack, Link } from '@chakra-ui/react'
+import { Icon, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, Link } from '@chakra-ui/react'
 import { ArrowSquareOut } from '@phosphor-icons/react';
 import { searchPath } from './lib/youtube';
+import HintRow from './components/HintRow';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -168,20 +169,13 @@ const HomePage = () => {
                       />
                     </InputRightElement>
                   </InputGroup>
-                  <Center>
-                    <HStack alignItems={['start', 'start', 'center']}>
-                      <Badge colorScheme={isSearchValid ? 'purple' : 'red'} mt={[1, 1, 0]}>
-                        {isSearchValid ? 'pro tip' : 'try again'}
-                      </Badge>
-                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isSearchValid && hasSearchSubmitAttempt ? "red.500" : "inherit"}>
+                  <HintRow tone={isSearchValid ? 'tip' : 'error'} badge={isSearchValid ? 'pro tip' : 'try again'}>
                         {isSearchValid ? (
                           'This works best when you are specific. Include a song title & artist.'
                         ) : (
                           searchErrorMessage
                         )}
-                      </Text>
-                    </HStack>
-                  </Center>
+                      </HintRow>
                 </TabPanel>
                 <TabPanel px='0'>
                   <InputGroup size='md' mb='2' colorScheme='blackAlpha'>
@@ -215,12 +209,7 @@ const HomePage = () => {
                       />
                     </InputRightElement>
                   </InputGroup>
-                  <Center>
-                    <HStack alignItems={['start', 'start', 'center']}>
-                      <Badge colorScheme={isLinkValid ? 'purple' : 'red'} mt={[1, 1, 0]}>
-                        {isLinkValid ? 'pro tip' : 'try again'}
-                      </Badge>
-                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isLinkValid ? "red.500" : "inherit"}>
+                  <HintRow tone={isLinkValid ? 'tip' : 'error'} badge={isLinkValid ? 'pro tip' : 'try again'}>
                         {isLinkValid ? (
                           <>
                             <Link
@@ -241,9 +230,7 @@ const HomePage = () => {
                         ) : (
                           linkErrorMessage
                         )}
-                      </Text>
-                    </HStack>
-                  </Center>
+                      </HintRow>
                 </TabPanel>
               </TabPanels>
             </Tabs>

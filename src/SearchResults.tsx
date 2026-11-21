@@ -2,13 +2,10 @@ import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Badge,
   Box,
   Button,
-  Center,
   Container,
   Flex,
-  HStack,
   Heading,
   Icon,
   IconButton,
@@ -20,6 +17,7 @@ import {
 } from '@chakra-ui/react';
 import { MagnifyingGlass } from '@phosphor-icons/react';
 import SearchQuotaError from './SearchQuotaError';
+import HintRow from './components/HintRow';
 import SongListRow, { SongPill } from './features/songs/SongListRow';
 import { useSavedSongsQuery } from './features/sections/queries';
 import { env } from './lib/env';
@@ -181,20 +179,11 @@ const SearchResults = () => {
             />
           </InputRightElement>
         </InputGroup>
-        <Center mb="8">
-          <HStack alignItems={['start', 'start', 'center']}>
-            <Badge colorScheme={isSearchValid ? 'purple' : 'red'} mt={[1, 1, 0]}>
-              {isSearchValid ? 'pro tip' : 'try again'}
-            </Badge>
-            <Text
-              fontSize="sm"
-              textAlign={['left', 'left', 'center']}
-              color={!isSearchValid && hasSearchSubmitAttempt ? 'red.500' : 'inherit'}
-            >
-              {isSearchValid ? 'This works best when you are specific. Include a song title & artist.' : searchErrorMessage}
-            </Text>
-          </HStack>
-        </Center>
+        <Box mb={8}>
+          <HintRow tone={isSearchValid ? 'tip' : 'error'} badge={isSearchValid ? 'pro tip' : 'try again'}>
+            {isSearchValid ? 'This works best when you are specific. Include a song title & artist.' : searchErrorMessage}
+          </HintRow>
+        </Box>
         {results}
       </Container>
     </Flex>
