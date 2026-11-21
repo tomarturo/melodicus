@@ -40,15 +40,21 @@ const SavedSongs = () => {
             variant="unstyled"
             bg="transparent"
             direction={{ base: 'column', sm: 'row' }}
-            alignItems="center"
+            // Full width on phones, so every thumbnail is the same size.
+            alignItems={{ base: 'stretch', sm: 'center' }}
           >
             <Link to={`/video/${song.videoId}`} style={{ flex: 1 }}>
-              <Flex direction={{ base: 'column', sm: 'row' }} alignItems="center">
+              <Flex direction={{ base: 'column', sm: 'row' }} alignItems={{ base: 'stretch', sm: 'center' }}>
+                {/* The whole 16:9 thumbnail, uncropped. For music uploads YouTube
+                    pads the square cover art with a blurred copy of it, which a
+                    square crop would cut away. */}
                 <Image
                   borderRadius="xl"
-                  boxSize={['100%', 180]}
-                  maxW={{ base: '100%', sm: '200px' }}
+                  w={{ base: '100%', sm: '240px' }}
+                  aspectRatio={16 / 9}
+                  flexShrink={0}
                   src={`https://img.youtube.com/vi/${song.videoId}/mqdefault.jpg`}
+                  alt=""
                   objectFit="cover"
                 />
                 <Stack mt={[2, 0]} spacing="3" ml={{ base: '2', sm: '8' }} mr={{ base: '2', sm: '0' }}>
