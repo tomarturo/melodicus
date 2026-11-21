@@ -14,16 +14,17 @@ const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => 
       // Shown until a thumbnail loads, or if there is none.
       bg="#4B4B4E"
     >
-      {/* The backdrop: the thumbnail scaled to cover the area and blurred.
-          It extends past the edges so the blur doesn't fade out at them. */}
+      {/* The backdrop: the thumbnail scaled to cover the area and heavily
+          blurred. It extends well past the edges (further than the blur
+          radius) so the blur doesn't pull in transparency and fade there. */}
       {videoThumbnail && (
         <Box
           position="absolute"
-          inset="-15%"
+          inset="-400px"
           backgroundImage={videoThumbnail}
           backgroundSize="cover"
           backgroundPosition="center"
-          filter="blur(40px) saturate(1.3) brightness(0.8)"
+          filter="blur(350px) saturate(1.3) brightness(0.8)"
           aria-hidden
           data-testid="video-backdrop"
         />
