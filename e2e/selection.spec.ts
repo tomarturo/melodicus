@@ -92,11 +92,11 @@ test('dragging a saved loop’s edge offers Update, which moves that loop', asyn
   await expect(activePill(page)).toHaveText('Solo');
 });
 
-test('Reset puts an edited saved loop back to its saved edges', async ({ page }) => {
+test('Cancel puts an edited saved loop back to its saved edges', async ({ page }) => {
   await openWith(page, [SOLO]);
   await page.getByRole('button', { name: 'Solo', exact: true }).click();
   await dragRightEdge(page, 60);
-  await page.getByRole('button', { name: 'Reset', exact: true }).click();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(row(page)).toHaveText('');
   await expect(activePill(page)).toHaveText('Solo');
   await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);

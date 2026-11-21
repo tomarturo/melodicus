@@ -14,7 +14,7 @@ interface LoopSelectionBarProps {
   onUpdate: (section: Section) => void;
   /** Drops a new selection, back to the hint. */
   onCancel: () => void;
-  /** Puts an edited saved loop back to its saved edges. */
+  /** Cancels an edit: puts the saved loop back to its saved edges. */
   onReset: (section: Section) => void;
 }
 
@@ -46,9 +46,6 @@ const LoopSelectionBar = ({ status, isBusy, onSaveNew, onUpdate, onCancel, onRes
 
     {status.kind === 'modified' && (
       <>
-        <Button {...textButton} isDisabled={isBusy} onClick={onSaveNew} aria-label="Save as new loop">
-          Save as new
-        </Button>
         <Button
           variant="pill"
           size="sm"
@@ -65,8 +62,11 @@ const LoopSelectionBar = ({ status, isBusy, onSaveNew, onUpdate, onCancel, onRes
             Update
           </Box>
         </Button>
+        <Button {...textButton} isDisabled={isBusy} onClick={onSaveNew} aria-label="Save as new loop">
+          Save as new
+        </Button>
         <Button {...textButton} isDisabled={isBusy} onClick={() => onReset(status.section)}>
-          Reset
+          Cancel
         </Button>
       </>
     )}

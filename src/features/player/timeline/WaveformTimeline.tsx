@@ -51,7 +51,7 @@ const WaveformTimeline = ({
   const { loop, hasCustomLoop, loopOrigin } = usePlayerState(controller);
   const status = selectionStatus({ loop, hasCustomLoop, loopOrigin, sections: savedSections });
   // A saved loop stays marked while its edges are being edited, so the pill
-  // shows which loop Update and Reset refer to.
+  // shows which loop Update and Cancel refer to.
   const activeSectionId = status.kind === 'saved' || status.kind === 'modified' ? status.section.id : null;
   const { containerRef, zoomIndex, setZoomIndex } = useWaveformTimeline({
     controller,
