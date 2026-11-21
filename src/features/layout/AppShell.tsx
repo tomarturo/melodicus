@@ -166,10 +166,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       direction="column"
       bg="chrome.bg"
       pl={isPhone ? 0 : `${RAIL_WIDTH}px`}
+      // dvh follows Safari's toolbar as it shows and hides. On iPad, 100vh is
+      // the height with the toolbar hidden, so a page that is 100vh tall
+      // scrolls by the toolbar's height (about 50px). Browsers without dvh
+      // fall back to vh.
       {...(fitsScreen
-        ? // dvh follows Safari's toolbar as it shows and hides; vh is the fallback.
-          { h: '100vh', sx: { height: '100dvh' }, overflow: 'hidden' }
-        : { minH: '100vh' })}
+        ? { h: '100dvh', overflow: 'hidden', sx: { '@supports not (height: 100dvh)': { height: '100vh' } } }
+        : { minH: '100dvh', sx: { '@supports not (height: 100dvh)': { minHeight: '100vh' } } })}
     >
       {isPhone ? <PhoneBar /> : <Rail />}
       <Flex direction="column" flex="1" minH="0" pt={isPhone ? 0 : 4} px={['0', '0', 6]}>
