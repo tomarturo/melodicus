@@ -79,7 +79,7 @@ const SearchResults = ({ searchQuery }: { searchQuery?: string }) => {
 
   return (
     <>
-        <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} overflow="hidden">
+        <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} minH="0" overflowY="auto" overscrollBehavior="contain">
         {quotaExceeded ? (
           <SearchQuotaError query={query} />
             ) : (

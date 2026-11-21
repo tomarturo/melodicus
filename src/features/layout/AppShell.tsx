@@ -146,18 +146,37 @@ function PhoneBar() {
   );
 }
 
+// Pages whose content panel is the scroll area: the frame fits the screen,
+// so the panel's rounded corners and the footer always stay in view. Other
+// pages (the video page) grow with their content and scroll as a whole.
+const SCROLLS_IN_PANEL = [/^\/$/, /^\/search\//, /^\/saved-songs$/];
+
+export const scrollsInPanel = (pathname: string) => SCROLLS_IN_PANEL.some((pattern) => pattern.test(pathname));
+
 /**
  * The frame every page sits in: the sidebar (a rail from tablet width up, a
  * drawer on phones), the page itself, and the footer.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const isPhone = useBreakpointValue({ base: true, md: false }, { ssr: false });
+  const fitsScreen = scrollsInPanel(useLocation().pathname);
 
   return (
-    <Flex direction="column" minH="100vh" bg="chrome.bg" pl={isPhone ? 0 : `${RAIL_WIDTH}px`}>
+    <Flex
+      direction="column"
+      bg="chrome.bg"
+      pl={isPhone ? 0 : `${RAIL_WIDTH}px`}
+      // dvh follows Safari's toolbar as it shows and hides. On iPad, 100vh is
+      // the height with the toolbar hidden, so a page that is 100vh tall
+      // scrolls by the toolbar's height (about 50px). Browsers without dvh
+      // fall back to vh.
+      {...(fitsScreen
+        ? { h: '100dvh', overflow: 'hidden', sx: { '@supports not (height: 100dvh)': { height: '100vh' } } }
+        : { minH: '100dvh', sx: { '@supports not (height: 100dvh)': { minHeight: '100vh' } } })}
+    >
       {isPhone ? <PhoneBar /> : <Rail />}
-      <Flex direction="column" flex="1" pt={isPhone ? 0 : 4} px={['0', '0', 6]}>
-        <Box maxW="1400px" w="100%" mx="auto" display="flex" flexDirection="column" flex="1">
+      <Flex direction="column" flex="1" minH="0" pt={isPhone ? 0 : 4} px={['0', '0', 6]}>
+        <Box maxW="1400px" w="100%" mx="auto" display="flex" flexDirection="column" flex="1" minH="0">
           {children}
         </Box>
         <Box maxW="1400px" w="100%" mx="auto">
