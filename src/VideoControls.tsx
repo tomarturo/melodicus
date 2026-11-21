@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Icon } from '@chakra-ui/react';
-import { Pause, Play, Repeat } from '@phosphor-icons/react';
+import { Pause, Play, SkipBack } from '@phosphor-icons/react';
 import PlaybackRateSelector, { CONTROL_HEIGHT } from './PlaybackRateSelector';
 
 interface VideoControlsProps {
@@ -29,7 +29,7 @@ const VideoControls = ({ isPlaying, playbackRate, onPlayPause, onRestartLoop, on
       variant="pill"
       size="md"
       aria-label="Restart Loop"
-      leftIcon={<Icon as={Repeat} boxSize="18px" />}
+      leftIcon={<Icon as={SkipBack} weight="fill" boxSize="18px" />}
       iconSpacing={{ base: 0, md: 2 }}
       px={{ base: 0, md: 5 }}
       h={CONTROL_HEIGHT}
