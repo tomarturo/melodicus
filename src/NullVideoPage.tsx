@@ -29,7 +29,7 @@ const NullVideoPage = () => {
             target="_blank"
             rel="noopener noreferrer"
             >
-            Follow this link<Icon as={ArrowUpRight}></Icon>
+            Follow this link<Icon as={ArrowUpRight} weight="bold" />
             </Link>{' '}
             to open YouTube in a new tab. Find the song you want to learn, then copy and paste its link below.
         </Text>

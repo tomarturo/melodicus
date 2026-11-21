@@ -226,8 +226,8 @@ const HomePage = () => {
                               Open YouTube
                               {/* Bold, to match the link's weight. */}
                               <Icon as={ArrowUpRight} weight="bold" />
-                            </Link>
-                            , find your next song, then paste the link here.
+                            </Link>{' '}
+                            find your next song, then paste the link here.
                           </>
                         ) : (
                           linkErrorMessage
