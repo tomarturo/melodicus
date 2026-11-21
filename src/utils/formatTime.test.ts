@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { convertDurationToSeconds, formatLoopLength, formatLoopTime, formatSecondsToDuration, roundSeconds } from './formatTime';
+import { convertDurationToSeconds, formatLoopTime, formatSecondsToDuration, roundSeconds } from './formatTime';
 
 describe('convertDurationToSeconds', () => {
   it.each([
@@ -43,9 +43,3 @@ describe('formatLoopTime', () => {
   });
 });
 
-describe('formatLoopLength', () => {
-  it('uses seconds under a minute and loop time beyond', () => {
-    expect(formatLoopLength(15.62)).toBe('15.6s');
-    expect(formatLoopLength(65.3)).toBe('1:05.3');
-  });
-});

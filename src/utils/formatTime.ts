@@ -41,7 +41,3 @@ export const formatLoopTime = (seconds: number): string => {
   const secText = secs.toFixed(1).padStart(4, '0');
   return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${secText}` : `${minutes}:${secText}`;
 };
-
-/** A loop's length: 15.6s under a minute, otherwise as a loop time (1:05.3). */
-export const formatLoopLength = (seconds: number): string =>
-  seconds < 59.95 ? `${(Math.round(seconds * 10) / 10).toFixed(1)}s` : formatLoopTime(seconds);

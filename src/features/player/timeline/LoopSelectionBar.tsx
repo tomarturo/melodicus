@@ -1,6 +1,6 @@
 import { Box, Button, Flex, HStack, Icon, Text } from '@chakra-ui/react';
 import { ArrowsClockwise, PlusCircle } from '@phosphor-icons/react';
-import { formatLoopLength, formatLoopTime } from '../../../utils/formatTime';
+import { formatLoopTime } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
 import type { Loop } from '../loopLogic';
 import type { SelectionStatus } from '../selection';
@@ -36,11 +36,6 @@ const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate }: LoopSel
           </Text>
         )}
         {formatLoopTime(loop.start)} – {formatLoopTime(loop.end)}
-        {/* The length is left out on phones, where the actions need the room. */}
-        <Text as="span" color="fg.muted" display={fromTablet}>
-          {' '}
-          · {formatLoopLength(loop.end - loop.start)}
-        </Text>
       </Text>
     )}
 
