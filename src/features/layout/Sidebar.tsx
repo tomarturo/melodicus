@@ -21,6 +21,9 @@ interface SidebarProps {
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
+// Where an item's label starts: its margin and padding, the icon, the gap.
+const LABEL_INSET = '56px'; // mx 8 + px 12 + icon 24 + gap 12
+
 const itemStyles: FlexProps = {
   align: 'center',
   gap: '3',
@@ -74,10 +77,17 @@ function SavedSongsList({ onNavigate }: { onNavigate?: () => void }) {
   const songsQuery = useSavedSongsQuery();
   const songs = songsQuery.data ?? [];
 
+  // Status lines start where "My songs" does, reading as its subcopy.
+  const status = (text: string) => (
+    <Text color="chrome.fgMuted" pl={`calc(${LABEL_INSET} - var(--chakra-space-3))`}>
+      {text}
+    </Text>
+  );
+
   let body: ReactNode;
-  if (songsQuery.isPending) body = <Text color="chrome.fgMuted">Loading…</Text>;
-  else if (songsQuery.isError) body = <Text color="chrome.fgMuted">Couldn’t load your songs.</Text>;
-  else if (songs.length === 0) body = <Text color="chrome.fgMuted">Songs you save loops for appear here.</Text>;
+  if (songsQuery.isPending) body = status('Loading…');
+  else if (songsQuery.isError) body = status('Couldn’t load your songs.');
+  else if (songs.length === 0) body = status('Songs you save loops for appear here.');
   else
     body = (
       <Box as="ul" listStyleType="none">
