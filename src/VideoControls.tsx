@@ -24,7 +24,7 @@ const LABELLED_MIN_WIDTH = '124px';
  * row under the timeline, sharing from the button over the video area.
  */
 const VideoControls = ({ isPlaying, playbackRate, onPlayPause, onRestartLoop, onPlaybackRateChange }: VideoControlsProps) => (
-  <Flex justify="center" align="center" gap={3} pt={2} pb={3} px={{ base: 4, md: 5 }}>
+  <Flex justify="center" align="center" gap={3} pt={2} pb={5} px={{ base: 4, md: 5 }}>
     <Button
       variant="pill"
       size="md"
