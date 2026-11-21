@@ -171,7 +171,7 @@ const HomePage = () => {
                   </InputGroup>
                   <HintRow tone={isSearchValid ? 'tip' : 'error'} badge={isSearchValid ? 'pro tip' : 'try again'}>
                         {isSearchValid ? (
-                          'This works best when you are specific. Include a song title & artist.'
+                          'Be specific. Include a title and artist.'
                         ) : (
                           searchErrorMessage
                         )}

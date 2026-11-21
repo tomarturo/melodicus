@@ -181,7 +181,7 @@ const SearchResults = () => {
         </InputGroup>
         <Box mb={8}>
           <HintRow tone={isSearchValid ? 'tip' : 'error'} badge={isSearchValid ? 'pro tip' : 'try again'}>
-            {isSearchValid ? 'This works best when you are specific. Include a song title & artist.' : searchErrorMessage}
+            {isSearchValid ? 'Be specific. Include a title and artist.' : searchErrorMessage}
           </HintRow>
         </Box>
         {results}
