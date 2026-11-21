@@ -5,7 +5,7 @@ import useWaveformTimeline from './useWaveformTimeline';
 import LoopPills from './LoopPills';
 import LoopSelectionBar from './LoopSelectionBar';
 import { selectionStatus } from '../selection';
-import { ZOOM_LEVELS, activeLoopId, drawableSections } from './timelineLogic';
+import { ZOOM_LEVELS, drawableSections } from './timelineLogic';
 import { usePlayerState } from '../usePlayer';
 import type { PlayerController } from '../playerController';
 import type { Section } from '../../sections/types';
@@ -50,6 +50,9 @@ const WaveformTimeline = ({
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const { loop, hasCustomLoop, loopOrigin } = usePlayerState(controller);
   const status = selectionStatus({ loop, hasCustomLoop, loopOrigin, sections: savedSections });
+  // A saved loop stays marked while its edges are being edited, so the pill
+  // shows which loop Update and Reset refer to.
+  const activeSectionId = status.kind === 'saved' || status.kind === 'modified' ? status.section.id : null;
   const { containerRef, zoomIndex, setZoomIndex } = useWaveformTimeline({
     controller,
     duration: videoLength,
@@ -65,7 +68,7 @@ const WaveformTimeline = ({
         <Flex align="flex-start" gap={4} mb={2}>
           <LoopPills
             sections={savedSections}
-            activeSectionId={activeLoopId(savedSections, loop)}
+            activeSectionId={activeSectionId}
             onSelectSection={(section) => controller.jumpToLoop(section.start_time, section.end_time, section.id)}
             onEditSection={onEditSection}
             onDeleteSection={onDeleteSection}
@@ -94,7 +97,6 @@ const WaveformTimeline = ({
         </Flex>
       </Box>
       <LoopSelectionBar
-        loop={loop}
         status={status}
         isBusy={isSavingLoop}
         onSaveNew={onSaveLoop}

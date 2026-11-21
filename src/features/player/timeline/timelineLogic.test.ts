@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activeLoopId, drawableSections, orderedLoops, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import { drawableSections, orderedLoops, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
 
 const section = (id: string, start_time: number, end_time: number) => ({ id, name: null, start_time, end_time });
 
@@ -27,14 +27,6 @@ describe('orderedLoops', () => {
   it('orders by start, then end, and drops unusable loops', () => {
     const loops = [section('late', 50, 60), section('bad', 5, 5), section('early-long', 1, 9), section('early', 1, 2)];
     expect(orderedLoops(loops).map((s) => s.id)).toEqual(['early', 'early-long', 'late']);
-  });
-});
-
-describe('activeLoopId', () => {
-  it('finds the saved loop that matches the current loop', () => {
-    const loops = [section('a', 10, 20), section('b', 30, 40)];
-    expect(activeLoopId(loops, { start: 30.001, end: 40 })).toBe('b');
-    expect(activeLoopId(loops, { start: 30, end: 41 })).toBeNull();
   });
 });
 

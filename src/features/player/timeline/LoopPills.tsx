@@ -7,7 +7,7 @@ import { orderedLoops } from './timelineLogic';
 
 interface LoopPillsProps {
   sections: Section[];
-  /** The saved loop that is currently playing, shown as selected. */
+  /** The saved loop the current selection is, or is being edited from, shown as selected. */
   activeSectionId: string | null;
   onSelectSection: (section: Section) => void;
   onEditSection: (section: Section) => void;

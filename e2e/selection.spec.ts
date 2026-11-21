@@ -41,19 +41,21 @@ const dragRightEdge = async (page: Page, dx: number) => {
   await page.mouse.up();
 };
 
-test('the row under the track hints, then shows a new selection with Save loop', async ({ page }) => {
+const activePill = (page: Page) => page.locator('[aria-current="true"]');
+
+test('the row under the track hints, then offers Save loop for a new selection', async ({ page }) => {
   await openWith(page, []);
   await expect(row(page)).toHaveText('Drag on the track to make a loop');
   await expect(page.getByRole('button', { name: 'Save loop', exact: true })).toHaveCount(0);
 
   await dragSelection(page, 0.5, 0.6);
-  await expect(row(page)).toContainText(/\d:\d\d\.\d – \d:\d\d\.\d/);
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Bridge');
   await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
 
-  // Once saved, the selection is that loop: its name shows and there's nothing to save.
-  await expect(row(page)).toContainText('Bridge ·');
+  // Once saved, the selection is that loop: its pill is selected and there's nothing to save.
+  await expect(activePill(page)).toHaveText('Bridge');
+  await expect(row(page)).toHaveText('');
   await expect(page.getByRole('button', { name: 'Save loop', exact: true })).toHaveCount(0);
   expect(await storedLoops(page)).toHaveLength(1);
 });
@@ -73,9 +75,11 @@ test('Cancel drops a new selection, back to the hint', async ({ page }) => {
 test('dragging a saved loop’s edge offers Update, which moves that loop', async ({ page }) => {
   await openWith(page, [SOLO]);
   await page.getByRole('button', { name: 'Solo', exact: true }).click();
-  await expect(row(page)).toContainText('Solo · 0:30.0 – 0:45.0');
+  await expect(activePill(page)).toHaveText('Solo');
 
   await dragRightEdge(page, 60);
+  // The pill stays selected while its loop is edited.
+  await expect(activePill(page)).toHaveText('Solo');
   await page.getByRole('button', { name: 'Update “Solo”' }).click();
   await expect(page.getByText('“Solo” updated')).toBeVisible();
 
@@ -85,7 +89,7 @@ test('dragging a saved loop’s edge offers Update, which moves that loop', asyn
   expect(loop!.start_time).toBe(30);
   expect(loop!.end_time).toBeGreaterThan(45);
   await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);
-  await expect(row(page)).toContainText('Solo ·');
+  await expect(activePill(page)).toHaveText('Solo');
 });
 
 test('Reset puts an edited saved loop back to its saved edges', async ({ page }) => {
@@ -93,7 +97,8 @@ test('Reset puts an edited saved loop back to its saved edges', async ({ page })
   await page.getByRole('button', { name: 'Solo', exact: true }).click();
   await dragRightEdge(page, 60);
   await page.getByRole('button', { name: 'Reset', exact: true }).click();
-  await expect(row(page)).toContainText('Solo · 0:30.0 – 0:45.0');
+  await expect(row(page)).toHaveText('');
+  await expect(activePill(page)).toHaveText('Solo');
   await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);
   expect(await storedLoops(page)).toEqual([SOLO]);
 });
@@ -118,6 +123,7 @@ test('a fresh drag after picking a saved loop is a new selection, not an update'
   await page.getByRole('button', { name: 'Solo', exact: true }).click();
   await dragSelection(page, 0.7, 0.8);
   await expect(page.getByRole('button', { name: 'Save loop', exact: true })).toBeVisible();
+  await expect(activePill(page)).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);
 });
 
