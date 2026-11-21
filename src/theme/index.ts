@@ -70,9 +70,11 @@ const semanticTokens = {
  * Hover thickens the outline with a 1px shadow rather than a wider border, so
  * nothing shifts.
  */
-// The shadow names its color outright: Chakra has no boxShadowColor prop, and
-// a bare '0 0 0 1px' takes the text color, ringing a pale border in black.
-export const HOVER_RING = '0 0 0 1px var(--chakra-colors-border-emphasis)';
+// The hover edge is the darkest text color, border and ring alike, so it
+// reads as one 2px line. Chakra has no boxShadowColor prop, so the color is
+// written into the shadow itself.
+export const HOVER_EDGE = 'fg.strong';
+export const HOVER_RING = '0 0 0 1px var(--chakra-colors-fg-strong)';
 const components = {
   Button: {
     variants: {
@@ -98,7 +100,7 @@ const components = {
         _hover: {
           boxShadow: HOVER_RING,
           bg: 'bg.mutedHover',
-          borderColor: 'border.emphasis',
+          borderColor: HOVER_EDGE,
           color: 'fg.strong',
           _disabled: { bg: 'bg.muted', boxShadow: 'none', borderColor: 'border.default', color: 'fg.default' },
         },
@@ -112,7 +114,7 @@ const components = {
         _hover: {
           boxShadow: HOVER_RING,
           bg: 'bg.mutedHover',
-          borderColor: 'border.emphasis',
+          borderColor: HOVER_EDGE,
           color: 'fg.strong',
           _disabled: { bg: 'transparent', boxShadow: 'none', borderColor: 'border.strong', color: 'fg.default' },
         },
