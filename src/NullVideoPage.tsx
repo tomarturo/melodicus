@@ -15,7 +15,7 @@ const NullVideoPage = () => {
 
     return (
     <>
-      <Flex direction="column" flex="1" bg='bg.panel' borderRadius={['none', 'none', 'xl']}>
+      <Flex direction="column" flex="1" minH="0" overflowY="auto" overscrollBehavior="contain" bg='bg.panel' borderRadius={['none', 'none', 'xl']}>
         <Container maxW='3xl' mt='12'>
           <Heading as='h1' size='xl' textAlign="center" mb='6'>We're having trouble with the link you provided</Heading>
           <Text align='center' mb='8'>

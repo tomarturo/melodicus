@@ -26,11 +26,9 @@ const VideoControls = ({
 }: VideoControlsProps) => (
   <Flex
     direction="column"
-    bg='bg.panel'
     pt={4}
     pb={8}
     px={["12px", "12px", 8]}
-    borderBottomRadius={["0", "0", "xl"]}
     gap={3}
   >
     {/* 320px+ and 480px+: Play/Restart row */}

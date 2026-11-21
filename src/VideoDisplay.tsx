@@ -4,11 +4,9 @@ const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => 
   return (
     <Box
       pos='relative'
-      flexGrow='1'
-      h={["45vh", "50vh", "55vh"]}
-      inset="0"
-      borderTopLeftRadius="xl"
-      borderTopRightRadius="xl"
+      // Takes whatever height the timeline and controls leave, down to a minimum.
+      flex='1 1 0'
+      minH='180px'
       backgroundImage={videoThumbnail ?? undefined}
       backgroundSize="11px 11px"
       backgroundRepeat="repeat"
@@ -21,8 +19,6 @@ const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => 
         backdropInvert: '0.175',
         backdropContrast: '0.8',
         backdropSaturate: '1.7',
-        borderTopLeftRadius: { base: '0', md: 'xl' },
-        borderTopRightRadius: { base: '0', md: 'xl' },
       }}
     >
       <AbsoluteCenter

@@ -51,7 +51,7 @@ const WaveformTimeline = ({
   const hasLoops = drawableSections(savedSections).length > 0;
 
   return (
-    <Box py={4} px={8} bg="bg.panel">
+    <Box py={4} px={8} flexShrink={0}>
       {hasLoops && (
         <Flex align="flex-start" gap={4} mb={2}>
           <LoopPills
