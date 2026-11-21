@@ -116,10 +116,12 @@ test('the copyright and GitHub link sit in the sidebar, not under the page', asy
   await page.goto('/');
   const github = page.getByRole('link', { name: 'GitHub' });
   await expect(github).toHaveAttribute('href', 'https://github.com/tomarturo/melodicus');
-  // The rail shows the icon; the copyright line appears once it's expanded.
-  await expect(page.getByText('© 2025')).toHaveCount(0);
+  const copyright = page.getByRole('link', { name: '© 2025 HeyTK' });
+  await expect(copyright).toHaveAttribute('href', 'https://www.heytk.net');
+  // The rail shows only the icons; the labels appear once it's expanded.
+  await expect(page.getByText('2025 HeyTK')).toBeHidden();
   await page.getByRole('button', { name: 'Expand sidebar' }).click();
-  await expect(page.getByText('© 2025')).toBeVisible();
+  await expect(page.getByText('2025 HeyTK')).toBeVisible();
   // The panel runs to the bottom margin of the window.
   const metrics = await panelMetrics(page);
   expect(metrics.viewportHeight - metrics.bottom).toBeLessThanOrEqual(16);
@@ -130,5 +132,5 @@ test('on a phone, the drawer holds the copyright and GitHub link', async ({ page
   await page.goto('/');
   await page.getByRole('button', { name: 'Open menu' }).click();
   await expect(page.getByRole('dialog').getByRole('link', { name: 'GitHub' })).toBeVisible();
-  await expect(page.getByRole('dialog').getByText('© 2025')).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('link', { name: '© 2025 HeyTK' })).toBeVisible();
 });

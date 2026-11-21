@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Box, Flex, Icon, Image, Kbd, Link, Text, useDisclosure, type FlexProps } from '@chakra-ui/react';
-import { ArrowSquareOut, GithubLogo, MagnifyingGlass, MusicNotes, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
+import { Box, Flex, Icon, Image, Kbd, Text, useDisclosure, type FlexProps } from '@chakra-ui/react';
+import { ArrowSquareOut, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../../AuthModal';
 import { useSavedSongsQuery } from '../sections/queries';
@@ -114,8 +114,7 @@ function SavedSongsList({ onNavigate }: { onNavigate?: () => void }) {
 /**
  * The app's navigation: logo, search, saved songs, account, and the project's
  * links at the foot. Collapsed it is an icon rail; expanded (on hover, by its
- * toggle, or as the phone drawer) it adds labels, the list of saved songs and
- * the copyright line.
+ * toggle, or as the phone drawer) it adds labels and the list of saved songs.
  */
 export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarProps) {
   const { user, logout } = useAuth();
@@ -203,23 +202,18 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
         icon={<Icon as={GithubLogo} boxSize="22px" />}
         trailing={<Icon as={ArrowSquareOut} boxSize="14px" color="chrome.fgMuted" />}
       />
-      {expanded && (
-        <Text px="5" pt="2" fontSize="xs" color="chrome.fgMuted" whiteSpace="nowrap">
-          © 2025{' '}
-          <Link
-            href="https://www.heytk.net"
-            isExternal
-            display="inline-flex"
-            alignItems="center"
-            gap="2px"
-            fontWeight="semibold"
-            color="chrome.fg"
-          >
-            HeyTK
-            <Icon as={ArrowSquareOut} boxSize="12px" />
-          </Link>
-        </Text>
-      )}
+      <SidebarItem
+        as="a"
+        href="https://www.heytk.net"
+        target="_blank"
+        rel="noopener noreferrer"
+        expanded={expanded}
+        label="2025 HeyTK"
+        // The © is the icon, so the name spells it out.
+        aria-label="© 2025 HeyTK"
+        icon={<Icon as={Copyright} boxSize="22px" />}
+        trailing={<Icon as={ArrowSquareOut} boxSize="14px" color="chrome.fgMuted" />}
+      />
       <AuthModal isOpen={authDialog.isOpen} onClose={authDialog.onClose} />
     </Flex>
   );
