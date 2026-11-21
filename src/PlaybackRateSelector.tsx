@@ -1,6 +1,7 @@
 import type { ChangeEvent } from 'react';
 import { Select, HStack, IconButton } from '@chakra-ui/react';
 import { Plus, Minus } from '@phosphor-icons/react';
+import { HOVER_RING } from './theme';
 
 const RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
@@ -37,8 +38,8 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
         borderColor="border.default"
         minW="100px"
         _hover={{
-          boxShadow: '0 0 0 1px',
-          boxShadowColor: 'fg.default',
+          // Matches the pill buttons beside it.
+          boxShadow: HOVER_RING,
           bg: 'bg.mutedHover',
           borderColor: 'border.emphasis',
           color: 'fg.strong',
