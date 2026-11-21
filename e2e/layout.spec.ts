@@ -135,3 +135,20 @@ test('on a phone, the drawer holds the copyright and GitHub link', async ({ page
   await expect(page.getByRole('dialog').getByRole('link', { name: 'tomarturo on GitHub' })).toBeVisible();
   await expect(page.getByRole('dialog').getByRole('link', { name: '© 2025 HeyTK' })).toBeVisible();
 });
+
+test('past 1600px the app, rail included, stays together and centers in the window', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await page.goto('/');
+  await page.mouse.move(1800, 300);
+  // Polled: whether there's a mouse (and so whether the touch toggle needs room)
+  // is known only once the app has checked, just after the first render.
+  const gaps = () => page.evaluate(() => {
+    const nav = document.querySelector('nav')!.getBoundingClientRect();
+    const panel = [...document.querySelectorAll<HTMLElement>('div')]
+      .find((d) => getComputedStyle(d).borderTopLeftRadius === '12px' && d.getBoundingClientRect().width > 600)!
+      .getBoundingClientRect();
+    return { beforeRail: nav.left, railToPanel: panel.left - nav.right, afterPanel: window.innerWidth - panel.right };
+  });
+  // 1920 - 1600 leaves 160px each side; the panel keeps its 20px frame inside that.
+  await expect.poll(gaps).toEqual({ beforeRail: 160, railToPanel: 0, afterPanel: 180 });
+});

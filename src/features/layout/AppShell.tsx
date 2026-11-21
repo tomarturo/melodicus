@@ -26,6 +26,12 @@ const HOVER_OPEN_DELAY_MS = 150;
 
 const HOVER_QUERY = '(hover: hover) and (pointer: fine)';
 
+// The widest the app gets, rail included. Past it, the whole app (rail and
+// panel together) centers in the window, and the leftover space is plain frame
+// on both sides. --app-inset is that leftover on each side, or 0.
+const APP_MAX_WIDTH = 1600;
+const APP_INSET = `max(0px, calc((100vw - ${APP_MAX_WIDTH}px) / 2))`;
+
 function Rail() {
   const [state, setState] = useState<RailState>('closed');
   const [canHover] = useMediaQuery(HOVER_QUERY);
@@ -69,7 +75,8 @@ function Rail() {
         position="fixed"
         top="0"
         bottom="0"
-        left="0"
+        // Beside the content, wherever the centered app starts.
+        left="var(--app-inset)"
         zIndex="banner"
         w={`${expanded ? EXPANDED_WIDTH : RAIL_WIDTH}px`}
         bg="chrome.bg"
@@ -178,18 +185,21 @@ export function AppShell({ children }: { children: ReactNode }) {
     <Flex
       direction="column"
       bg="chrome.bg"
-      pl={isPhone ? 0 : `${RAIL_WIDTH}px`}
+      pl={isPhone ? 0 : `calc(${RAIL_WIDTH}px + var(--app-inset))`}
+      pr={isPhone ? 0 : 'var(--app-inset)'}
       // dvh follows Safari's toolbar as it shows and hides. On iPad, 100vh is
       // the height with the toolbar hidden, so a page that is 100vh tall
       // scrolls by the toolbar's height (about 50px). Browsers without dvh
       // fall back to vh.
-      {...(fitsScreen
-        ? { h: '100dvh', overflow: 'hidden', sx: { '@supports not (height: 100dvh)': { height: '100vh' } } }
-        : { minH: '100dvh', sx: { '@supports not (height: 100dvh)': { minHeight: '100vh' } } })}
+      {...(fitsScreen ? { h: '100dvh', overflow: 'hidden' } : { minH: '100dvh' })}
+      sx={{
+        '--app-inset': isPhone ? '0px' : APP_INSET,
+        '@supports not (height: 100dvh)': fitsScreen ? { height: '100vh' } : { minHeight: '100vh' },
+      }}
     >
       {isPhone ? <PhoneBar /> : <Rail />}
       <Flex direction="column" flex="1" minH="0" py={frame} pl={panelLeft} pr={frame}>
-        <Box maxW="1400px" w="100%" mx="auto" display="flex" flexDirection="column" flex="1" minH="0">
+        <Box w="100%" display="flex" flexDirection="column" flex="1" minH="0">
           {children}
         </Box>
       </Flex>
