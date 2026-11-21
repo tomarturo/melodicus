@@ -120,7 +120,8 @@ test('the copyright and GitHub link sit in the sidebar, not under the page', asy
   await expect(copyright).toHaveAttribute('href', 'https://www.heytk.net');
   // The rail shows only the icons; the labels appear once it's expanded.
   await expect(page.getByText('2025 HeyTK')).toBeHidden();
-  await page.getByRole('button', { name: 'Expand sidebar' }).click();
+  await page.mouse.move(700, 300);
+  await page.getByRole('navigation', { name: 'Main' }).hover();
   await expect(page.getByText('2025 HeyTK')).toBeVisible();
   // The panel runs to the bottom margin of the window.
   const metrics = await panelMetrics(page);

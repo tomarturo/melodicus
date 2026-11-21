@@ -136,7 +136,9 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
         <Flex as={RouterLink} to="/" onClick={onNavigate} align="center" gap="2" aria-label="Melodicus home">
           {/* The wordmark includes the logomark's dots, so it replaces it rather than following it. */}
           {expanded ? (
-            <Image src="/wordmark.svg" alt="" w="112px" />
+            // Sized so its M matches the logomark's (14px tall), so the mark doesn't
+            // jump as the rail opens. The logomark's SVG has more padding.
+            <Image src="/wordmark.svg" alt="" h="15.3px" w="auto" ml="2.5px" />
           ) : (
             <Image src="/favicon.svg" alt="" boxSize="24px" flexShrink={0} />
           )}

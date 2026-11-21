@@ -63,6 +63,7 @@ function Rail() {
       <Box
         as="nav"
         aria-label="Main"
+        data-expanded={expanded}
         position="fixed"
         top="0"
         bottom="0"
@@ -89,27 +90,31 @@ function Rail() {
         }}
       >
         <Sidebar expanded={expanded} onNavigate={close} showShortcut={canHover} />
-        <IconButton
-          aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-          aria-expanded={expanded}
-          icon={<Icon as={expanded ? CaretLeft : CaretRight} boxSize="14px" />}
-          onClick={() => {
-            cancelHover();
-            setState(state === 'pinned' ? 'closed' : 'pinned');
-          }}
-          position="absolute"
-          top="24px"
-          right="-14px"
-          size="xs"
-          isRound
-          minW="28px"
-          h="28px"
-          bg="chrome.raised"
-          color="chrome.fg"
-          borderWidth="1px"
-          borderColor="chrome.border"
-          _hover={{ bg: 'chrome.active' }}
-        />
+        {/* With a mouse, hovering opens the rail. A touch screen has no hover,
+            so it gets a button instead. */}
+        {!canHover && (
+          <IconButton
+            aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-expanded={expanded}
+            icon={<Icon as={expanded ? CaretLeft : CaretRight} boxSize="14px" />}
+            onClick={() => {
+              cancelHover();
+              setState(state === 'pinned' ? 'closed' : 'pinned');
+            }}
+            position="absolute"
+            top="24px"
+            right="-14px"
+            size="xs"
+            isRound
+            minW="28px"
+            h="28px"
+            bg="chrome.raised"
+            color="chrome.fg"
+            borderWidth="1px"
+            borderColor="chrome.border"
+            _hover={{ bg: 'chrome.active' }}
+          />
+        )}
       </Box>
     </>
   );
