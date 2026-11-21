@@ -83,7 +83,7 @@ const SearchResults = ({ searchQuery }: { searchQuery?: string }) => {
     <div>
       <Flex direction='column' minH='100vh'>
         <Header />
-        <Flex direction="column" flex="1" pt='12' bg='#FAF9F6' borderRadius={['none', 'none', 'xl']} overflow="hidden">
+        <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} overflow="hidden">
         {quotaExceeded ? (
           <SearchQuotaError query={query} />
             ) : (
@@ -94,13 +94,13 @@ const SearchResults = ({ searchQuery }: { searchQuery?: string }) => {
                       mb='1'
                       rounded='full'
                       variant='filled'
-                      bg="blackAlpha.100"
-                      _hover={{ bg: "blackAlpha.200" }}
-                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.900" }}
+                      bg="bg.muted"
+                      _hover={{ bg: "bg.mutedHover" }}
+                      _focus={{ bg: "bg.muted", borderColor: "border.focus" }}
                       pr='2rem'
                       type='text'
                       placeholder='Enter a song title & artist'
-                      _placeholder={{ opacity: 1, color: 'blackAlpha.600' }}
+                      _placeholder={{ opacity: 1, color: 'fg.placeholder' }}
                       defaultValue={query}
                       onChange={(e) => setCurrentSearchQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
@@ -113,9 +113,9 @@ const SearchResults = ({ searchQuery }: { searchQuery?: string }) => {
                         icon={<SearchIcon />} 
                         isRound 
                         size='sm' 
-                        color="blackAlpha.900" 
+                        color="fg.strong" 
                         bg="none" 
-                        _hover={{ color: 'whiteAlpha.900', bg: 'blackAlpha.800' }}
+                        _hover={{ color: 'fg.onInverse', bg: 'bg.inverse' }}
                       />
                     </InputRightElement>
                   </InputGroup>

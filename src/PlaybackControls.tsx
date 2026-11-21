@@ -13,15 +13,7 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }: PlaybackCo
       <Button
         width= "128px"
         size='lg'
-        variant='filled'
-        rounded='full'
-        bg="blackAlpha.100"
-        border="1px"
-        color="blackAlpha.800"
-        borderColor="blackAlpha.200"
-        _hover={{
-          boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
-        }}
+        variant='pill'
         aria-label='Play or Pause'
         leftIcon={isPlaying ? <Icon as={Pause} weight="fill" /> : <Icon as={Play} weight="fill" />}
         onClick={playPauseClick}
@@ -29,19 +21,10 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }: PlaybackCo
         {isPlaying ? 'Pause' : 'Play'}
       </Button>
       <Button
-        
         width= "128px"
         leftIcon={<Icon as={Repeat} />}
         size='lg'
-        variant='filled'
-        rounded='full'
-        bg="blackAlpha.100"
-        border="1px"
-        color="blackAlpha.800"
-        borderColor="blackAlpha.200"
-        _hover={{
-          boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
-        }}
+        variant='pill'
         aria-label='Restart Loop'
         onClick={restartLoop}
       >

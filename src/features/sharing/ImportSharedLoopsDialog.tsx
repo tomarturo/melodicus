@@ -40,7 +40,7 @@ const ImportSharedLoopsDialog = ({ loops, canImport, isImporting, onImport, onDi
                 <Text as="span" fontWeight="semibold">
                   {loop.name || 'Untitled loop'}
                 </Text>{' '}
-                <Text as="span" color="blackAlpha.700">
+                <Text as="span" color="fg.muted">
                   {formatSecondsToDuration(loop.start_time)} – {formatSecondsToDuration(loop.end_time)}
                 </Text>
               </ListItem>
@@ -54,9 +54,9 @@ const ImportSharedLoopsDialog = ({ loops, canImport, isImporting, onImport, onDi
             </Button>
             <Button
               rounded="full"
-              bg="blackAlpha.800"
-              color="white"
-              _hover={{ bg: 'blackAlpha.900' }}
+              bg="bg.inverse"
+              color="fg.inverse"
+              _hover={{ bg: 'bg.inverseHover' }}
               isDisabled={!canImport}
               isLoading={isImporting}
               loadingText="Importing"

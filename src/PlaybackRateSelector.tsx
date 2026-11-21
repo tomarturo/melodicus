@@ -35,15 +35,7 @@ function PlaybackRateSelector({ onRateChange }: { onRateChange: (rate: number) =
       > 
       <IconButton
         size="sm"
-        variant='filled'
-        rounded='full'
-        bg="blackAlpha.100"
-        border="1px"
-        color="blackAlpha.800"
-        borderColor="blackAlpha.200"
-        _hover={{
-          boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
-        }}
+        variant='pill'
         isDisabled={currentRate === rates[0]}
         onClick={onMinusClick}
         icon={<Minus size={20} />}
@@ -53,13 +45,13 @@ function PlaybackRateSelector({ onRateChange }: { onRateChange: (rate: number) =
         size="lg"
         variant='filled'
         rounded='full'
-        bg="blackAlpha.100"
+        bg="bg.muted"
         border="1px"
-        color="blackAlpha.800"
-        borderColor="blackAlpha.200"
+        color="fg.default"
+        borderColor="border.default"
         minW="100px" 
         _hover={{
-          boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
+          boxShadow: "0 0 0 1px", boxShadowColor: "fg.default", bg: "bg.mutedHover", borderColor: "border.emphasis", color: "fg.strong"
         }}
         value={currentRate.toString()}
         onChange={handleChange}
@@ -72,15 +64,7 @@ function PlaybackRateSelector({ onRateChange }: { onRateChange: (rate: number) =
       </Select>
         <IconButton
           size="sm"
-          variant='filled'
-          rounded='full'
-          bg="blackAlpha.100"
-          border="1px"
-          color="blackAlpha.800"
-          borderColor="blackAlpha.200"
-          _hover={{
-            boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
-          }}
+          variant='pill'
           icon={<Plus size={20} />}
           onClick={onPlusClick}
           isDisabled={currentRate === rates[rates.length - 1]}

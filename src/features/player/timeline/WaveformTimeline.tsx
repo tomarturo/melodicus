@@ -44,7 +44,7 @@ const WaveformTimeline = ({
   const closeMenu = useCallback(() => setMenu(null), []);
 
   return (
-    <Box py={4} px={8} bg="#FAF9F6">
+    <Box py={4} px={8} bg="bg.panel">
       <Flex justify="flex-end" align="center" gap={1} mb={1}>
         {!isFollowing && (
           <Button
@@ -65,7 +65,7 @@ const WaveformTimeline = ({
           isDisabled={zoomIndex === 0}
           onClick={() => setZoomIndex((index) => Math.max(0, index - 1))}
         />
-        <Text fontSize="xs" color="blackAlpha.700" minW="26px" textAlign="center">
+        <Text fontSize="xs" color="fg.muted" minW="26px" textAlign="center">
           {ZOOM_LEVELS[zoomIndex]}x
         </Text>
         <IconButton

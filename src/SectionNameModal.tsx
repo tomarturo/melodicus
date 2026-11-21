@@ -55,11 +55,11 @@ const SectionNameModal = ({
           <Input
             rounded='full'
             variant='filled'
-            bg="blackAlpha.100"
-            _hover={{ bg: "blackAlpha.200" }}
-            _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.900" }}
+            bg="bg.muted"
+            _hover={{ bg: "bg.mutedHover" }}
+            _focus={{ bg: "bg.muted", borderColor: "border.focus" }}
             placeholder="Loop name (optional)"
-            _placeholder={{ opacity: 1, color: 'blackAlpha.600' }}
+            _placeholder={{ opacity: 1, color: 'fg.placeholder' }}
             value={sectionName}
             onChange={(e) => onSectionNameChange(e.target.value)}
             onKeyPress={(e) => {
@@ -67,7 +67,7 @@ const SectionNameModal = ({
             }}
           />
 
-            {/* <Text fontSize="md" color="blackAlpha.700" mb="1">Quick add</Text> */}
+            {/* <Text fontSize="md" color="fg.muted" mb="1">Quick add</Text> */}
             <Box overflowX="auto" pb="1">
               <HStack spacing="1" minW="max-content">
                 {musicTerms.map((term) => (
@@ -75,12 +75,12 @@ const SectionNameModal = ({
                     key={term}
                     size="sm"
                     rounded="full"
-                    bg="blackAlpha.50"
-                    color="blackAlpha.800"
+                    bg="bg.subtle"
+                    color="fg.default"
                     border="1px"
-                    borderColor="blackAlpha.200"
-                    _hover={{ bg: "blackAlpha.100", borderColor: "blackAlpha.400" }}
-                    _active={{ bg: "blackAlpha.200" }}
+                    borderColor="border.default"
+                    _hover={{ bg: "bg.muted", borderColor: "border.strongHover" }}
+                    _active={{ bg: "bg.mutedHover" }}
                     onClick={() => handleQuickSelect(term)}
                     flexShrink={0}
                   >
@@ -96,12 +96,12 @@ const SectionNameModal = ({
                     key={item}
                     size="sm"
                     rounded="full"
-                    bg="blackAlpha.50"
-                    color="blackAlpha.800"
+                    bg="bg.subtle"
+                    color="fg.default"
                     border="1px"
-                    borderColor="blackAlpha.200"
-                    _hover={{ bg: "blackAlpha.100", borderColor: "blackAlpha.400" }}
-                    _active={{ bg: "blackAlpha.200" }}
+                    borderColor="border.default"
+                    _hover={{ bg: "bg.muted", borderColor: "border.strongHover" }}
+                    _active={{ bg: "bg.mutedHover" }}
                     onClick={() => handleQuickSelect(item)}
                     flexShrink={0}
                     minW="40px"
@@ -120,10 +120,10 @@ const SectionNameModal = ({
           size="md"
           rounded="full"
           bg="none"
-          color="blackAlpha.800"
+          color="fg.default"
           border="1px"
-          borderColor="blackAlpha.300"
-          _hover={{ bg:"blackAlpha.200", borderColor:"blackAlpha.100", border:"2px", color:"blackAlpha.900"}}
+          borderColor="border.strong"
+          _hover={{ bg:"bg.mutedHover", borderColor:"border.subtle", border:"2px", color:"fg.strong"}}
           onClick={onClose}>
             Cancel
           </Button>
@@ -132,11 +132,11 @@ const SectionNameModal = ({
           size='md'
           rounded='full'
           variant='filled'
-          bg="blackAlpha.100"
+          bg="bg.muted"
           border="1px"
-          color="blackAlpha.800"
-          borderColor="blackAlpha.100"
-          _hover={{ bg:"blackAlpha.200", borderColor:"blackAlpha.700", border:"2px", color:"blackAlpha.900"}}
+          color="fg.default"
+          borderColor="border.subtle"
+          _hover={{ bg:"bg.mutedHover", borderColor:"border.emphasis", border:"2px", color:"fg.strong"}}
           isLoading={isSaving}
           loadingText={isEditing ? 'Updating' : 'Saving'}
           onClick={onSave}>

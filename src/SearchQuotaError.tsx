@@ -14,7 +14,7 @@ const SearchQuotaError = ({ query }: { query: string }) => {
     };
 
     return (
-    <Container maxW='3xl' mt='12' bg="white" borderRadius={['none', 'none', 'xl']}>
+    <Container maxW='3xl' mt='12' bg="bg.surface" borderRadius={['none', 'none', 'xl']}>
       <Heading as='h1' size='xl' textAlign="center" mb='6'>We can't run your search right now</Heading>
       <Text align='center' mb='8'>
       <Link
@@ -43,7 +43,7 @@ const SearchQuotaError = ({ query }: { query: string }) => {
         onChange={(e) => setVideoLink(e.target.value)}
         />
             <InputRightElement>
-                <IconButton onClick={handleButtonClick} aria-label='Open video' icon={<ArrowForwardIcon />}  isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>
+                <IconButton onClick={handleButtonClick} aria-label='Open video' icon={<ArrowForwardIcon />}  isRound size='sm' color="fg.inverse" bg="bg.inverseStrong" _hover={{color:'fg.max', bg:'bg.surface', border:'1px', borderColor:'border.inverse'}}>
                 </IconButton>
             </InputRightElement>
         </InputGroup>

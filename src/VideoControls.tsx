@@ -26,7 +26,7 @@ const VideoControls = ({
 }: VideoControlsProps) => (
   <Flex
     direction="column"
-    bg='#FAF9F6'
+    bg='bg.panel'
     pt={4}
     pb={8}
     px={["12px", "12px", 8]}
@@ -67,20 +67,8 @@ const VideoControls = ({
       <Button
         onClick={onNewLoop}
         leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
-        variant='filled'
+        variant='pill'
         size='lg'
-        rounded='full'
-        bg="blackAlpha.100"
-        border="1px"
-        color="blackAlpha.800"
-        borderColor="blackAlpha.200"
-        _hover={{
-          boxShadow: "0 0 0 1px",
-          boxShadowColor: "blackAlpha.800",
-          bg: "blackAlpha.200",
-          borderColor: "blackAlpha.700",
-          color: "blackAlpha.900"
-        }}
         aria-label='Add loop'
       >
         Add loop
@@ -119,20 +107,8 @@ const VideoControls = ({
         <Button
           onClick={onNewLoop}
           leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
-          variant='filled'
+          variant='pill'
           size='lg'
-          rounded='full'
-          bg="blackAlpha.100"
-          border="1px"
-          color="blackAlpha.800"
-          borderColor="blackAlpha.200"
-          _hover={{
-            boxShadow: "0 0 0 1px",
-            boxShadowColor: "blackAlpha.800",
-            bg: "blackAlpha.200",
-            borderColor: "blackAlpha.700",
-            color: "blackAlpha.900"
-          }}
           aria-label='Add loop'
         >
           Add loop
@@ -160,20 +136,8 @@ const VideoControls = ({
         <Button
           onClick={onNewLoop}
           leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
-          variant='filled'
+          variant='pill'
           size='lg'
-          rounded='full'
-          bg="blackAlpha.100"
-          border="1px"
-          color="blackAlpha.800"
-          borderColor="blackAlpha.200"
-          _hover={{
-            boxShadow: "0 0 0 1px",
-            boxShadowColor: "blackAlpha.800",
-            bg: "blackAlpha.200",
-            borderColor: "blackAlpha.700",
-            color: "blackAlpha.900"
-          }}
           aria-label='Add loop'
         >
           Add loop

@@ -18,7 +18,7 @@ const NullVideoPage = () => {
     return (
     <Flex direction='column' minH='100vh'>
       <Header/>
-      <Flex direction="column" flex="1" bg='#FAF9F6' borderRadius={['none', 'none', 'xl']}>
+      <Flex direction="column" flex="1" bg='bg.panel' borderRadius={['none', 'none', 'xl']}>
         <Container maxW='3xl' mt='12'>
           <Heading as='h1' size='xl' textAlign="center" mb='6'>We're having trouble with the link you provided</Heading>
           <Text align='center' mb='8'>
@@ -48,7 +48,7 @@ const NullVideoPage = () => {
             onChange={(e) => setVideoLink(e.target.value)}
             />
                 <InputRightElement>
-                    <IconButton onClick={handleButtonClick} aria-label='Open video' icon={<ArrowForwardIcon />}  isRound size='sm' color="white" bg="black" _hover={{color:'black', bg:'white', border:'1px', borderColor:'black'}}>
+                    <IconButton onClick={handleButtonClick} aria-label='Open video' icon={<ArrowForwardIcon />}  isRound size='sm' color="fg.inverse" bg="bg.inverseStrong" _hover={{color:'fg.max', bg:'bg.surface', border:'1px', borderColor:'border.inverse'}}>
                     </IconButton>
                 </InputRightElement>
             </InputGroup>
