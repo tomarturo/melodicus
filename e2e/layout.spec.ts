@@ -114,15 +114,15 @@ test.describe('video page', () => {
 test('the copyright and GitHub link sit in the sidebar, not under the page', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
-  const github = page.getByRole('link', { name: 'tomarturo on GitHub' });
+  const github = page.getByRole('link', { name: 'View source on GitHub' });
   await expect(github).toHaveAttribute('href', 'https://github.com/tomarturo/melodicus');
-  const copyright = page.getByRole('link', { name: '© 2025 HeyTK' });
-  await expect(copyright).toHaveAttribute('href', 'https://www.heytk.net');
+  const copyright = page.getByRole('link', { name: '© 2026 Tom Kurzeka' });
+  await expect(copyright).toHaveAttribute('href', 'https://www.linkedin.com/in/tomkurzeka');
   // The rail shows only the icons; the labels appear once it's expanded.
-  await expect(page.getByText('2025 HeyTK')).toBeHidden();
+  await expect(page.getByText('2026 Tom Kurzeka')).toBeHidden();
   await page.mouse.move(700, 300);
   await page.getByRole('navigation', { name: 'Main' }).hover();
-  await expect(page.getByText('2025 HeyTK')).toBeVisible();
+  await expect(page.getByText('2026 Tom Kurzeka')).toBeVisible();
   // With no footer, the panel runs down to the window's 20px frame.
   const metrics = await panelMetrics(page);
   expect(metrics.viewportHeight - metrics.bottom).toBe(20);
@@ -132,8 +132,8 @@ test('on a phone, the drawer holds the copyright and GitHub link', async ({ page
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await page.getByRole('button', { name: 'Open menu' }).click();
-  await expect(page.getByRole('dialog').getByRole('link', { name: 'tomarturo on GitHub' })).toBeVisible();
-  await expect(page.getByRole('dialog').getByRole('link', { name: '© 2025 HeyTK' })).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('link', { name: 'View source on GitHub' })).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('link', { name: '© 2026 Tom Kurzeka' })).toBeVisible();
 });
 
 test('past 1600px the app, rail included, stays together and centers in the window', async ({ page }) => {

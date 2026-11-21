@@ -232,28 +232,28 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
           onClick={authDialog.onOpen}
         />
       )}
+      {/* Separates the account from the project's links below it. */}
+      <Box h="1px" bg="chrome.border" mx="5" my="2" flexShrink={0} aria-hidden />
       <SidebarItem
         as="a"
         href="https://github.com/tomarturo/melodicus"
         target="_blank"
         rel="noopener noreferrer"
         expanded={expanded}
-        label="tomarturo"
-        // The handle in the system monospace, as it reads on GitHub.
-        labelFont="mono"
-        aria-label="tomarturo on GitHub"
+        label="View source"
+        aria-label="View source on GitHub"
         icon={<Icon as={GithubLogo} boxSize="22px" />}
         trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
       />
       <SidebarItem
         as="a"
-        href="https://www.heytk.net"
+        href="https://www.linkedin.com/in/tomkurzeka"
         target="_blank"
         rel="noopener noreferrer"
         expanded={expanded}
-        label="2025 HeyTK"
+        label="2026 Tom Kurzeka"
         // The © is the icon, so the name spells it out.
-        aria-label="© 2025 HeyTK"
+        aria-label="© 2026 Tom Kurzeka"
         icon={<Icon as={Copyright} boxSize="22px" />}
         trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
       />
