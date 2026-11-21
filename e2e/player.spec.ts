@@ -76,7 +76,7 @@ const mouseDrag = async (page: Page, from: { x: number; y: number }, to: { x: nu
 
 const zoomTo8x = async (page: Page) => {
   for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Zoom in' }).click();
-  await expect(page.getByText('8x')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Zoom in' })).toBeDisabled();
 };
 
 const playheadInView = async (page: Page) => {
