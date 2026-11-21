@@ -74,8 +74,11 @@ const TRACK_STYLES = `
   /* A small gap between the track and the ruler. */
   [part="timeline-wrapper"] { margin-top: 4px; }
 
-  /* No grips while the loop is the whole song: nothing has been picked yet. */
-  [part~="loop"][data-whole-song] [part~="region-handle"]::after { display: none; }
+  /* Until a loop is picked it spans the whole song, and isn't drawn: no fill,
+     no edges, no grips. Hidden handles also leave the track's ends free for
+     dragging out a selection. */
+  [part~="loop"][data-whole-song] { background-color: transparent !important; }
+  [part~="loop"][data-whole-song] [part~="region-handle"] { visibility: hidden; }
 `;
 
 // A region drag reports positions continuously, and those come back from the
@@ -118,7 +121,7 @@ const styleRegion = (region: Region, edgeColor?: string) => {
   });
 };
 
-/** Flags the loop region while it spans the whole song, before any selection. */
+/** Flags the loop region while it spans the whole song, before any selection, so it isn't drawn. */
 const markWholeSong = (region: Region, wholeSong: boolean) => {
   region.element?.toggleAttribute('data-whole-song', wholeSong);
 };

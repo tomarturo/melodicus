@@ -60,11 +60,22 @@ test('the row under the track hints, then offers Save loop for a new selection',
   expect(await storedLoops(page)).toHaveLength(1);
 });
 
+const loopFill = (page: Page) =>
+  page.locator('[part~="region"][part~="loop"]').first().evaluate((el) => getComputedStyle(el).backgroundColor);
+
+test('the loop isn’t drawn until one is picked', async ({ page }) => {
+  await openWith(page, [SOLO]);
+  await expect.poll(() => loopFill(page)).toBe('rgba(0, 0, 0, 0)');
+  await page.getByRole('button', { name: 'Solo', exact: true }).click();
+  await expect.poll(() => loopFill(page)).not.toBe('rgba(0, 0, 0, 0)');
+});
+
 test('Cancel drops a new selection, back to the hint', async ({ page }) => {
   await openWith(page, []);
   await dragSelection(page, 0.5, 0.6);
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(row(page)).toHaveText('Drag on the track to make a loop');
+  await expect.poll(() => loopFill(page)).toBe('rgba(0, 0, 0, 0)');
   // The loop spans the whole video again.
   const region = await page.locator('[part~="region"][part~="loop"]').first().boundingBox();
   const track = await page.locator('[part~="canvases"]').first().boundingBox();
