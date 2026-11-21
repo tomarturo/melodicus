@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
-import Header from './Header';
-import Footer from './Footer';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 import { ArrowSquareOut } from '@phosphor-icons/react';
 import { Flex, IconButton, Icon, Link, Heading, Text, Input, InputGroup, InputRightElement, Container, } from '@chakra-ui/react';
@@ -16,8 +14,7 @@ const NullVideoPage = () => {
     };
 
     return (
-    <Flex direction='column' minH='100vh'>
-      <Header/>
+    <>
       <Flex direction="column" flex="1" bg='bg.panel' borderRadius={['none', 'none', 'xl']}>
         <Container maxW='3xl' mt='12'>
           <Heading as='h1' size='xl' textAlign="center" mb='6'>We're having trouble with the link you provided</Heading>
@@ -54,8 +51,7 @@ const NullVideoPage = () => {
             </InputGroup>
         </Container> 
         </Flex>
-        <Footer/>
-      </Flex> 
+      </> 
   )}
 
 export default NullVideoPage;

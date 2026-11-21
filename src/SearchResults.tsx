@@ -13,8 +13,6 @@ import {
   HStack,
   Badge
 } from '@chakra-ui/react';
-import Header from './Header';
-import Footer from './Footer';
 import SearchQuotaError from './SearchQuotaError';
 import SearchResultsList from './SearchResultsList';
 import { SearchIcon } from '@chakra-ui/icons';
@@ -80,9 +78,7 @@ const SearchResults = ({ searchQuery }: { searchQuery?: string }) => {
   };
 
   return (
-    <div>
-      <Flex direction='column' minH='100vh'>
-        <Header />
+    <>
         <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} overflow="hidden">
         {quotaExceeded ? (
           <SearchQuotaError query={query} />
@@ -137,9 +133,7 @@ const SearchResults = ({ searchQuery }: { searchQuery?: string }) => {
               </Container>
             )}
         </Flex>
-        <Footer />
-      </Flex>
-    </div>
+    </>
   );
 };
 
