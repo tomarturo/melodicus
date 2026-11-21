@@ -49,14 +49,11 @@ const ImportSharedLoopsDialog = ({ loops, canImport, isImporting, onImport, onDi
         </ModalBody>
         <ModalFooter>
           <HStack gap="4">
-            <Button rounded="full" variant="ghost" onClick={onDismiss}>
+            <Button variant="quiet" onClick={onDismiss}>
               Not now
             </Button>
             <Button
-              rounded="full"
-              bg="bg.inverse"
-              color="fg.inverse"
-              _hover={{ bg: 'bg.inverseHover' }}
+              variant="loud"
               isDisabled={!canImport}
               isLoading={isImporting}
               loadingText="Importing"

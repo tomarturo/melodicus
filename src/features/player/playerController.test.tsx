@@ -89,6 +89,23 @@ describe('PlayerController', () => {
     expect(controller.getState().loop).toEqual({ start: 3, end: 9 });
   });
 
+  it('clears a selection back to the whole video', () => {
+    attach(fakePlayer(100));
+    controller.jumpToLoop(3, 9, 'saved-id');
+    controller.clearLoop();
+    expect(controller.getState()).toMatchObject({ loop: { start: 0, end: 100 }, hasCustomLoop: false, loopOrigin: null });
+  });
+
+  it('resets an edited saved loop to its saved edges without seeking', () => {
+    const player = attach(fakePlayer(100));
+    controller.jumpToLoop(3, 9, 'saved-id');
+    controller.previewLoop(3, 12);
+    player.seekTo.mockClear();
+    controller.resetLoop(3, 9, 'saved-id');
+    expect(controller.getState()).toMatchObject({ loop: { start: 3, end: 9 }, hasCustomLoop: true, loopOrigin: 'saved-id' });
+    expect(player.seekTo).not.toHaveBeenCalled();
+  });
+
   it('asks the timeline to follow the playhead on play, restart and jumping to a loop, not on pause', () => {
     attach();
     const before = controller.getState().followRequest;

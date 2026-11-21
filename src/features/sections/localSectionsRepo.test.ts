@@ -20,6 +20,15 @@ describe('LocalSectionsRepo', () => {
     expect(await repo.listSections(video.videoId)).toEqual([]);
   });
 
+  it('moves a loop’s start and end, keeping its name, and rejects an end before the start', async () => {
+    const repo = new LocalSectionsRepo();
+    const created = await repo.createSection(video, { name: 'Solo', start_time: 30, end_time: 45 });
+    const retimed = await repo.retimeSection(video.videoId, created.id, { start_time: 31.5, end_time: 47 });
+    expect(retimed).toEqual({ id: created.id, name: 'Solo', start_time: 31.5, end_time: 47 });
+    expect(await repo.listSections(video.videoId)).toEqual([retimed]);
+    await expect(repo.retimeSection(video.videoId, created.id, { start_time: 50, end_time: 40 })).rejects.toThrow();
+  });
+
   it('adds a video to the saved-songs index when its first loop is saved', async () => {
     const repo = new LocalSectionsRepo();
     await repo.createSection(video, { name: null, start_time: 1, end_time: 2 });

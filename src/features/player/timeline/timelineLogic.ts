@@ -34,15 +34,6 @@ export function orderedLoops(sections: Section[]): Section[] {
   );
 }
 
-/** The saved loop that matches the current loop exactly, if any. */
-export function activeLoopId(sections: Section[], loop: { start: number; end: number }, epsilon = 0.01): string | null {
-  return (
-    sections.find(
-      (section) => Math.abs(section.start_time - loop.start) < epsilon && Math.abs(section.end_time - loop.end) < epsilon,
-    )?.id ?? null
-  );
-}
-
 /**
  * Where to scroll so the playhead stays in view, or null to stay put. Rather
  * than keeping the playhead centred (which moves the track on every tick), the

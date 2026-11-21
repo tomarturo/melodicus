@@ -47,6 +47,14 @@ describe('SupabaseSectionsRepo', () => {
     expect(await repo.listSections(video.videoId)).toEqual([]);
   });
 
+  it('moves a loop’s start and end', async () => {
+    const repo = new SupabaseSectionsRepo(client, USER);
+    const created = await repo.createSection(video, { name: 'Solo', start_time: 30, end_time: 45 });
+    const retimed = await repo.retimeSection(video.videoId, created.id, { start_time: 31.5, end_time: 47 });
+    expect(retimed).toMatchObject({ id: created.id, name: 'Solo', start_time: 31.5, end_time: 47 });
+    expect(await repo.listSections(video.videoId)).toEqual([retimed]);
+  });
+
   it('imports loops without duplicates, in one insert', async () => {
     const repo = new SupabaseSectionsRepo(client, USER);
     await repo.createSection(video, { name: 'A', start_time: 10, end_time: 20 });

@@ -61,13 +61,37 @@ const semanticTokens = {
   },
 };
 
+/*
+ * Three button styles, all rounded. Each works at any Chakra size: sm in the
+ * row under the timeline, md in dialogs.
+ *   loud:  black fill. The action answering what the person just did (Save
+ *          loop, Update), and the Share button over the video.
+ *   pill:  soft fill. Standing controls and dialog actions.
+ *   quiet: hairline outline. Secondary choices beside a louder one (Cancel).
+ * Hover thickens the outline with a 1px shadow rather than a wider border, so
+ * nothing shifts.
+ */
+// The hover edge is the darkest text color, border and ring alike, so it
+// reads as one 2px line. Chakra has no boxShadowColor prop, so the color is
+// written into the shadow itself.
+export const HOVER_EDGE = 'fg.strong';
+export const HOVER_RING = '0 0 0 1px var(--chakra-colors-fg-strong)';
 const components = {
   Button: {
     variants: {
-      /**
-       * The app's rounded, softly filled button: playback controls, Add loop,
-       * Save and the playback-rate steppers.
-       */
+      loud: {
+        rounded: 'full',
+        bg: 'ink',
+        border: '1px',
+        borderColor: 'ink',
+        color: 'fg.inverse',
+        _hover: {
+          bg: 'ink.hover',
+          borderColor: 'ink.hover',
+          _disabled: { bg: 'ink', borderColor: 'ink' },
+        },
+        _active: { bg: 'ink.active', borderColor: 'ink.active' },
+      },
       pill: {
         rounded: 'full',
         bg: 'bg.muted',
@@ -75,13 +99,27 @@ const components = {
         borderColor: 'border.default',
         color: 'fg.default',
         _hover: {
-          boxShadow: '0 0 0 1px',
-          boxShadowColor: 'fg.default',
+          boxShadow: HOVER_RING,
           bg: 'bg.mutedHover',
-          borderColor: 'border.emphasis',
+          borderColor: HOVER_EDGE,
           color: 'fg.strong',
           _disabled: { bg: 'bg.muted', boxShadow: 'none', borderColor: 'border.default', color: 'fg.default' },
         },
+      },
+      quiet: {
+        rounded: 'full',
+        bg: 'transparent',
+        border: '1px',
+        borderColor: 'border.strong',
+        color: 'fg.default',
+        _hover: {
+          boxShadow: HOVER_RING,
+          bg: 'bg.mutedHover',
+          borderColor: HOVER_EDGE,
+          color: 'fg.strong',
+          _disabled: { bg: 'transparent', boxShadow: 'none', borderColor: 'border.strong', color: 'fg.default' },
+        },
+        _active: { bg: 'bg.muted' },
       },
     },
   },

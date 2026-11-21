@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSectionsRepository } from './useSectionsRepository';
-import type { NewSection, VideoRef } from './types';
+import type { LoopTimes, NewSection, VideoRef } from './types';
 
 export const sectionKeys = {
   all: ['sections'] as const,
@@ -42,6 +42,11 @@ export function useSectionMutations(videoId: string) {
     rename: useMutation({
       mutationFn: ({ sectionId, name }: { sectionId: string; name: string | null }) =>
         repo.renameSection(videoId, sectionId, name),
+      onSettled: refresh,
+    }),
+    retime: useMutation({
+      mutationFn: ({ sectionId, times }: { sectionId: string; times: LoopTimes }) =>
+        repo.retimeSection(videoId, sectionId, times),
       onSettled: refresh,
     }),
     remove: useMutation({

@@ -4,6 +4,7 @@ import type { Database } from '../../lib/database.types';
 import {
   SectionSchema,
   withoutDuplicates,
+  type LoopTimes,
   type NewSection,
   type SavedSong,
   type Section,
@@ -72,6 +73,19 @@ export class SupabaseSectionsRepo implements SectionsRepository {
     const row = unwrap(
       await this.client.from('saved_sections').update({ name }).eq('id', sectionId).select().single(),
       'rename the loop',
+    );
+    return toSection(row);
+  }
+
+  async retimeSection(_videoId: string, sectionId: string, times: LoopTimes): Promise<Section> {
+    const row = unwrap(
+      await this.client
+        .from('saved_sections')
+        .update({ start_time: times.start_time, end_time: times.end_time })
+        .eq('id', sectionId)
+        .select()
+        .single(),
+      'update the loop',
     );
     return toSection(row);
   }

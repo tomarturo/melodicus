@@ -11,6 +11,7 @@ import { useSectionsRepository } from './features/sections/useSectionsRepository
 import type { Section } from './features/sections/types';
 import { useIncomingShare } from './features/sharing/useIncomingShare';
 import ImportSharedLoopsDialog from './features/sharing/ImportSharedLoopsDialog';
+import ShareButton from './features/sharing/ShareButton';
 
 import VideoDisplay from './VideoDisplay';
 import VideoControls from './VideoControls';
@@ -39,7 +40,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
 
   const sectionsQuery = useSectionsQuery(videoId);
   const savedSections = sectionsQuery.data ?? EMPTY;
-  const { create, rename, remove, importLoops } = useSectionMutations(videoId);
+  const { create, rename, retime, remove, importLoops } = useSectionMutations(videoId);
   const video = { videoId, title: videoTitle ?? '' };
 
   const [nameDialog, setNameDialog] = useState<NameDialog>(null);
@@ -100,15 +101,33 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         await rename.mutateAsync({ sectionId: nameDialog.section.id, name });
       } else {
         // Rounded here so both backends store the same value for the same loop.
-        await create.mutateAsync({
+        const created = await create.mutateAsync({
           video,
           loop: { name, start_time: roundSeconds(loop.start), end_time: roundSeconds(loop.end) },
         });
+        // Dragging this loop's edges from now on offers to update it.
+        controller.setLoopOrigin(created.id);
       }
       toast({ title: nameDialog.mode === 'edit' ? 'Loop updated!' : 'Loop saved!', status: 'success', duration: 3000 });
       closeNameDialog();
     } catch (error) {
       showError('Error', error);
+    } finally {
+      isSavingRef.current = false;
+    }
+  };
+
+  const handleUpdateLoop = async (section: Section) => {
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
+    try {
+      await retime.mutateAsync({
+        sectionId: section.id,
+        times: { start_time: roundSeconds(loop.start), end_time: roundSeconds(loop.end) },
+      });
+      toast({ title: `“${section.name || 'Unnamed'}” updated`, status: 'success', duration: 3000 });
+    } catch (error) {
+      showError('Could not update the loop', error);
     } finally {
       isSavingRef.current = false;
     }
@@ -144,15 +163,21 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
       overscrollBehavior="contain"
     >
       <Box ref={hostRef} display="none" />
-      <VideoDisplay videoThumbnail={videoThumbnail} />
+      <VideoDisplay videoThumbnail={videoThumbnail}>
+        <Box position="absolute" top={3} right={3} zIndex={1}>
+          <ShareButton videoId={videoId} savedSections={savedSections} />
+        </Box>
+      </VideoDisplay>
       {videoLength ? (
         <WaveformTimeline
           controller={controller}
           videoLength={videoLength}
           savedSections={savedSections}
-          onJumpToSection={(start, end) => controller.jumpToLoop(start, end)}
           onEditSection={handleEditSection}
           onDeleteSection={handleDeleteSection}
+          onSaveLoop={handleNewLoop}
+          onUpdateLoop={handleUpdateLoop}
+          isSavingLoop={create.isPending || retime.isPending}
         />
       ) : null}
       <Box flexShrink={0}>
@@ -162,9 +187,6 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
           onPlayPause={() => controller.togglePlay()}
           onRestartLoop={() => controller.restartLoop()}
           onPlaybackRateChange={(rate) => controller.setPlaybackRate(rate)}
-          onNewLoop={handleNewLoop}
-          videoId={videoId}
-          savedSections={savedSections}
         />
       </Box>
       <SectionNameModal

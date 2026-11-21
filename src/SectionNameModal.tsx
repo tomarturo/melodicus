@@ -115,28 +115,12 @@ const SectionNameModal = ({
       </ModalBody>
       <ModalFooter>
         <HStack gap="4">
-          <Button 
-          w="100px"
-          size="md"
-          rounded="full"
-          bg="none"
-          color="fg.default"
-          border="1px"
-          borderColor="border.strong"
-          _hover={{ bg:"bg.mutedHover", borderColor:"border.subtle", border:"2px", color:"fg.strong"}}
-          onClick={onClose}>
+          <Button w="100px" variant="quiet" onClick={onClose}>
             Cancel
           </Button>
           <Button
           w="130px"
-          size='md'
-          rounded='full'
-          variant='filled'
-          bg="bg.muted"
-          border="1px"
-          color="fg.default"
-          borderColor="border.subtle"
-          _hover={{ bg:"bg.mutedHover", borderColor:"border.emphasis", border:"2px", color:"fg.strong"}}
+          variant="pill"
           isLoading={isSaving}
           loadingText={isEditing ? 'Updating' : 'Saving'}
           onClick={onSave}>

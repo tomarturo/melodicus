@@ -7,9 +7,9 @@ import { orderedLoops } from './timelineLogic';
 
 interface LoopPillsProps {
   sections: Section[];
-  /** The saved loop that is currently playing, shown as selected. */
+  /** The saved loop the current selection is, or is being edited from, shown as selected. */
   activeSectionId: string | null;
-  onJumpToSection: (start: number, end: number) => void;
+  onSelectSection: (section: Section) => void;
   onEditSection: (section: Section) => void;
   onDeleteSection: (sectionId: string) => void;
   /** Hovering a pill highlights its span on the track. */
@@ -24,7 +24,7 @@ interface LoopPillsProps {
 const LoopPills = ({
   sections,
   activeSectionId,
-  onJumpToSection,
+  onSelectSection,
   onEditSection,
   onDeleteSection,
   onHighlight,
@@ -64,7 +64,7 @@ const LoopPills = ({
               // Set on the button itself: buttons don't inherit font weight.
               fontWeight="medium"
               pr="1"
-              onClick={() => onJumpToSection(section.start_time, section.end_time)}
+              onClick={() => onSelectSection(section)}
             >
               <span>{name}</span>
             </Flex>
