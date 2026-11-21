@@ -108,7 +108,6 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
   const [readyInstance, setReadyInstance] = useState(0);
   const isReady = readyInstance > 0;
   const followingRef = useRef(true);
-  const [isFollowing, setIsFollowing] = useState(true);
 
   /** Scrolls so the playhead is in view, if following and it isn't. */
   const keepPlayheadInView = useCallback((time: number) => {
@@ -130,7 +129,6 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
   const setFollowing = useCallback(
     (following: boolean) => {
       followingRef.current = following;
-      setIsFollowing(following);
       if (following) keepPlayheadInView(controller.getTime());
     },
     [controller, keepPlayheadInView],
@@ -407,8 +405,6 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
     containerRef,
     zoomIndex,
     setZoomIndex,
-    isFollowing,
-    follow: () => setFollowing(true),
   };
 };
 

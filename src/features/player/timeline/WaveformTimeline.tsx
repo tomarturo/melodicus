@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Box, Button, Flex, Icon, IconButton } from '@chakra-ui/react';
-import { Crosshair, MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
+import { Box, Flex, Icon, IconButton } from '@chakra-ui/react';
+import { MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
 import useWaveformTimeline from './useWaveformTimeline';
 import LoopPills from './LoopPills';
 import { ZOOM_LEVELS, activeLoopId, drawableSections } from './timelineLogic';
@@ -26,9 +26,9 @@ const zoomButtonStyle = {
   borderRadius: 'md',
   _hover: { bg: 'gray.800' },
   _active: { bg: 'gray.700' },
-  // Keep the black square when disabled; only the icon dims.
-  _disabled: { opacity: 1, color: 'whiteAlpha.400', cursor: 'not-allowed' },
-  sx: { '&:disabled:hover': { bg: 'black' } },
+  // Disabled: the white icon stays, the black square lightens.
+  _disabled: { opacity: 1, bg: 'blackAlpha.400', color: 'white', cursor: 'not-allowed' },
+  sx: { '&:disabled:hover': { bg: 'blackAlpha.400' } },
 } as const;
 
 const WaveformTimeline = ({
@@ -41,7 +41,7 @@ const WaveformTimeline = ({
 }: WaveformTimelineProps) => {
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const { loop } = usePlayerState(controller);
-  const { containerRef, zoomIndex, setZoomIndex, isFollowing, follow } = useWaveformTimeline({
+  const { containerRef, zoomIndex, setZoomIndex } = useWaveformTimeline({
     controller,
     duration: videoLength,
     sections: savedSections,
@@ -52,7 +52,7 @@ const WaveformTimeline = ({
 
   return (
     <Box py={4} px={8} bg="bg.panel">
-      {(hasLoops || !isFollowing) && (
+      {hasLoops && (
         <Flex align="flex-start" gap={4} mb={2}>
           <LoopPills
             sections={savedSections}
@@ -62,13 +62,6 @@ const WaveformTimeline = ({
             onDeleteSection={onDeleteSection}
             onHighlight={setHighlightedId}
           />
-          {!isFollowing && (
-            <Flex align="center" ml="auto" flexShrink={0} h="30px">
-              <Button size="xs" variant="ghost" leftIcon={<Icon as={Crosshair} boxSize="14px" />} onClick={follow}>
-                Follow playhead
-              </Button>
-            </Flex>
-          )}
         </Flex>
       )}
       <Box position="relative">
