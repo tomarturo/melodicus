@@ -8,21 +8,8 @@ import type { Section } from '../../sections/types';
 import { MIN_LOOP } from '../loopLogic';
 import type { PlayerController } from '../playerController';
 import { chipRows, drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import type { TimelinePalette } from './timelinePalette';
 
-// blackAlpha.500 and blackAlpha.800 from the slider this replaced, flattened
-// against the #FAF9F6 panel rather than left translucent. They have to be
-// opaque: the progress canvas is the main canvas recomposited with
-// 'source-in', which multiplies the two alphas, so a translucent waveColor
-// drags progressColor down with it.
-const TRACK_COLOR = '#A09F9D'; // blackAlpha.500 over #FAF9F6
-const PLAYED_COLOR = '#323231'; // blackAlpha.800 over #FAF9F6
-const PLAYHEAD_COLOR = '#C53030'; // red.600
-// The loop needs its own hue: as another shade of black it was
-// indistinguishable from the played-portion darkening it overlaps.
-const LOOP_COLOR = 'rgba(128, 90, 213, 0.30)'; // purple.500
-const LOOP_EDGE_COLOR = '#553C9A'; // purple.700
-const SECTION_COLOR = 'rgba(85, 60, 154, 0.13)'; // purple.700, well under the loop
-const SECTION_CHIP_COLOR = '#553C9A'; // purple.700
 const LOOP_REGION_ID = 'loop';
 const SECTION_ID_PREFIX = 'section-';
 
@@ -80,7 +67,7 @@ interface Handlers {
 // Region content lands inside the renderer's shadow root, where Chakra's class
 // names don't reach, hence plain DOM and inline styles. The caret defers to a
 // Chakra menu rendered outside the shadow root by WaveformTimeline.
-const buildSectionChip = (section: Section, row: number, handlers: { current: Handlers }) => {
+const buildSectionChip = (section: Section, row: number, handlers: { current: Handlers }, palette: TimelinePalette) => {
   const chip = document.createElement('div');
   chip.dataset.interactive = 'true';
   Object.assign(chip.style, {
@@ -89,8 +76,8 @@ const buildSectionChip = (section: Section, row: number, handlers: { current: Ha
     left: '0',
     display: 'inline-flex',
     alignItems: 'center',
-    background: SECTION_CHIP_COLOR,
-    color: '#FAF9F6',
+    background: palette.chip,
+    color: palette.chipText,
     font: '500 11px/1 system-ui, -apple-system, sans-serif',
     borderRadius: '9999px',
     whiteSpace: 'nowrap',
@@ -146,9 +133,18 @@ interface UseWaveformTimelineOptions extends Handlers {
   controller: PlayerController;
   duration: number;
   sections: Section[];
+  /** Colors for the current color mode. A change rebuilds the timeline. */
+  palette: TimelinePalette;
 }
 
-const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, onSectionMenu }: UseWaveformTimelineOptions) => {
+const useWaveformTimeline = ({
+  controller,
+  duration,
+  sections,
+  palette,
+  onJumpToSection,
+  onSectionMenu,
+}: UseWaveformTimelineOptions) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const regionsRef = useRef<RegionsPlugin | null>(null);
@@ -228,9 +224,9 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
       peaks: PLACEHOLDER_PEAKS,
       duration,
       height: TRACK_HEIGHT,
-      waveColor: TRACK_COLOR,
-      progressColor: PLAYED_COLOR,
-      cursorColor: PLAYHEAD_COLOR,
+      waveColor: palette.track,
+      progressColor: palette.played,
+      cursorColor: palette.playhead,
       cursorWidth: 3,
       renderFunction: renderTrackBar,
       interact: true,
@@ -250,10 +246,10 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
           formatTimeCallback: formatSecondsToDuration,
         }),
         HoverPlugin.create({
-          lineColor: PLAYHEAD_COLOR,
+          lineColor: palette.playhead,
           lineWidth: 1,
-          labelBackground: 'rgba(0, 0, 0, 0.80)',
-          labelColor: '#FAF9F6',
+          labelBackground: palette.hoverLabel,
+          labelColor: palette.hoverLabelText,
           labelSize: 11,
           formatTimeCallback: formatSecondsToDuration,
         }),
@@ -272,7 +268,7 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
     // Dragging across the track redefines the loop. enableDragSelection builds
     // a throwaway region per drag; once the gesture ends its bounds are folded
     // into the persistent loop region. Its 3px threshold keeps a tap a seek.
-    regions.enableDragSelection({ color: LOOP_COLOR });
+    regions.enableDragSelection({ color: palette.loop });
 
     regions.on('region-update', (region) => {
       if (region.id === LOOP_REGION_ID) controller.previewLoop(region.start, region.end);
@@ -302,12 +298,12 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
           id: LOOP_REGION_ID,
           start: loop.start,
           end: loop.end || duration,
-          color: LOOP_COLOR,
+          color: palette.loop,
           drag: false,
           resize: true,
           minLength: MIN_LOOP,
         });
-        styleRegion(loopRegionRef.current, LOOP_EDGE_COLOR);
+        styleRegion(loopRegionRef.current, palette.loopEdge);
       }
       wavesurfer.setTime(controller.getTime());
       readyCount.current += 1;
@@ -376,7 +372,7 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
       setReadyInstance(0);
       wavesurfer.destroy();
     };
-  }, [duration, applyZoom, controller, setFollowing]);
+  }, [duration, palette, applyZoom, controller, setFollowing]);
 
   // Playback time goes straight from the controller to the renderer, without
   // passing through React state.
@@ -458,10 +454,10 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
         id,
         start: section.start_time,
         end: section.end_time,
-        color: SECTION_COLOR,
+        color: palette.section,
         drag: false,
         resize: false,
-        content: buildSectionChip(section, rowById.get(section.id) ?? 0, handlers),
+        content: buildSectionChip(section, rowById.get(section.id) ?? 0, handlers, palette),
       });
       styleRegion(region);
       live.set(id, region);
@@ -472,7 +468,7 @@ const useWaveformTimeline = ({ controller, duration, sections, onJumpToSection, 
       region.remove();
       live.delete(id);
     });
-  }, [sections, isReady, readyInstance]);
+  }, [sections, palette, isReady, readyInstance]);
 
   return { containerRef, zoomIndex, setZoomIndex, isFollowing, follow: () => setFollowing(true) };
 };

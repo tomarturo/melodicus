@@ -6,6 +6,7 @@ import '@fontsource-variable/space-grotesk';
 import '@fontsource-variable/work-sans';
 import { createQueryClient } from './lib/queryClient';
 import { theme } from './theme';
+import { colorModeManager } from './theme/colorMode';
 import { AuthProvider } from './contexts/AuthContext';
 import GuestLoopsSync from './features/sections/GuestLoopsSync';
 import { AppShell } from './features/layout/AppShell';
@@ -19,7 +20,7 @@ import SavedSongs from './SavedSongs';
 function App() {
   const [queryClient] = useState(createQueryClient);
   return (
-    <ChakraProvider theme={theme}>
+    <ChakraProvider theme={theme} colorModeManager={colorModeManager}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <GuestLoopsSync />

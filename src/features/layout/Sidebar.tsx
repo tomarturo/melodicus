@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Flex, Icon, Image, Kbd, Text, useDisclosure, type FlexProps } from '@chakra-ui/react';
-import { MagnifyingGlass, MusicNotes, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
+import { Desktop, MagnifyingGlass, Moon, MusicNotes, SignIn, SignOut, Sun, UserCircle } from '@phosphor-icons/react';
+import { useColorModePreference, type ColorModePreference } from '../../theme/colorMode';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../../AuthModal';
 import { useSavedSongsQuery } from '../sections/queries';
+import { brandImageProps } from '../../theme/brandImage';
 import { useCommandSearch } from '../search/CommandSearch';
 
 export const RAIL_WIDTH = 64;
@@ -108,6 +110,68 @@ function SavedSongsList({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+const APPEARANCE: Array<{ value: ColorModePreference; label: string; icon: typeof Sun }> = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Desktop },
+];
+
+/**
+ * Light, dark or follow the system. Expanded: three labelled buttons.
+ * Collapsed: one button showing the current choice that steps to the next.
+ * (A pop-up menu would render outside the rail and collapse it on hover.)
+ */
+function AppearanceControl({ expanded }: { expanded: boolean }) {
+  const { preference, setPreference } = useColorModePreference();
+  const currentIndex = APPEARANCE.findIndex((option) => option.value === preference);
+  const current = APPEARANCE[currentIndex] ?? APPEARANCE[2]!;
+
+  if (!expanded) {
+    const next = APPEARANCE[(currentIndex + 1) % APPEARANCE.length]!;
+    return (
+      <SidebarItem
+        as="button"
+        expanded={false}
+        label={`Appearance: ${current.label}. Switch to ${next.label}`}
+        icon={<Icon as={current.icon} boxSize="22px" />}
+        onClick={() => setPreference(next.value)}
+      />
+    );
+  }
+
+  return (
+    <Flex role="radiogroup" aria-label="Appearance" mx="4" my="1" p="1" gap="1" bg="chrome.hover" borderRadius="lg">
+      {APPEARANCE.map((option) => {
+        const selected = option.value === preference;
+        return (
+          <Flex
+            as="button"
+            key={option.value}
+            role="radio"
+            aria-checked={selected}
+            onClick={() => setPreference(option.value)}
+            flex="1"
+            align="center"
+            justify="center"
+            gap="1.5"
+            h="32px"
+            borderRadius="md"
+            fontSize="xs"
+            fontWeight="medium"
+            color={selected ? 'chrome.fg' : 'chrome.fgMuted'}
+            bg={selected ? 'chrome.raised' : 'transparent'}
+            boxShadow={selected ? 'sm' : 'none'}
+            _hover={{ color: 'chrome.fg' }}
+          >
+            <Icon as={option.icon} boxSize="16px" />
+            {option.label}
+          </Flex>
+        );
+      })}
+    </Flex>
+  );
+}
+
 /**
  * The app's navigation: logo, search, saved songs and account. Collapsed it is
  * an icon rail; expanded (on hover, by its toggle, or as the phone drawer) it
@@ -124,9 +188,9 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
         <Flex as={RouterLink} to="/" onClick={onNavigate} align="center" gap="2" aria-label="Melodicus home">
           {/* The wordmark includes the logomark's dots, so it replaces it rather than following it. */}
           {expanded ? (
-            <Image src="/wordmark.svg" alt="" w="112px" />
+            <Image src="/wordmark.svg" alt="" w="112px" {...brandImageProps} />
           ) : (
-            <Image src="/favicon.svg" alt="" boxSize="24px" flexShrink={0} />
+            <Image src="/favicon.svg" alt="" boxSize="24px" flexShrink={0} {...brandImageProps} />
           )}
         </Flex>
       </Flex>
@@ -161,6 +225,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
         {expanded && <SavedSongsList onNavigate={onNavigate} />}
       </Box>
 
+      <AppearanceControl expanded={expanded} />
       {user ? (
         <>
           {expanded && (

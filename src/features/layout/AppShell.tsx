@@ -16,6 +16,7 @@ import {
 import { CaretLeft, CaretRight, List } from '@phosphor-icons/react';
 import Footer from '../../Footer';
 import { EXPANDED_WIDTH, RAIL_WIDTH, Sidebar } from './Sidebar';
+import { brandImageProps } from '../../theme/brandImage';
 
 // 'hover': open while the mouse is over it. 'pinned': opened with the toggle,
 // stays open until toggled, tapped outside, Escape or navigation.
@@ -134,7 +135,7 @@ function PhoneBar() {
         onClick={drawer.onOpen}
       />
       <Flex as={RouterLink} to="/" align="center" gap="2" aria-label="Melodicus home">
-        <Image src="/wordmark.svg" alt="" w="104px" />
+        <Image src="/wordmark.svg" alt="" w="104px" {...brandImageProps} />
       </Flex>
       <Drawer isOpen={drawer.isOpen} onClose={drawer.onClose} placement="left">
         <DrawerOverlay />

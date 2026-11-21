@@ -54,7 +54,7 @@ const SavedSongs = () => {
                 <Stack mt={[2, 0]} spacing="3" ml={{ base: '2', sm: '8' }} mr={{ base: '2', sm: '0' }}>
                   <CardBody>
                     <Heading size="md">{song.title || 'Untitled video'}</Heading>
-                    <Text size="xs" color="gray.500">
+                    <Text size="xs" color="fg.muted">
                       Saved on {new Date(song.savedAt).toLocaleDateString()}
                     </Text>
                   </CardBody>

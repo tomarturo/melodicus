@@ -86,7 +86,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                             <Button
                                 variant="link"
                                 onClick={() => setIsLogin(!isLogin)}
-                                color="blue.500"
+                                color="fg.link"
                             >
                                 {isLogin ? "Sign Up" : "Login"}
                             </Button>

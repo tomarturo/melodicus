@@ -100,7 +100,7 @@ const SearchResults = ({ searchQuery }: { searchQuery?: string }) => {
                       defaultValue={query}
                       onChange={(e) => setCurrentSearchQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      borderColor={!isSearchValid && hasSearchSubmitAttempt ? "red.500" : "transparent"}
+                      borderColor={!isSearchValid && hasSearchSubmitAttempt ? "fg.error" : "transparent"}
                     />
                     <InputRightElement>
                       <IconButton 
@@ -120,7 +120,7 @@ const SearchResults = ({ searchQuery }: { searchQuery?: string }) => {
                       <Badge colorScheme={isSearchValid ? 'purple' : 'red'} mt={[1, 1, 0]}>
                         {isSearchValid ? 'pro tip' : 'try again'}
                       </Badge>
-                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isSearchValid && hasSearchSubmitAttempt ? "red.500" : "inherit"}>
+                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isSearchValid && hasSearchSubmitAttempt ? "fg.error" : "inherit"}>
                         {isSearchValid ? (
                           'This works best when you are specific. Include a song title & artist.'
                         ) : (

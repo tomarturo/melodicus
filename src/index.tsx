@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(rootElement);
 if (envError) {
   // A misconfigured deploy shows what is missing instead of a blank page.
   root.render(
-    <pre style={{ color: '#FAF9F6', padding: '24px', whiteSpace: 'pre-wrap' }}>
+    <pre style={{ padding: '24px', whiteSpace: 'pre-wrap' }}>
       {`Melodicus is missing configuration:\n\n${envError}`}
     </pre>
   );

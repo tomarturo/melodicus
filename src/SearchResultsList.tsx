@@ -17,7 +17,7 @@ const SearchResultsList = ({ searchResults }: { searchResults: SearchResult[] })
           <Stack mt={[2, 0]} spacing='3' ml={{base:'2', sm:'8'}} mr={{base:'2', sm:'0'}}>
             <CardBody>
               <Heading size='md'>{video.snippet.title}</Heading>
-              <Text size='xs' blendMode="multiply">{video.snippet.description}</Text>
+              <Text size='xs' color="fg.muted">{video.snippet.description}</Text>
             </CardBody>
           </Stack>
         </Card>

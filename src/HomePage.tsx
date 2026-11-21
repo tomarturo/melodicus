@@ -119,7 +119,7 @@ const HomePage = () => {
               align='center'
               isFitted maxW='2xl'>
               <TabList
-                borderBottomColor="blackAlpha.300">
+                borderBottomColor="border.strong">
                 <Tab
                   color='fg.muted'
                   _selected={{ color: 'fg.default', fontWeight: 'semibold' }}
@@ -152,7 +152,7 @@ const HomePage = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      borderColor={!isSearchValid && hasSearchSubmitAttempt ? "red.500" : "transparent"}
+                      borderColor={!isSearchValid && hasSearchSubmitAttempt ? "fg.error" : "transparent"}
                     />
                     <InputRightElement>
                       <IconButton
@@ -172,7 +172,7 @@ const HomePage = () => {
                       <Badge colorScheme={isSearchValid ? 'purple' : 'red'} mt={[1, 1, 0]}>
                         {isSearchValid ? 'pro tip' : 'try again'}
                       </Badge>
-                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isSearchValid && hasSearchSubmitAttempt ? "red.500" : "inherit"}>
+                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isSearchValid && hasSearchSubmitAttempt ? "fg.error" : "inherit"}>
                         {isSearchValid ? (
                           'This works best when you are specific. Include a song title & artist.'
                         ) : (
@@ -198,8 +198,8 @@ const HomePage = () => {
                       value={videoLink}
                       onChange={handleLinkChange}
                       onKeyDown={handleKeyDown}
-                      borderColor={!isLinkValid ? "red.500" : "transparent"}
-                      _invalid={{ boxShadow: '0 0 0 1px red.500' }}
+                      borderColor={!isLinkValid ? "fg.error" : "transparent"}
+                      _invalid={{ boxShadow: '0 0 0 1px var(--chakra-colors-fg-error)' }}
                     />
                     <InputRightElement>
                       <IconButton
@@ -219,7 +219,7 @@ const HomePage = () => {
                       <Badge colorScheme={isLinkValid ? 'purple' : 'red'} mt={[1, 1, 0]}>
                         {isLinkValid ? 'pro tip' : 'try again'}
                       </Badge>
-                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isLinkValid ? "red.500" : "inherit"}>
+                      <Text fontSize='sm' textAlign={['left', 'left', 'center']} color={!isLinkValid ? "fg.error" : "inherit"}>
                         {isLinkValid ? (
                           <>
                             <Link

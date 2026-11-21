@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
-import { Box, Button, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Icon, IconButton, Menu, MenuButton, MenuList, MenuItem, Portal, Text, useColorMode } from '@chakra-ui/react';
 import { Crosshair, MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
 import useWaveformTimeline from './useWaveformTimeline';
 import { ZOOM_LEVELS } from './timelineLogic';
+import { timelinePalette } from './timelinePalette';
 import type { PlayerController } from '../playerController';
 import type { Section } from '../../sections/types';
 
@@ -33,8 +34,10 @@ const WaveformTimeline = ({
     setMenu({ section, x, y });
   }, []);
 
+  const { colorMode } = useColorMode();
   const { containerRef, zoomIndex, setZoomIndex, isFollowing, follow } = useWaveformTimeline({
     controller,
+    palette: timelinePalette(colorMode),
     duration: videoLength,
     sections: savedSections,
     onJumpToSection,
@@ -107,8 +110,8 @@ const WaveformTimeline = ({
             <MenuItem
               fontSize="14px"
               fontWeight="medium"
-              color="red.700"
-              _hover={{ bg: 'red.50', color: 'red.800' }}
+              color="fg.danger"
+              _hover={{ bg: 'bg.dangerHover', color: 'fg.dangerHover' }}
               onClick={() => {
                 if (menu) onDeleteSection(menu.section.id);
                 closeMenu();
