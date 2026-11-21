@@ -77,6 +77,12 @@ const semanticTokens = {
 export const HOVER_EDGE = 'fg.strong';
 export const HOVER_RING = '0 0 0 1px var(--chakra-colors-fg-strong)';
 const components = {
+  // Every dialog: the content panel's off-white and its rounded corners.
+  Modal: {
+    baseStyle: {
+      dialog: { bg: 'bg.panel', borderRadius: 'xl' },
+    },
+  },
   Button: {
     variants: {
       loud: {

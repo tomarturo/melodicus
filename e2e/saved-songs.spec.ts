@@ -93,7 +93,7 @@ test('guests see the temporarily saved banner, whose Log in opens the login dial
   await page.goto('/saved-songs');
   await expect(page.getByText('Temporarily saved')).toBeVisible();
   await page.getByRole('button', { name: 'Log in' }).last().click();
-  await expect(page.getByRole('dialog', { name: 'Login' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
 });
 
 test('signed in, there is no banner and the loops come from the account', async ({ page }) => {
@@ -110,4 +110,28 @@ test('signed in, there is no banner and the loops come from the account', async 
     'Solo',
   ]);
   await expect(page.getByText('Temporarily saved')).toHaveCount(0);
+});
+
+test('a failed login keeps the dialog open, with the reason under the fields', async ({ page }) => {
+  await mockSupabase(page);
+  await page.route('https://e2e.supabase.co/auth/v1/token**', (route) =>
+    route.fulfill({
+      status: 400,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'invalid_grant', error_description: 'Invalid login credentials', msg: 'Invalid login credentials' }),
+    }),
+  );
+  await page.goto('/saved-songs');
+  await page.getByRole('button', { name: 'Log in' }).last().click();
+  const dialog = page.getByRole('dialog', { name: 'Log in' });
+  await dialog.getByLabel('Email').fill('someone@example.com');
+  await dialog.getByLabel('Password').fill('wrong-password');
+  await dialog.getByLabel('Password').press('Enter');
+
+  await expect(dialog.getByRole('alert')).toContainText('Couldn’t log in. Invalid login credentials');
+  await expect(dialog.getByLabel('Email')).toHaveValue('someone@example.com');
+
+  await dialog.getByRole('button', { name: 'Create an account' }).click();
+  await expect(page.getByRole('dialog', { name: 'Create an account' })).toBeVisible();
+  await expect(page.getByText('At least 6 characters')).toBeVisible();
 });
