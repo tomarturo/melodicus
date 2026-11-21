@@ -17,7 +17,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { Share } from '@phosphor-icons/react';
+import { ShareFat } from '@phosphor-icons/react';
 import type { Section } from '../sections/types';
 import { buildShareUrl } from './shareFormat';
 
@@ -50,15 +50,11 @@ const ShareButton = ({ videoId, savedSections }: ShareButtonProps) => {
     <>
       <IconButton
         aria-label="Share"
-        icon={<Icon as={Share} boxSize="20px" />}
+        icon={<Icon as={ShareFat} boxSize="20px" />}
         onClick={dialog.onOpen}
+        variant="loud"
         boxSize="40px"
         minW="40px"
-        borderRadius="lg"
-        bg="ink"
-        color="white"
-        _hover={{ bg: 'ink.hover' }}
-        _active={{ bg: 'ink.active' }}
       />
       <Modal isOpen={dialog.isOpen} onClose={dialog.onClose}>
         <ModalOverlay />

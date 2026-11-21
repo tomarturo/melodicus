@@ -64,7 +64,8 @@ const semanticTokens = {
 /*
  * Three button styles, all rounded. Each works at any Chakra size: sm in the
  * row under the timeline, md in dialogs.
- *   loud:  black fill. The action answering what the person just did (Save loop).
+ *   loud:  black fill. The action answering what the person just did (Save
+ *          loop, Update), and the Share button over the video.
  *   pill:  soft fill. Standing controls and dialog actions.
  *   quiet: hairline outline. Secondary choices beside a louder one (Cancel).
  * Hover thickens the outline with a 1px shadow rather than a wider border, so

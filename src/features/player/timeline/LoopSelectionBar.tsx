@@ -47,8 +47,9 @@ const LoopSelectionBar = ({ status, isBusy, onSaveNew, onUpdate, onCancel, onRes
 
     {status.kind === 'modified' && (
       <>
+        {/* Loud like Save loop: it answers the edit just made. */}
         <Button
-          variant="pill"
+          variant="loud"
           size="sm"
           leftIcon={<Icon as={ArrowsClockwise} boxSize="18px" />}
           isLoading={isBusy}
