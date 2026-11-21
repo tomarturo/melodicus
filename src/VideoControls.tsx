@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Icon } from '@chakra-ui/react';
 import { Pause, Play, Repeat } from '@phosphor-icons/react';
-import PlaybackRateSelector from './PlaybackRateSelector';
+import PlaybackRateSelector, { CONTROL_HEIGHT } from './PlaybackRateSelector';
 
 interface VideoControlsProps {
   isPlaying: boolean;
@@ -14,6 +14,10 @@ interface VideoControlsProps {
 // whole row fits on one line.
 const labelFromTablet = { base: 'none', md: 'inline' } as const;
 
+// Play is a step up from the rest of the row (CONTROL_HEIGHT).
+const PLAY_HEIGHT = '48px';
+const LABELLED_MIN_WIDTH = '104px';
+
 /**
  * One centered row: Restart, Play/Pause, speed. Saving a loop happens in the
  * row under the timeline, sharing from the button over the video area.
@@ -22,12 +26,13 @@ const VideoControls = ({ isPlaying, playbackRate, onPlayPause, onRestartLoop, on
   <Flex justify="center" align="center" gap={3} pt={2} pb={6} px={['12px', '12px', 8]}>
     <Button
       variant="pill"
-      size="lg"
+      size="md"
       aria-label="Restart Loop"
-      leftIcon={<Icon as={Repeat} boxSize="20px" />}
+      leftIcon={<Icon as={Repeat} boxSize="18px" />}
       iconSpacing={{ base: 0, md: 2 }}
-      px={{ base: 0, md: 6 }}
-      minW={{ base: '48px', md: '128px' }}
+      px={{ base: 0, md: 5 }}
+      h={CONTROL_HEIGHT}
+      minW={{ base: CONTROL_HEIGHT.base, md: LABELLED_MIN_WIDTH }}
       onClick={onRestartLoop}
     >
       <Box as="span" display={labelFromTablet}>
@@ -36,14 +41,14 @@ const VideoControls = ({ isPlaying, playbackRate, onPlayPause, onRestartLoop, on
     </Button>
     <Button
       variant="pill"
-      size="lg"
+      size="md"
       aria-label="Play or Pause"
-      leftIcon={<Icon as={isPlaying ? Pause : Play} weight="fill" boxSize="22px" />}
+      leftIcon={<Icon as={isPlaying ? Pause : Play} weight="fill" boxSize="20px" />}
       iconSpacing={{ base: 0, md: 2 }}
-      px={{ base: 0, md: 6 }}
+      px={{ base: 0, md: 5 }}
       // The biggest target, round on phones.
-      minW={{ base: '56px', md: '128px' }}
-      h="56px"
+      minW={{ base: PLAY_HEIGHT, md: LABELLED_MIN_WIDTH }}
+      h={PLAY_HEIGHT}
       onClick={onPlayPause}
     >
       <Box as="span" display={labelFromTablet}>

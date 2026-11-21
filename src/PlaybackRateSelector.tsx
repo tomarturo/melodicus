@@ -3,6 +3,12 @@ import { Box, Flex, IconButton, Select, type SystemStyleObject } from '@chakra-u
 import { Plus, Minus } from '@phosphor-icons/react';
 import { HOVER_EDGE, HOVER_RING } from './theme';
 
+/**
+ * The playback row's standard height, shared with Restart. Phones keep 44px,
+ * the smallest comfortable tap target; desktop goes to 40px.
+ */
+export const CONTROL_HEIGHT = { base: '44px', md: '40px' } as const;
+
 const RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 interface PlaybackRateSelectorProps {
@@ -37,7 +43,7 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
       role="group"
       aria-label="Playback speed"
       align="center"
-      h="48px"
+      h={CONTROL_HEIGHT}
       rounded="full"
       overflow="hidden"
       bg="bg.muted"
@@ -49,21 +55,21 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
     >
       <IconButton
         sx={segment}
-        w="44px"
-        minW="44px"
+        w="40px"
+        minW="40px"
         pl="1"
         isDisabled={index <= 0}
         onClick={() => onRateChange(RATES[index - 1]!)}
-        icon={<Minus size={18} />}
+        icon={<Minus size={16} />}
         aria-label="Decrease playback rate"
       />
       <Divider />
       <Select
         variant="unstyled"
-        size="lg"
+        size="md"
         h="100%"
-        w="84px"
-        pl="4"
+        w="76px"
+        pl="3.5"
         fontWeight="semibold"
         sx={segment}
         aria-label="Playback rate"
@@ -79,10 +85,10 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
       <Divider />
       <IconButton
         sx={segment}
-        w="44px"
-        minW="44px"
+        w="40px"
+        minW="40px"
         pr="1"
-        icon={<Plus size={18} />}
+        icon={<Plus size={16} />}
         onClick={() => onRateChange(RATES[index + 1]!)}
         isDisabled={index === RATES.length - 1}
         aria-label="Increase playback rate"
