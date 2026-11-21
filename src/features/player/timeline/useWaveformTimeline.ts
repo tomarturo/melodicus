@@ -222,8 +222,8 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
       const loop = loopRegionRef.current;
       if (!loop || end - start < MIN_LOOP) return;
       loop.setOptions({ start, end });
-      controller.previewLoop(start, end);
-      controller.endLoopPreview();
+      // A fresh drag replaces the selection, whatever saved loop it came from.
+      controller.startNewLoop(start, end);
     });
 
     // Regions clamp their bounds against the plugin's duration, which is only

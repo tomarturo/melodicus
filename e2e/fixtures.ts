@@ -79,3 +79,14 @@ export async function signIn(page: Page) {
   };
   await page.addInitScript((value) => localStorage.setItem('sb-e2e-auth-token', value), JSON.stringify(session));
 }
+
+/** Drags out a new selection on the (unzoomed) track, between two fractions of its width. */
+export async function dragSelection(page: Page, from: number, to: number) {
+  const track = await page.locator('[part~="canvases"]').first().boundingBox();
+  if (!track) throw new Error('no timeline track on the page');
+  const y = track.y + track.height / 2;
+  await page.mouse.move(track.x + track.width * from, y);
+  await page.mouse.down();
+  await page.mouse.move(track.x + track.width * to, y, { steps: 10 });
+  await page.mouse.up();
+}

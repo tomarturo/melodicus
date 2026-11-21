@@ -1,9 +1,6 @@
-import { Box, Button, Grid, Icon } from '@chakra-ui/react';
-import { PlusCircle } from '@phosphor-icons/react';
-import PlaybackControls from './PlaybackControls';
+import { Box, Button, Flex, Icon } from '@chakra-ui/react';
+import { Pause, Play, Repeat } from '@phosphor-icons/react';
 import PlaybackRateSelector from './PlaybackRateSelector';
-import ShareTimestamps from './ShareTimestamps';
-import type { Section } from './features/sections/types';
 
 interface VideoControlsProps {
   isPlaying: boolean;
@@ -11,61 +8,50 @@ interface VideoControlsProps {
   onPlayPause: () => void;
   onRestartLoop: () => void;
   onPlaybackRateChange: (rate: number) => void;
-  onNewLoop: () => void;
-  videoId: string;
-  savedSections: Section[];
 }
 
+// Labels show from tablet width up; on phones the buttons are icons, so the
+// whole row fits on one line.
+const labelFromTablet = { base: 'none', md: 'inline' } as const;
+
 /**
- * Each control is rendered once and placed by grid areas per screen size:
- *
- *   phone              tablet                    desktop
- *   [ transport ]      [transport]    [add]      [transport][speed] … [add][save]
- *   [   speed   ]      [  speed  ]   [save]
- *   [save] [add]
- *
- * (They used to be three separate copies, one per size, which meant three
- * speed selectors with their own state and three Save dialogs.)
+ * One centered row: Restart, Play/Pause, speed. Saving a loop happens in the
+ * row under the timeline, sharing from the button over the video area.
  */
-const VideoControls = ({
-  isPlaying,
-  playbackRate,
-  onPlayPause,
-  onRestartLoop,
-  onPlaybackRateChange,
-  onNewLoop,
-  videoId,
-  savedSections,
-}: VideoControlsProps) => (
-  <Grid
-    pt={4}
-    pb={8}
-    px={['12px', '12px', 8]}
-    gap={3}
-    alignItems="center"
-    templateAreas={[
-      `"transport transport" "speed speed" "save add"`,
-      `"transport transport" "speed speed" "save add"`,
-      `"transport add" "speed save"`,
-      `"transport speed . add save"`,
-    ]}
-    templateColumns={['1fr 1fr', '1fr 1fr', 'auto 1fr', 'auto auto 1fr auto auto']}
-  >
-    <Box gridArea="transport">
-      <PlaybackControls isPlaying={isPlaying} playPauseClick={onPlayPause} restartLoop={onRestartLoop} />
-    </Box>
-    <Box gridArea="speed" justifySelf="center">
-      <PlaybackRateSelector rate={playbackRate} onRateChange={onPlaybackRateChange} />
-    </Box>
-    <Box gridArea="add" justifySelf={['start', 'start', 'end', 'auto']}>
-      <Button onClick={onNewLoop} leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />} variant="pill" size="lg">
-        Add loop
-      </Button>
-    </Box>
-    <Box gridArea="save" justifySelf={['end', 'end', 'end', 'auto']}>
-      <ShareTimestamps videoId={videoId} savedSections={savedSections} />
-    </Box>
-  </Grid>
+const VideoControls = ({ isPlaying, playbackRate, onPlayPause, onRestartLoop, onPlaybackRateChange }: VideoControlsProps) => (
+  <Flex justify="center" align="center" gap={3} pt={2} pb={6} px={['12px', '12px', 8]}>
+    <Button
+      variant="pill"
+      size="lg"
+      aria-label="Restart Loop"
+      leftIcon={<Icon as={Repeat} boxSize="20px" />}
+      iconSpacing={{ base: 0, md: 2 }}
+      px={{ base: 0, md: 6 }}
+      minW={{ base: '48px', md: '128px' }}
+      onClick={onRestartLoop}
+    >
+      <Box as="span" display={labelFromTablet}>
+        Restart
+      </Box>
+    </Button>
+    <Button
+      variant="pill"
+      size="lg"
+      aria-label="Play or Pause"
+      leftIcon={<Icon as={isPlaying ? Pause : Play} weight="fill" boxSize="22px" />}
+      iconSpacing={{ base: 0, md: 2 }}
+      px={{ base: 0, md: 6 }}
+      // The biggest target, round on phones.
+      minW={{ base: '56px', md: '128px' }}
+      h="56px"
+      onClick={onPlayPause}
+    >
+      <Box as="span" display={labelFromTablet}>
+        {isPlaying ? 'Pause' : 'Play'}
+      </Box>
+    </Button>
+    <PlaybackRateSelector rate={playbackRate} onRateChange={onPlaybackRateChange} />
+  </Flex>
 );
 
 export default VideoControls;

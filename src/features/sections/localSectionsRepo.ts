@@ -4,6 +4,7 @@ import {
   SectionSchema,
   newSectionId,
   withoutDuplicates,
+  type LoopTimes,
   type NewSection,
   type SavedSong,
   type Section,
@@ -76,6 +77,16 @@ export class LocalSectionsRepo implements SectionsRepository {
     const renamed = { ...existing, name };
     this.writeSections(videoId, sections.map((section) => (section.id === sectionId ? renamed : section)));
     return renamed;
+  }
+
+  async retimeSection(videoId: string, sectionId: string, times: LoopTimes): Promise<Section> {
+    this.migrateLegacy();
+    const sections = this.readSections(videoId);
+    const existing = sections.find((section) => section.id === sectionId);
+    if (!existing) throw new Error('That loop no longer exists.');
+    const retimed = SectionSchema.parse({ ...existing, ...times });
+    this.writeSections(videoId, sections.map((section) => (section.id === sectionId ? retimed : section)));
+    return retimed;
   }
 
   async deleteSection(videoId: string, sectionId: string): Promise<void> {

@@ -13,6 +13,9 @@ export const SectionSchema = z
   });
 export type Section = z.infer<typeof SectionSchema>;
 
+/** A loop's bounds, in seconds. */
+export type LoopTimes = Pick<Section, 'start_time' | 'end_time'>;
+
 /** A loop that hasn't been stored yet. */
 export type NewSection = Omit<Section, 'id'>;
 
@@ -35,6 +38,8 @@ export interface SectionsRepository {
   listSections(videoId: string): Promise<Section[]>;
   createSection(video: VideoRef, input: NewSection): Promise<Section>;
   renameSection(videoId: string, sectionId: string, name: string | null): Promise<Section>;
+  /** Moves a saved loop's start and end. */
+  retimeSection(videoId: string, sectionId: string, times: LoopTimes): Promise<Section>;
   deleteSection(videoId: string, sectionId: string): Promise<void>;
   /**
    * Adds loops to a video, skipping any with the same start and end as a loop

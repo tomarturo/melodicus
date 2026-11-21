@@ -11,6 +11,11 @@ export interface PlayerState {
   /** False while the loop is still the default whole-video span. */
   hasCustomLoop: boolean;
   /**
+   * The saved loop the current selection started from, by id, so dragging a
+   * saved loop's edges can offer to update it. Null for a fresh selection.
+   */
+  loopOrigin: string | null;
+  /**
    * Bumped whenever playback should be brought back into view: play, restart,
    * jumping to a saved loop. The timeline resumes following the playhead.
    */
@@ -38,6 +43,7 @@ export class PlayerController {
     loop: { start: 0, end: 0 },
     playbackRate: 1,
     hasCustomLoop: false,
+    loopOrigin: null,
     followRequest: 0,
   };
   private time = 0;
@@ -130,6 +136,17 @@ export class PlayerController {
     this.setLoop({ start, end });
   }
 
+  /** A loop drawn fresh on the track, not derived from a saved one. */
+  startNewLoop(start: number, end: number) {
+    this.setLoop({ start, end });
+    this.update({ loopOrigin: null });
+  }
+
+  /** Records that the current selection is now stored as a saved loop. */
+  setLoopOrigin(origin: string | null) {
+    this.update({ loopOrigin: origin });
+  }
+
   /** The end of a drag started with previewLoop. */
   endLoopPreview() {
     if (!this.isScrubbing) return;
@@ -138,8 +155,9 @@ export class PlayerController {
   }
 
   /** Makes a saved loop the current one and starts it from the top. */
-  jumpToLoop(start: number, end: number) {
+  jumpToLoop(start: number, end: number, origin: string | null = null) {
     this.setLoop({ start, end });
+    this.update({ loopOrigin: origin });
     this.seek(start);
     this.requestFollow();
   }

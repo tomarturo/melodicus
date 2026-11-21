@@ -20,6 +20,8 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
       <IconButton
         size="sm"
         variant="pill"
+        // On phones the select alone, so the controls fit one row.
+        display={{ base: 'none', md: 'inline-flex' }}
         isDisabled={index <= 0}
         onClick={() => onRateChange(RATES[index - 1]!)}
         icon={<Minus size={20} />}
@@ -54,6 +56,7 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
       <IconButton
         size="sm"
         variant="pill"
+        display={{ base: 'none', md: 'inline-flex' }}
         icon={<Plus size={20} />}
         onClick={() => onRateChange(RATES[index + 1]!)}
         isDisabled={index === RATES.length - 1}

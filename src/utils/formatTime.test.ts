@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { convertDurationToSeconds, formatSecondsToDuration, roundSeconds } from './formatTime';
+import { convertDurationToSeconds, formatLoopLength, formatLoopTime, formatSecondsToDuration, roundSeconds } from './formatTime';
 
 describe('convertDurationToSeconds', () => {
   it.each([
@@ -29,5 +29,23 @@ describe('roundSeconds', () => {
 
   it('accepts numeric strings', () => {
     expect(roundSeconds('12.3456')).toBe(12.346);
+  });
+});
+
+describe('formatLoopTime', () => {
+  it.each([
+    [30.24, '0:30.2'],
+    [245, '4:05.0'],
+    [59.96, '1:00.0'],
+    [3723.4, '1:02:03.4'],
+  ])('formats %f as %s', (input, expected) => {
+    expect(formatLoopTime(input)).toBe(expected);
+  });
+});
+
+describe('formatLoopLength', () => {
+  it('uses seconds under a minute and loop time beyond', () => {
+    expect(formatLoopLength(15.62)).toBe('15.6s');
+    expect(formatLoopLength(65.3)).toBe('1:05.3');
   });
 });

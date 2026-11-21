@@ -3,6 +3,8 @@ import { Box, Flex, Icon, IconButton } from '@chakra-ui/react';
 import { MagnifyingGlassPlus, MagnifyingGlassMinus } from '@phosphor-icons/react';
 import useWaveformTimeline from './useWaveformTimeline';
 import LoopPills from './LoopPills';
+import LoopSelectionBar from './LoopSelectionBar';
+import { selectionStatus } from '../selection';
 import { ZOOM_LEVELS, activeLoopId, drawableSections } from './timelineLogic';
 import { usePlayerState } from '../usePlayer';
 import type { PlayerController } from '../playerController';
@@ -12,9 +14,13 @@ interface WaveformTimelineProps {
   controller: PlayerController;
   videoLength: number;
   savedSections: Section[];
-  onJumpToSection: (start: number, end: number) => void;
   onEditSection: (section: Section) => void;
   onDeleteSection: (sectionId: string) => void;
+  /** Save the current selection as a new loop (opens the naming dialog). */
+  onSaveLoop: () => void;
+  /** Move a saved loop to the current selection. */
+  onUpdateLoop: (section: Section) => void;
+  isSavingLoop: boolean;
 }
 
 const zoomButtonStyle = {
@@ -35,12 +41,15 @@ const WaveformTimeline = ({
   controller,
   videoLength,
   savedSections,
-  onJumpToSection,
   onEditSection,
   onDeleteSection,
+  onSaveLoop,
+  onUpdateLoop,
+  isSavingLoop,
 }: WaveformTimelineProps) => {
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
-  const { loop } = usePlayerState(controller);
+  const { loop, hasCustomLoop, loopOrigin } = usePlayerState(controller);
+  const status = selectionStatus({ loop, hasCustomLoop, loopOrigin, sections: savedSections });
   const { containerRef, zoomIndex, setZoomIndex } = useWaveformTimeline({
     controller,
     duration: videoLength,
@@ -57,7 +66,7 @@ const WaveformTimeline = ({
           <LoopPills
             sections={savedSections}
             activeSectionId={activeLoopId(savedSections, loop)}
-            onJumpToSection={onJumpToSection}
+            onSelectSection={(section) => controller.jumpToLoop(section.start_time, section.end_time, section.id)}
             onEditSection={onEditSection}
             onDeleteSection={onDeleteSection}
             onHighlight={setHighlightedId}
@@ -84,6 +93,13 @@ const WaveformTimeline = ({
           />
         </Flex>
       </Box>
+      <LoopSelectionBar
+        loop={loop}
+        status={status}
+        isBusy={isSavingLoop}
+        onSaveNew={onSaveLoop}
+        onUpdate={onUpdateLoop}
+      />
     </Box>
   );
 };

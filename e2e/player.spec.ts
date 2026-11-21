@@ -161,9 +161,9 @@ test.describe('on a touch screen', () => {
 
     expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toBe('');
 
-    await page.getByRole('button', { name: 'Add loop' }).tap();
+    await page.getByRole('button', { name: 'Save loop', exact: true }).tap();
     await page.getByPlaceholder('Loop name (optional)').fill('Touch loop');
-    await page.getByRole('button', { name: 'Save Loop' }).tap();
+    await page.getByRole('button', { name: 'Save Loop', exact: true }).tap();
     await expect(page.getByText('Touch loop', { exact: true })).toBeVisible();
 
     const [saved] = await page.evaluate(
@@ -199,7 +199,7 @@ test('the playback speed survives rotating an iPad, and each control exists once
   await expect(page.getByRole('combobox', { name: 'Playback rate' })).toHaveValue('1.75');
   expect(await page.evaluate(() => (window as unknown as { __fakeYt: { player: { rate: number } } }).__fakeYt.player.rate)).toBe(1.75);
 
-  for (const name of ['Add loop', 'Save', 'Play or Pause', 'Restart Loop', 'Increase playback rate', 'Decrease playback rate']) {
+  for (const name of ['Share', 'Play or Pause', 'Restart Loop', 'Increase playback rate', 'Decrease playback rate']) {
     await expect(page.getByRole('button', { name, exact: true }), name).toHaveCount(1);
   }
   await expect(page.getByRole('combobox', { name: 'Playback rate' })).toHaveCount(1);

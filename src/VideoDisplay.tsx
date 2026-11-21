@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react';
 import { Box } from '@chakra-ui/react';
 
-const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => {
+/** The video area: blurred backdrop, album art, and any overlay passed as children. */
+const VideoDisplay = ({ videoThumbnail, children }: { videoThumbnail: string | null; children?: ReactNode }) => {
   return (
     <Box
       pos='relative'
@@ -46,6 +48,7 @@ const VideoDisplay = ({ videoThumbnail }: { videoThumbnail: string | null }) => 
         boxShadow="xl"
         data-testid="album-art"
       />
+      {children}
     </Box>
   );
 };

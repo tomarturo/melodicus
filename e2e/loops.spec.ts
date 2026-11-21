@@ -1,15 +1,16 @@
 import { expect, test } from '@playwright/test';
-import { VIDEO_ID, VIDEO_TITLE, mockSupabase, mockYouTube, signIn } from './fixtures';
+import { VIDEO_ID, VIDEO_TITLE, dragSelection, mockSupabase, mockYouTube, signIn } from './fixtures';
 
 test('a guest saves, renames and deletes a loop, and the song shows under My songs', async ({ page }) => {
   await mockYouTube(page);
   await mockSupabase(page);
   await page.goto(`/video/${VIDEO_ID}`);
 
-  // The loop starts out spanning the whole video, which is a valid loop to save.
-  await page.getByRole('button', { name: 'Add loop' }).click();
+  await expect(page.locator('[part~="canvases"]')).toBeVisible();
+  await dragSelection(page, 0.3, 0.5);
+  await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Chorus');
-  await page.getByRole('button', { name: 'Save Loop' }).click();
+  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
   await expect(page.getByText('Loop saved!')).toBeVisible();
   await expect(page.getByText('Chorus', { exact: true })).toBeVisible();
 
@@ -35,10 +36,12 @@ test('tapping Save twice while a slow save is in flight saves the loop once', as
   await signIn(page);
   await page.goto(`/video/${VIDEO_ID}`);
 
-  await page.getByRole('button', { name: 'Add loop' }).click();
+  await expect(page.locator('[part~="canvases"]')).toBeVisible();
+  await dragSelection(page, 0.3, 0.5);
+  await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Once');
   // Both clicks land before React can re-render the button as busy.
-  await page.getByRole('button', { name: 'Save Loop' }).evaluate((button: HTMLButtonElement) => {
+  await page.getByRole('button', { name: 'Save Loop', exact: true }).evaluate((button: HTMLButtonElement) => {
     button.click();
     button.click();
   });
