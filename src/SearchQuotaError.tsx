@@ -1,53 +1,93 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
-import { ArrowForwardIcon } from '@chakra-ui/icons';
-import { ArrowSquareOut } from '@phosphor-icons/react';
-import { IconButton, Icon, Link, Heading, Text, Input, InputGroup, InputRightElement, Container, } from '@chakra-ui/react';
+import { Container, Heading, Icon, IconButton, Input, InputGroup, InputRightElement, Link, Stack, Text } from '@chakra-ui/react';
+import { ArrowRight, ArrowUpRight } from '@phosphor-icons/react';
 
+/**
+ * Shown when the day's YouTube search quota is used up: search on YouTube
+ * itself, then paste the video's link here.
+ */
 const SearchQuotaError = ({ query }: { query: string }) => {
-    const navigate = useNavigate();
-    const [videoLink, setVideoLink] = useState('');
-    const handleButtonClick = () => {
-    const videoId = getYoutubeID(videoLink);
-    navigate(`/video/${videoId}`);
-    };
+  const navigate = useNavigate();
+  const [videoLink, setVideoLink] = useState('');
+  const [isInvalid, setIsInvalid] = useState(false);
 
-    return (
-    <Container maxW='3xl' mt='12' bg="bg.surface" borderRadius={['none', 'none', 'xl']}>
-      <Heading as='h1' size='xl' textAlign="center" mb='6'>We can't run your search right now</Heading>
-      <Text align='center' mb='8'>
-      <Link
-        isExternal    
-        display='inline-flex'
-        alignItems='center'
-        gap='2px'
-        fontWeight='bold'
-        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        >
-        Follow this link<Icon as={ArrowSquareOut}></Icon>
-        </Link>{' '}
-        to open YouTube in a new tab. Find the song you want to learn, then copy and paste its link below.
-    </Text>
-      <InputGroup size='md' mb='2'>
-        <Input
-        rounded='full'
-        variant='filled'
-        pr='2rem'
-        mb={4}
-        type='text'
-        placeholder='Enter a YouTube link'
-        value={videoLink}
-        onChange={(e) => setVideoLink(e.target.value)}
-        />
+  const openVideo = (event: FormEvent) => {
+    event.preventDefault();
+    const videoId = getYoutubeID(videoLink.trim());
+    if (!videoId) {
+      setIsInvalid(true);
+      return;
+    }
+    navigate(`/video/${videoId}`);
+  };
+
+  return (
+    <Container maxW="2xl" pt={{ base: 8, md: 12 }} pb={12}>
+      <Stack spacing={6} textAlign="center">
+        <Heading as="h1" size="xl" sx={{ textWrap: 'balance' }}>
+          We can’t search YouTube right now
+        </Heading>
+        <Text color="fg.default">
+          Our search allowance for today is used up.{' '}
+          <Link
+            isExternal
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`}
+            fontWeight="semibold"
+            color="fg.strong"
+            textDecoration="underline"
+            textUnderlineOffset="3px"
+            display="inline-flex"
+            alignItems="center"
+            gap="2px"
+          >
+            Search on YouTube
+            <Icon as={ArrowUpRight} boxSize="14px" />
+          </Link>{' '}
+          instead, then paste the video’s link here.
+        </Text>
+        <form onSubmit={openVideo} noValidate>
+          <InputGroup>
+            <Input
+              rounded="full"
+              variant="filled"
+              bg="bg.muted"
+              _hover={{ bg: 'bg.mutedHover' }}
+              _focus={{ bg: 'bg.muted', borderColor: 'border.focus' }}
+              _placeholder={{ opacity: 1, color: 'fg.placeholder' }}
+              borderColor={isInvalid ? 'red.500' : 'transparent'}
+              pr="2.75rem"
+              type="url"
+              aria-label="YouTube link"
+              aria-invalid={isInvalid}
+              placeholder="Paste a YouTube link"
+              value={videoLink}
+              onChange={(event) => {
+                setVideoLink(event.target.value);
+                setIsInvalid(false);
+              }}
+            />
             <InputRightElement>
-                <IconButton onClick={handleButtonClick} aria-label='Open video' icon={<ArrowForwardIcon />}  isRound size='sm' color="fg.inverse" bg="bg.inverseStrong" _hover={{color:'fg.max', bg:'bg.surface', border:'1px', borderColor:'border.inverse'}}>
-                </IconButton>
+              <IconButton
+                type="submit"
+                aria-label="Open video"
+                icon={<Icon as={ArrowRight} boxSize="16px" />}
+                isRound
+                size="sm"
+                variant="loud"
+              />
             </InputRightElement>
-        </InputGroup>
-    </Container> 
-)}
+          </InputGroup>
+          {isInvalid && (
+            <Text role="alert" fontSize="sm" color="red.700" mt={2}>
+              That doesn’t look like a YouTube link. Copy it from the address bar or the Share button.
+            </Text>
+          )}
+        </form>
+      </Stack>
+    </Container>
+  );
+};
 
 export default SearchQuotaError;

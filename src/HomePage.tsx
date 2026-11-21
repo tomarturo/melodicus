@@ -4,6 +4,7 @@ import getYoutubeID from 'get-youtube-id';
 import { ArrowForwardIcon, SearchIcon } from '@chakra-ui/icons';
 import { Icon, Center, Badge, IconButton, Container, Heading, Text, Input, InputGroup, InputRightElement, Tabs, TabList, TabIndicator, TabPanels, Tab, TabPanel, VStack, Flex, HStack, Link } from '@chakra-ui/react'
 import { ArrowSquareOut } from '@phosphor-icons/react';
+import { searchPath } from './lib/youtube';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const HomePage = () => {
 
     // If we have a search query, proceed with navigation
     localStorage.setItem('recentSearchQuery', searchQuery);
-    navigate(`/search/${searchQuery}`);
+    navigate(searchPath(searchQuery));
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
