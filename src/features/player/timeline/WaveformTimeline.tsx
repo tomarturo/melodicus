@@ -63,7 +63,8 @@ const WaveformTimeline = ({
   const hasLoops = drawableSections(savedSections).length > 0;
 
   return (
-    <Box py={4} px={8} flexShrink={0}>
+    // Side padding: 20px from tablet up, matching the frame around the panel; 16px on phones.
+    <Box py={4} px={{ base: 4, md: 5 }} flexShrink={0}>
       {hasLoops && (
         <Flex align="flex-start" gap={4} mb={2}>
           <LoopPills
