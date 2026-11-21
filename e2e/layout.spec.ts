@@ -46,7 +46,7 @@ for (const [name, path, lastItem] of [
   ['search results', '/search/test', 'Result 20'],
   ['saved songs', '/saved-songs', 'Saved song 15'],
 ] as const) {
-  test(`${name}: the content scrolls inside the panel, keeping its corners and the footer in view`, async ({ page }) => {
+  test(`${name}: the content scrolls inside the panel, keeping its corners in view`, async ({ page }) => {
     await page.goto(path);
     await expect(page.getByText(lastItem)).toBeAttached();
 
@@ -62,17 +62,15 @@ for (const [name, path, lastItem] of [
     expect(after.scrollTop).toBeGreaterThan(0);
     expect(after.top).toBe(before.top);
     expect(after.bottom).toBeLessThanOrEqual(after.viewportHeight);
-    await expect(page.getByRole('link', { name: 'Melodicus on GitHub' }).or(page.getByText('© 2025'))).toBeInViewport();
   });
 }
 
-test('home: the panel and footer fit the screen', async ({ page }) => {
+test('home: the panel fits the screen', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /learn the songs/i })).toBeVisible();
   const metrics = await panelMetrics(page);
   expect(metrics.windowScrollable).toBe(false);
   expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
-  await expect(page.getByText('© 2025')).toBeInViewport();
 });
 
 test.describe('video page', () => {
@@ -99,7 +97,7 @@ test.describe('video page', () => {
       await expect(page.locator('[part~="canvases"]')).toBeVisible();
 
       expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBe(0);
-      await expect(page.getByText('© 2025')).toBeInViewport();
+      await expect(page.getByRole('button', { name: 'Play or Pause' })).toBeInViewport();
 
       const display = await page.getByTestId('video-display').boundingBox();
       const art = await page.getByTestId('album-art').boundingBox();
@@ -111,4 +109,46 @@ test.describe('video page', () => {
       expect(Math.abs(art!.width - art!.height)).toBeLessThan(1);
     });
   }
+});
+
+test('the copyright and GitHub link sit in the sidebar, not under the page', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  const github = page.getByRole('link', { name: 'tomarturo on GitHub' });
+  await expect(github).toHaveAttribute('href', 'https://github.com/tomarturo/melodicus');
+  const copyright = page.getByRole('link', { name: '© 2025 HeyTK' });
+  await expect(copyright).toHaveAttribute('href', 'https://www.heytk.net');
+  // The rail shows only the icons; the labels appear once it's expanded.
+  await expect(page.getByText('2025 HeyTK')).toBeHidden();
+  await page.mouse.move(700, 300);
+  await page.getByRole('navigation', { name: 'Main' }).hover();
+  await expect(page.getByText('2025 HeyTK')).toBeVisible();
+  // With no footer, the panel runs down to the window's 20px frame.
+  const metrics = await panelMetrics(page);
+  expect(metrics.viewportHeight - metrics.bottom).toBe(20);
+});
+
+test('on a phone, the drawer holds the copyright and GitHub link', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await expect(page.getByRole('dialog').getByRole('link', { name: 'tomarturo on GitHub' })).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('link', { name: '© 2025 HeyTK' })).toBeVisible();
+});
+
+test('past 1600px the app, rail included, stays together and centers in the window', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await page.goto('/');
+  await page.mouse.move(1800, 300);
+  // Polled: whether there's a mouse (and so whether the touch toggle needs room)
+  // is known only once the app has checked, just after the first render.
+  const gaps = () => page.evaluate(() => {
+    const nav = document.querySelector('nav')!.getBoundingClientRect();
+    const panel = [...document.querySelectorAll<HTMLElement>('div')]
+      .find((d) => getComputedStyle(d).borderTopLeftRadius === '12px' && d.getBoundingClientRect().width > 600)!
+      .getBoundingClientRect();
+    return { beforeRail: nav.left, railToPanel: panel.left - nav.right, afterPanel: window.innerWidth - panel.right };
+  });
+  // 1920 - 1600 leaves 160px each side; the panel keeps its 20px frame inside that.
+  await expect.poll(gaps).toEqual({ beforeRail: 160, railToPanel: 0, afterPanel: 180 });
 });

@@ -14,30 +14,33 @@ test.beforeEach(async ({ page }) => {
 
 const sidebar = (page: Page) => page.getByRole('navigation', { name: 'Main' });
 const toggle = (page: Page) => page.getByRole('button', { name: /sidebar/ });
+const isExpanded = (page: Page, value: boolean) => expect(sidebar(page)).toHaveAttribute('data-expanded', String(value));
 
 test.describe('sidebar rail', () => {
   test('replaces the top bar, and expands on hover to list saved songs', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByPlaceholder('Search')).toHaveCount(0);
-    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    // With a mouse, hover opens it, so there's no toggle button.
+    await expect(toggle(page)).toHaveCount(0);
+    await isExpanded(page, false);
     await expect(sidebar(page).getByText('Little Wing')).toHaveCount(0);
 
     await page.mouse.move(700, 300);
     await sidebar(page).hover();
-    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await isExpanded(page, true);
     await sidebar(page).getByText('Little Wing').click();
 
     await expect(page).toHaveURL(/\/video\/otherVideo1$/);
-    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await isExpanded(page, false);
   });
 
   test('closes when the mouse leaves', async ({ page }) => {
     await page.goto('/');
     await page.mouse.move(700, 300);
     await sidebar(page).hover();
-    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await isExpanded(page, true);
     await page.mouse.move(900, 300);
-    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await isExpanded(page, false);
   });
 
   test('My songs leads to the saved songs page', async ({ page }) => {

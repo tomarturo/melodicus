@@ -14,7 +14,6 @@ import {
   useMediaQuery,
 } from '@chakra-ui/react';
 import { CaretLeft, CaretRight, List } from '@phosphor-icons/react';
-import Footer from '../../Footer';
 import { EXPANDED_WIDTH, RAIL_WIDTH, Sidebar } from './Sidebar';
 
 // 'hover': open while the mouse is over it. 'pinned': opened with the toggle,
@@ -25,9 +24,17 @@ type RailState = 'closed' | 'hover' | 'pinned';
 // the way somewhere else doesn't flash it open.
 const HOVER_OPEN_DELAY_MS = 150;
 
+const HOVER_QUERY = '(hover: hover) and (pointer: fine)';
+
+// The widest the app gets, rail included. Past it, the whole app (rail and
+// panel together) centers in the window, and the leftover space is plain frame
+// on both sides. --app-inset is that leftover on each side, or 0.
+const APP_MAX_WIDTH = 1600;
+const APP_INSET = `max(0px, calc((100vw - ${APP_MAX_WIDTH}px) / 2))`;
+
 function Rail() {
   const [state, setState] = useState<RailState>('closed');
-  const [canHover] = useMediaQuery('(hover: hover) and (pointer: fine)');
+  const [canHover] = useMediaQuery(HOVER_QUERY);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const location = useLocation();
   const expanded = state !== 'closed';
@@ -64,10 +71,12 @@ function Rail() {
       <Box
         as="nav"
         aria-label="Main"
+        data-expanded={expanded}
         position="fixed"
         top="0"
         bottom="0"
-        left="0"
+        // Beside the content, wherever the centered app starts.
+        left="var(--app-inset)"
         zIndex="banner"
         w={`${expanded ? EXPANDED_WIDTH : RAIL_WIDTH}px`}
         bg="chrome.bg"
@@ -90,27 +99,31 @@ function Rail() {
         }}
       >
         <Sidebar expanded={expanded} onNavigate={close} showShortcut={canHover} />
-        <IconButton
-          aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-          aria-expanded={expanded}
-          icon={<Icon as={expanded ? CaretLeft : CaretRight} boxSize="14px" />}
-          onClick={() => {
-            cancelHover();
-            setState(state === 'pinned' ? 'closed' : 'pinned');
-          }}
-          position="absolute"
-          top="24px"
-          right="-14px"
-          size="xs"
-          isRound
-          minW="28px"
-          h="28px"
-          bg="chrome.raised"
-          color="chrome.fg"
-          borderWidth="1px"
-          borderColor="chrome.border"
-          _hover={{ bg: 'chrome.active' }}
-        />
+        {/* With a mouse, hovering opens the rail. A touch screen has no hover,
+            so it gets a button instead. */}
+        {!canHover && (
+          <IconButton
+            aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-expanded={expanded}
+            icon={<Icon as={expanded ? CaretLeft : CaretRight} boxSize="14px" />}
+            onClick={() => {
+              cancelHover();
+              setState(state === 'pinned' ? 'closed' : 'pinned');
+            }}
+            position="absolute"
+            top="24px"
+            right="-14px"
+            size="xs"
+            isRound
+            minW="28px"
+            h="28px"
+            bg="chrome.raised"
+            color="chrome.fg"
+            borderWidth="1px"
+            borderColor="chrome.border"
+            _hover={{ bg: 'chrome.active' }}
+          />
+        )}
       </Box>
     </>
   );
@@ -147,39 +160,47 @@ function PhoneBar() {
 }
 
 // Pages whose content panel is the scroll area: the frame fits the screen,
-// so the panel's rounded corners and the footer always stay in view.
+// so the panel's rounded corners always stay in view.
 const SCROLLS_IN_PANEL = [/^\/$/, /^\/search\//, /^\/saved-songs$/, /^\/video\//];
 
 export const scrollsInPanel = (pathname: string) => SCROLLS_IN_PANEL.some((pattern) => pattern.test(pathname));
 
 /**
  * The frame every page sits in: the sidebar (a rail from tablet width up, a
- * drawer on phones), the page itself, and the footer.
+ * drawer on phones) and the page. The copyright and GitHub link live in the
+ * sidebar, so the page gets the full height.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const isPhone = useBreakpointValue({ base: true, md: false }, { ssr: false });
   const fitsScreen = scrollsInPanel(useLocation().pathname);
+  const [canHover] = useMediaQuery(HOVER_QUERY);
+  // A 20px frame on every side of the panel, matching the rail: its icons sit
+  // 20px in from its left edge, and the panel starts 20px past their right
+  // edge. A touch screen adds room on the left for the rail's toggle, which
+  // straddles that edge.
+  const frame = isPhone ? 0 : 5;
+  const panelLeft = isPhone || canHover ? 0 : 5;
 
   return (
     <Flex
       direction="column"
       bg="chrome.bg"
-      pl={isPhone ? 0 : `${RAIL_WIDTH}px`}
+      pl={isPhone ? 0 : `calc(${RAIL_WIDTH}px + var(--app-inset))`}
+      pr={isPhone ? 0 : 'var(--app-inset)'}
       // dvh follows Safari's toolbar as it shows and hides. On iPad, 100vh is
       // the height with the toolbar hidden, so a page that is 100vh tall
       // scrolls by the toolbar's height (about 50px). Browsers without dvh
       // fall back to vh.
-      {...(fitsScreen
-        ? { h: '100dvh', overflow: 'hidden', sx: { '@supports not (height: 100dvh)': { height: '100vh' } } }
-        : { minH: '100dvh', sx: { '@supports not (height: 100dvh)': { minHeight: '100vh' } } })}
+      {...(fitsScreen ? { h: '100dvh', overflow: 'hidden' } : { minH: '100dvh' })}
+      sx={{
+        '--app-inset': isPhone ? '0px' : APP_INSET,
+        '@supports not (height: 100dvh)': fitsScreen ? { height: '100vh' } : { minHeight: '100vh' },
+      }}
     >
       {isPhone ? <PhoneBar /> : <Rail />}
-      <Flex direction="column" flex="1" minH="0" pt={isPhone ? 0 : 4} px={['0', '0', 6]}>
-        <Box maxW="1400px" w="100%" mx="auto" display="flex" flexDirection="column" flex="1" minH="0">
+      <Flex direction="column" flex="1" minH="0" py={frame} pl={panelLeft} pr={frame}>
+        <Box w="100%" display="flex" flexDirection="column" flex="1" minH="0">
           {children}
-        </Box>
-        <Box maxW="1400px" w="100%" mx="auto">
-          <Footer />
         </Box>
       </Flex>
     </Flex>
