@@ -24,8 +24,8 @@ const DEFAULT_DURATION_MS = 4000;
 
 const TONE_ICON = {
   success: { icon: CheckCircle, color: 'green.300' },
-  warning: { icon: Warning, color: 'orange.300' },
-  error: { icon: WarningCircle, color: 'yellow.300' },
+  warning: { icon: Warning, color: 'yellow.300' },
+  error: { icon: WarningCircle, color: 'red.300' },
 } as const;
 
 interface NoticeViewProps extends Notice {
