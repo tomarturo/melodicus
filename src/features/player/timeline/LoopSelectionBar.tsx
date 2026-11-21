@@ -19,16 +19,17 @@ interface LoopSelectionBarProps {
 
 /**
  * The row under the track: what's selected, and what can be done with it.
- * Always the same height, so the video area above doesn't jump as it changes.
+ * Centered, with the times beside the action, so the action sits where the eye
+ * already is. Always the same height, so the video area above doesn't jump.
  */
 const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate }: LoopSelectionBarProps) => (
-  <Flex h="40px" mt={3} align="center" justify="space-between" gap={3} data-testid="loop-selection">
+  <Flex h="40px" mt={3} align="center" justify="center" gap={3} data-testid="loop-selection">
     {status.kind === 'none' ? (
       <Text fontSize="sm" color="fg.muted">
         Drag on the track to make a loop
       </Text>
     ) : (
-      <Text fontSize="sm" color="fg.default" sx={{ fontVariantNumeric: 'tabular-nums' }} noOfLines={1}>
+      <Text fontSize="sm" color="fg.default" sx={{ fontVariantNumeric: 'tabular-nums' }} noOfLines={1} minW={0}>
         {status.kind === 'saved' && (
           <Text as="span" fontWeight="semibold">
             {status.section.name || 'Unnamed'} ·{' '}
