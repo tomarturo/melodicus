@@ -22,7 +22,7 @@ test('a guest saves, renames and deletes a loop, and the song shows under My son
 
   await page.getByRole('link', { name: 'My songs' }).click();
   await expect(page.getByRole('heading', { name: VIDEO_TITLE })).toBeVisible();
-  await expect(page.getByText('saved in this browser')).toBeVisible();
+  await expect(page.getByText('Temporarily saved')).toBeVisible();
 
   await page.goBack();
   await page.getByRole('button', { name: 'Options for Last chorus' }).click();

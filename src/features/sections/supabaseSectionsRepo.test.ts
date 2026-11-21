@@ -79,6 +79,16 @@ describe('SupabaseSectionsRepo', () => {
     expect(fake.tables.saved_sections).toHaveLength(1);
   });
 
+  it('lists each saved song with its own loops in playing order', async () => {
+    const repo = new SupabaseSectionsRepo(client, USER);
+    await repo.createSection(video, { name: 'Solo', start_time: 60, end_time: 70 });
+    await repo.createSection(video, { name: 'Intro', start_time: 5, end_time: 9 });
+    await repo.createSection({ videoId: 'zzz', title: 'Song B' }, { name: 'Riff', start_time: 1, end_time: 2 });
+    const songs = await repo.listSavedSongs();
+    expect(songs.find((song) => song.title === 'Song A')!.loops.map((loop) => loop.name)).toEqual(['Intro', 'Solo']);
+    expect(songs.find((song) => song.title === 'Song B')!.loops.map((loop) => loop.name)).toEqual(['Riff']);
+  });
+
   it('only sees the signed-in user’s rows', async () => {
     await new SupabaseSectionsRepo(client, USER).createSection(video, { name: null, start_time: 1, end_time: 2 });
     fake.userId = 'user-2';

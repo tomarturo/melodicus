@@ -27,6 +27,9 @@ export const SavedSongSchema = z.object({
 });
 export type SavedSong = z.infer<typeof SavedSongSchema>;
 
+/** A saved song as listed: with its loops' names, in the order they play. */
+export type SavedSongWithLoops = SavedSong & { loops: Array<Pick<Section, 'name' | 'start_time'>> };
+
 /** Identifies the video a loop belongs to. Supabase requires the title. */
 export interface VideoRef {
   videoId: string;
@@ -47,7 +50,7 @@ export interface SectionsRepository {
    * were added.
    */
   importSections(video: VideoRef, sections: NewSection[]): Promise<number>;
-  listSavedSongs(): Promise<SavedSong[]>;
+  listSavedSongs(): Promise<SavedSongWithLoops[]>;
   /** Removes a saved song and all of its loops. */
   deleteSavedSong(videoId: string): Promise<void>;
 }

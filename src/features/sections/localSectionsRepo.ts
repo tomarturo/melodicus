@@ -7,6 +7,7 @@ import {
   type LoopTimes,
   type NewSection,
   type SavedSong,
+  type SavedSongWithLoops,
   type Section,
   type SectionsRepository,
   type VideoRef,
@@ -50,6 +51,9 @@ const parseEach = <T>(value: unknown, schema: z.ZodType<T>): T[] => {
  * live under their own key, and a separate index lists the saved videos so
  * guests get a saved-songs page too.
  */
+const loopsInOrder = (sections: Section[]) =>
+  [...sections].sort((a, b) => a.start_time - b.start_time).map(({ name, start_time }) => ({ name, start_time }));
+
 export class LocalSectionsRepo implements SectionsRepository {
   readonly kind = 'local' as const;
   private migrated = false;
@@ -104,9 +108,9 @@ export class LocalSectionsRepo implements SectionsRepository {
     return added.length;
   }
 
-  async listSavedSongs(): Promise<SavedSong[]> {
+  async listSavedSongs(): Promise<SavedSongWithLoops[]> {
     this.migrateLegacy();
-    return this.readSongs();
+    return this.readSongs().map((song) => ({ ...song, loops: loopsInOrder(this.readSections(song.videoId)) }));
   }
 
   async deleteSavedSong(videoId: string): Promise<void> {
