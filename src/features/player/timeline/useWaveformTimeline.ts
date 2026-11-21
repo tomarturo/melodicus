@@ -14,8 +14,10 @@ import { drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond,
 // progress canvas is the main canvas recomposited with 'source-in', which
 // multiplies the two alphas, so a translucent waveColor drags progressColor
 // down with it.
-const TRACK_COLOR = '#E4E2DD'; // about blackAlpha.100 over #FAF9F6
-const PLAYED_COLOR = '#CBC8C1'; // a step darker: played, without shouting
+// Both are tokens flattened onto the panel: the track matches the pill buttons
+// at rest, and the played part is the same neutral two steps darker.
+const TRACK_COLOR = '#EBEAE7'; // bg.muted (blackAlpha.100) over #FAF9F6
+const PLAYED_COLOR = '#D2D1CE'; // border.strong (blackAlpha.300) over #FAF9F6
 const PLAYHEAD_COLOR = '#161719'; // ink
 const HOVER_LINE_COLOR = 'rgba(22, 23, 25, 0.35)'; // ink, faint
 const LOOP_COLOR = 'rgba(128, 90, 213, 0.28)'; // purple.500
