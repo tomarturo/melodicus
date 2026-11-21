@@ -23,7 +23,8 @@ const segment: SystemStyleObject = {
   _focusVisible: { boxShadow: 'inset 0 0 0 2px var(--chakra-colors-border-focus)' },
 };
 
-const Divider = () => <Box w="1px" h="24px" bg="border.strong" flexShrink={0} aria-hidden />;
+// Full height, meeting the outline top and bottom, in the outline's color.
+const Divider = () => <Box w="1px" alignSelf="stretch" bg="border.default" flexShrink={0} aria-hidden />;
 
 /** Speed as one split button: step down, pick from the list, step up. */
 function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps) {
