@@ -228,7 +228,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
           expanded={expanded}
           label="Log in"
           labelWeight="bold"
-          icon={<Icon as={SignIn} boxSize="22px" />}
+          icon={<Icon as={SignIn} weight="bold" boxSize="22px" />}
           onClick={authDialog.onOpen}
         />
       )}
