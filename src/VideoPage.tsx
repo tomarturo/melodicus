@@ -108,7 +108,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         // Dragging this loop's edges from now on offers to update it.
         controller.setLoopOrigin(created.id);
       }
-      toast({ title: nameDialog.mode === 'edit' ? 'Loop updated!' : 'Loop saved!', status: 'success', duration: 3000 });
+      toast({ title: nameDialog.mode === 'edit' ? 'Loop renamed' : 'Loop saved!', status: 'success', duration: 3000 });
       closeNameDialog();
     } catch (error) {
       showError('Error', error);

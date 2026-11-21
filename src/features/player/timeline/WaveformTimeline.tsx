@@ -23,13 +23,14 @@ interface WaveformTimelineProps {
   isSavingLoop: boolean;
 }
 
+// The halves of the zoom split button. Square inside; the group rounds the ends.
 const zoomButtonStyle = {
   size: 'xs',
   minW: '24px',
   h: '24px',
   bg: 'ink',
   color: 'white',
-  borderRadius: 'md',
+  borderRadius: '0',
   _hover: { bg: 'ink.hover' },
   _active: { bg: 'ink.active' },
   // Disabled: the white icon stays, the dark square lightens.
@@ -86,6 +87,9 @@ const WaveformTimeline = ({
           <Button
             variant="quiet"
             borderStyle="dashed"
+            // On hover it reads as a regular button: the quiet style's solid edge.
+            // Set through sx so it adds to the variant's hover instead of replacing it.
+            sx={{ '&:hover': { borderStyle: 'solid' } }}
             h="30px"
             px="3"
             fontSize="xs"
@@ -101,7 +105,16 @@ const WaveformTimeline = ({
       <Box position="relative">
         <Box ref={containerRef} />
         {/* Over the track's top-right corner, above wavesurfer's layers. */}
-        <Flex position="absolute" top="1" right="1" gap="1" zIndex="docked">
+        <Flex
+          role="group"
+          aria-label="Zoom"
+          position="absolute"
+          top="1"
+          right="1"
+          zIndex="docked"
+          borderRadius="md"
+          overflow="hidden"
+        >
           <IconButton
             {...zoomButtonStyle}
             aria-label="Zoom out"
@@ -109,6 +122,7 @@ const WaveformTimeline = ({
             isDisabled={zoomIndex === 0}
             onClick={() => setZoomIndex((index) => Math.max(0, index - 1))}
           />
+          <Box w="1px" alignSelf="stretch" bg="whiteAlpha.400" aria-hidden />
           <IconButton
             {...zoomButtonStyle}
             aria-label="Zoom in"

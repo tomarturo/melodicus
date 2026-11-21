@@ -13,6 +13,17 @@ import {
   Box
 } from '@chakra-ui/react';
 
+// The suggestion rows scroll sideways with no scrollbar; a fade at the right
+// edge shows there's more. The rows end with matching padding, so the last
+// suggestion can scroll clear of the fade.
+const FADE_WIDTH = '40px';
+const scrollRow = {
+  scrollbarWidth: 'none',
+  '&::-webkit-scrollbar': { display: 'none' },
+  maskImage: `linear-gradient(to right, black calc(100% - ${FADE_WIDTH}), transparent)`,
+  WebkitMaskImage: `linear-gradient(to right, black calc(100% - ${FADE_WIDTH}), transparent)`,
+} as const;
+
 interface SectionNameModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,7 +58,7 @@ const SectionNameModal = ({
     <ModalOverlay />
     <ModalContent>
       <ModalHeader>
-        {isEditing ? 'Edit Loop Name' : 'Name This Loop'}
+        {isEditing ? 'Rename Loop' : 'Name This Loop'}
       </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
@@ -68,8 +79,8 @@ const SectionNameModal = ({
           />
 
             {/* <Text fontSize="md" color="fg.muted" mb="1">Quick add</Text> */}
-            <Box overflowX="auto" pb="1">
-              <HStack spacing="1" minW="max-content">
+            <Box overflowX="auto" pb="1" sx={scrollRow}>
+              <HStack spacing="1" minW="max-content" pr={FADE_WIDTH}>
                 {musicTerms.map((term) => (
                   <Button
                     key={term}
@@ -89,8 +100,8 @@ const SectionNameModal = ({
                 ))}
               </HStack>
             </Box>
-            <Box overflowX="auto" pb="2">
-              <HStack spacing="1" minW="max-content">
+            <Box overflowX="auto" pb="2" sx={scrollRow}>
+              <HStack spacing="1" minW="max-content" pr={FADE_WIDTH}>
                 {numbersAndLetters.map((item) => (
                   <Button
                     key={item}
@@ -122,9 +133,9 @@ const SectionNameModal = ({
           w="130px"
           variant="pill"
           isLoading={isSaving}
-          loadingText={isEditing ? 'Updating' : 'Saving'}
+          loadingText="Saving"
           onClick={onSave}>
-            {isEditing ? 'Update' : 'Save Loop'}
+            {isEditing ? 'Save' : 'Save Loop'}
           </Button>
         </HStack>
       </ModalFooter>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Flex, Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
-import { CaretDown } from '@phosphor-icons/react';
+import { Flex, Icon, Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
+import { CaretDown, PencilSimpleLine, Trash } from '@phosphor-icons/react';
 import { formatSecondsToDuration } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
 import { orderedLoops } from './timelineLogic';
@@ -80,15 +80,28 @@ const LoopPills = ({
                 <CaretDown size={12} weight="bold" />
               </MenuButton>
               <Portal>
-                <MenuList minW="0" w="120px" py="1" boxShadow="md" borderColor="transparent" rootProps={{ zIndex: 'dropdown' }}>
-                  <MenuItem fontSize="14px" fontWeight="medium" onClick={() => onEditSection(section)}>
-                    Edit
+                <MenuList minW="0" w="136px" py="1" boxShadow="md" borderColor="transparent" rootProps={{ zIndex: 'dropdown' }}>
+                  <MenuItem
+                    fontSize="14px"
+                    fontWeight="medium"
+                    color="fg.default"
+                    icon={<Icon as={PencilSimpleLine} boxSize="16px" />}
+                    iconSpacing="2"
+                    // Hover and keyboard focus in the app's neutrals.
+                    _hover={{ bg: 'bg.muted', color: 'fg.strong' }}
+                    _focus={{ bg: 'bg.muted', color: 'fg.strong' }}
+                    onClick={() => onEditSection(section)}
+                  >
+                    Rename
                   </MenuItem>
                   <MenuItem
                     fontSize="14px"
                     fontWeight="medium"
                     color="red.700"
+                    icon={<Icon as={Trash} boxSize="16px" />}
+                    iconSpacing="2"
                     _hover={{ bg: 'red.50', color: 'red.800' }}
+                    _focus={{ bg: 'red.50', color: 'red.800' }}
                     onClick={() => onDeleteSection(section.id)}
                   >
                     Delete
