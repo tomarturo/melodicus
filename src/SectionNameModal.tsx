@@ -13,6 +13,11 @@ import {
   Box
 } from '@chakra-ui/react';
 
+const hiddenScrollbar = {
+  scrollbarWidth: 'none',
+  '&::-webkit-scrollbar': { display: 'none' },
+} as const;
+
 interface SectionNameModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -68,7 +73,8 @@ const SectionNameModal = ({
           />
 
             {/* <Text fontSize="md" color="fg.muted" mb="1">Quick add</Text> */}
-            <Box overflowX="auto" pb="1">
+            {/* Scrolls sideways with no visible scrollbar. */}
+            <Box overflowX="auto" pb="1" sx={hiddenScrollbar}>
               <HStack spacing="1" minW="max-content">
                 {musicTerms.map((term) => (
                   <Button
@@ -89,7 +95,7 @@ const SectionNameModal = ({
                 ))}
               </HStack>
             </Box>
-            <Box overflowX="auto" pb="2">
+            <Box overflowX="auto" pb="2" sx={hiddenScrollbar}>
               <HStack spacing="1" minW="max-content">
                 {numbersAndLetters.map((item) => (
                   <Button
