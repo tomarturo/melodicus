@@ -50,11 +50,11 @@ const ShareButton = ({ videoId, savedSections }: ShareButtonProps) => {
     <>
       <IconButton
         aria-label="Share"
-        icon={<Icon as={ShareFat} boxSize="20px" />}
+        icon={<Icon as={ShareFat} boxSize="16px" />}
         onClick={dialog.onOpen}
         variant="loud"
-        boxSize="40px"
-        minW="40px"
+        boxSize="32px"
+        minW="32px"
       />
       <Modal isOpen={dialog.isOpen} onClose={dialog.onClose}>
         <ModalOverlay />
