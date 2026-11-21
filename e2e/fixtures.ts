@@ -82,7 +82,10 @@ export async function signIn(page: Page) {
 
 /** Drags out a new selection on the (unzoomed) track, between two fractions of its width. */
 export async function dragSelection(page: Page, from: number, to: number) {
-  const track = await page.locator('[part~="canvases"]').first().boundingBox();
+  const canvases = page.locator('[part~="canvases"]').first();
+  // The track can re-render as the loops load, so wait for it to settle visibly.
+  await canvases.waitFor({ state: 'visible' });
+  const track = await canvases.boundingBox();
   if (!track) throw new Error('no timeline track on the page');
   const y = track.y + track.height / 2;
   await page.mouse.move(track.x + track.width * from, y);
