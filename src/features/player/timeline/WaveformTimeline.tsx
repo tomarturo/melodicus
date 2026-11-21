@@ -87,6 +87,9 @@ const WaveformTimeline = ({
           <Button
             variant="quiet"
             borderStyle="dashed"
+            // On hover it reads as a regular button: the quiet style's solid edge.
+            // Set through sx so it adds to the variant's hover instead of replacing it.
+            sx={{ '&:hover': { borderStyle: 'solid' } }}
             h="30px"
             px="3"
             fontSize="xs"
