@@ -107,7 +107,7 @@ const HomePage = () => {
 
   return (
     <>
-      <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} overflow="hidden">
+      <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} minH="0" overflowY="auto" overscrollBehavior="contain">
         <Container maxW='3xl'>
           <VStack>
             <Flex mb='12' gap={8} direction={'column'}>
