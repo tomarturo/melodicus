@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // No toast: the dialog closes and the sidebar shows the account.
             return { data, error: null };
         } catch (error) {
-            notify({ tone: 'error', title: 'Couldn’t log in', description: errorCause(error) });
+            // Shown in the login dialog, which stays open to try again.
             return { data: null, error };
         }
     };
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
             return { data, error: null };
         } catch (error) {
-            notify({ tone: 'error', title: 'Couldn’t create your account', description: errorCause(error) });
+            // Shown in the sign-up dialog, which stays open to try again.
             return { data: null, error };
         }
     };
