@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawableSections, orderedLoops, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import { drawableSections, tickIntervals, orderedLoops, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
 
 const section = (id: string, start_time: number, end_time: number) => ({ id, name: null, start_time, end_time });
 
@@ -63,3 +63,10 @@ describe('isHorizontalWheel', () => {
   });
 });
 
+
+describe('tickIntervals', () => {
+  it('matches the ruler: 5s ticks and 30s labels fitted, 1s and 10s zoomed in', () => {
+    expect(tickIntervals(5.5)).toEqual({ tick: 5, secondary: 10, primary: 30 });
+    expect(tickIntervals(44)).toEqual({ tick: 1, secondary: 5, primary: 10 });
+  });
+});

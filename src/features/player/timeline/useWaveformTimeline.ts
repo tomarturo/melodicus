@@ -7,7 +7,7 @@ import { formatSecondsToDuration } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
 import { MIN_LOOP } from '../loopLogic';
 import type { PlayerController } from '../playerController';
-import { drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import { drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond, tickIntervals } from './timelineLogic';
 
 // The track is quiet so the loop leads. Light warm greys, flattened against
 // the #FAF9F6 panel rather than left translucent. They have to be opaque: the
@@ -52,6 +52,15 @@ const TRACK_STYLES = `
     overflow: hidden;
   }
   [part="cursor"], [part="hover"] { height: ${TRACK_HEIGHT}px !important; }
+  /* Above the track's fill, under the loop and saved loops. */
+  [part="ticks"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: ${TRACK_HEIGHT}px;
+    z-index: 3;
+    pointer-events: none;
+  }
   [part="cursor"] { border-radius: 1px; }
   [part="hover-label"] { border-radius: 4px; padding: 1px 5px !important; font-variant-numeric: tabular-nums; }
 
@@ -119,6 +128,40 @@ const styleRegion = (region: Region, edgeColor?: string) => {
     handle.style[isLeft ? 'borderLeft' : 'borderRight'] = `2px solid ${edgeColor}`;
     handle.style.borderRadius = '0';
   });
+};
+
+// Lines on the track, spaced like the ruler: short at each tick, medium at
+// the in-between labels, tall at the labelled times, on a faint midline.
+const TICK_COLOR = 'rgba(22, 23, 25, 0.14)'; // ink, faint
+const TICK_HEIGHTS = { tick: 0.2, secondary: 0.4, primary: 0.72 }; // of the track
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/**
+ * Draws the tick lines across the track at the current zoom, as an SVG of
+ * crisp 1px lines snapped to whole pixels (background gradients blur them
+ * whenever the spacing isn't a whole number of pixels).
+ */
+const drawTicks = (svg: SVGSVGElement, widthPx: number, duration: number) => {
+  const pxPerSec = widthPx / duration;
+  const { tick, secondary, primary } = tickIntervals(pxPerSec);
+  const mid = TRACK_HEIGHT / 2;
+  const isMultiple = (time: number, step: number) => Math.abs(time / step - Math.round(time / step)) < 1e-6;
+  let path = `M0 ${mid + 0.5}H${widthPx}`; // the midline
+  // Skips 0 and the very end, where a line would sit on the track's rounded edge.
+  for (let time = tick; time < duration; time += tick) {
+    const fraction = isMultiple(time, primary)
+      ? TICK_HEIGHTS.primary
+      : isMultiple(time, secondary)
+        ? TICK_HEIGHTS.secondary
+        : TICK_HEIGHTS.tick;
+    const half = Math.round((TRACK_HEIGHT * fraction) / 2);
+    const x = Math.round(time * pxPerSec) + 0.5;
+    path += `M${x} ${mid - half}V${mid + half}`;
+  }
+  svg.setAttribute('width', String(widthPx));
+  svg.setAttribute('viewBox', `0 0 ${widthPx} ${TRACK_HEIGHT}`);
+  svg.firstElementChild?.setAttribute('d', path);
 };
 
 /** Flags the loop region while it spans the whole song, before any selection, so it isn't drawn. */
@@ -313,6 +356,23 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
     });
 
     wavesurfer.on('resize', applyZoom);
+
+    // The tick lines, redrawn whenever the zoom (and so the spacing) changes.
+    const ticks = document.createElementNS(SVG_NS, 'svg');
+    ticks.setAttribute('part', 'ticks');
+    ticks.setAttribute('height', String(TRACK_HEIGHT));
+    ticks.setAttribute('shape-rendering', 'crispEdges');
+    const tickPath = document.createElementNS(SVG_NS, 'path');
+    tickPath.setAttribute('stroke', TICK_COLOR);
+    tickPath.setAttribute('stroke-width', '1');
+    ticks.appendChild(tickPath);
+    wrapper.appendChild(ticks);
+    const redrawTicks = () => {
+      const total = wavesurfer.getDuration();
+      if (total > 0 && wrapper.scrollWidth > 0) drawTicks(ticks, wrapper.scrollWidth, total);
+    };
+    wavesurfer.on('redrawcomplete', redrawTicks);
+    wavesurfer.on('ready', redrawTicks);
 
 
     // Dragging the ruler scrolls the track. A short press is still a tap,

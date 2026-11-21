@@ -62,3 +62,16 @@ export function followScrollLeft({
 export const isHorizontalWheel = (event: { deltaX: number; deltaY: number; shiftKey: boolean }) =>
   Math.abs(event.deltaX) > Math.abs(event.deltaY) || (event.shiftKey && event.deltaY !== 0);
 
+
+/**
+ * The ruler's spacing at a zoom, in seconds: a small tick, a secondary label
+ * and a primary label. This mirrors wavesurfer's timeline plugin defaults,
+ * so the lines drawn on the track land on the ruler's ticks.
+ */
+export function tickIntervals(pxPerSec: number): { tick: number; secondary: number; primary: number } {
+  const tick =
+    pxPerSec >= 25 ? 1 : pxPerSec * 5 >= 25 ? 5 : pxPerSec * 15 >= 25 ? 15 : 60 * Math.ceil(0.5 / pxPerSec);
+  const primaryEvery = pxPerSec >= 25 ? 10 : pxPerSec * 5 >= 25 ? 6 : 4;
+  const secondaryEvery = pxPerSec >= 25 ? 5 : 2;
+  return { tick, secondary: tick * secondaryEvery, primary: tick * primaryEvery };
+}
