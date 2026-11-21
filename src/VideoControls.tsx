@@ -16,7 +16,8 @@ const labelFromTablet = { base: 'none', md: 'inline' } as const;
 
 // Play is a step up from the rest of the row (CONTROL_HEIGHT).
 const PLAY_HEIGHT = '48px';
-const LABELLED_MIN_WIDTH = '104px';
+// Restart and Play/Pause share one width on desktop: Restart's, the longer label.
+const LABELLED_MIN_WIDTH = '124px';
 
 /**
  * One centered row: Restart, Play/Pause, speed. Saving a loop happens in the
