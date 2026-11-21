@@ -58,7 +58,7 @@ const SectionNameModal = ({
     <ModalOverlay />
     <ModalContent>
       <ModalHeader>
-        {isEditing ? 'Edit Loop Name' : 'Name This Loop'}
+        {isEditing ? 'Rename Loop' : 'Name This Loop'}
       </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
@@ -133,9 +133,9 @@ const SectionNameModal = ({
           w="130px"
           variant="pill"
           isLoading={isSaving}
-          loadingText={isEditing ? 'Updating' : 'Saving'}
+          loadingText="Saving"
           onClick={onSave}>
-            {isEditing ? 'Update' : 'Save Loop'}
+            {isEditing ? 'Save' : 'Save Loop'}
           </Button>
         </HStack>
       </ModalFooter>
