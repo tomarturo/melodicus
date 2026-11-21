@@ -132,7 +132,7 @@ function CommandSearchDialog({ onClose }: { onClose: () => void }) {
             h="56px"
             pl="12"
             pr="4"
-            placeholder="Search saved songs or YouTube, or paste a link"
+            placeholder="Search your songs, find new ones, or paste a link"
             _placeholder={{ color: 'fg.placeholder' }}
             value={input}
             onChange={(event) => {
