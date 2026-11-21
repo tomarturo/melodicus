@@ -5,6 +5,7 @@ import { ChakraProvider, Container } from '@chakra-ui/react';
 import '@fontsource-variable/space-grotesk';
 import '@fontsource-variable/work-sans';
 import { createQueryClient } from './lib/queryClient';
+import { theme } from './theme';
 import { AuthProvider } from './contexts/AuthContext';
 import GuestLoopsSync from './features/sections/GuestLoopsSync';
 import HomePage from './HomePage';
@@ -16,7 +17,7 @@ import SavedSongs from './SavedSongs';
 function App() {
   const [queryClient] = useState(createQueryClient);
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <GuestLoopsSync />

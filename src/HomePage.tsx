@@ -110,12 +110,12 @@ const HomePage = () => {
   return (
     <Flex direction='column' minH='100vh'>
       <Header />
-      <Flex direction="column" flex="1" pt='12' bg='#FAF9F6' borderRadius={['none', 'none', 'xl']} overflow="hidden">
+      <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} overflow="hidden">
         <Container maxW='3xl'>
           <VStack>
             <Flex mb='12' gap={8} direction={'column'}>
-              <Heading as='h1' size='3xl' color='blackAlpha.900' textAlign="center">Learn the songs & licks you love</Heading>
-              <Text fontSize='xl' color='blackAlpha.800' align="center">Uninterrupted loops. Controlled playback. Zero distractions.</Text>
+              <Heading as='h1' size='3xl' color='fg.strong' textAlign="center">Learn the songs & licks you love</Heading>
+              <Text fontSize='xl' color='fg.default' align="center">Uninterrupted loops. Controlled playback. Zero distractions.</Text>
             </Flex>
             <Tabs
               w='100%'
@@ -124,18 +124,18 @@ const HomePage = () => {
               <TabList
                 borderBottomColor="blackAlpha.300">
                 <Tab
-                  color='blackAlpha.700'
-                  _selected={{ color: 'blackAlpha.800', fontWeight: 'semibold' }}
+                  color='fg.muted'
+                  _selected={{ color: 'fg.default', fontWeight: 'semibold' }}
                 >Find a song</Tab>
                 <Tab
-                  color='blackAlpha.700'
-                  _selected={{ color: 'blackAlpha.800', fontWeight: 'semibold' }}
+                  color='fg.muted'
+                  _selected={{ color: 'fg.default', fontWeight: 'semibold' }}
                 >Paste a link</Tab>
               </TabList>
               <TabIndicator
                 mt="-1.5px"
                 height="2px"
-                bg="black"
+                bg="bg.inverseStrong"
                 borderRadius="1px"
               />
               <TabPanels>
@@ -144,14 +144,14 @@ const HomePage = () => {
                     <Input
                       rounded='full'
                       variant='filled'
-                      bg="blackAlpha.100"
-                      _hover={{ bg: "blackAlpha.200" }}
-                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.900" }}
+                      bg="bg.muted"
+                      _hover={{ bg: "bg.mutedHover" }}
+                      _focus={{ bg: "bg.muted", borderColor: "border.focus" }}
                       pr='2rem'
                       mb='1'
                       type='text'
                       placeholder='Enter a song title & artist'
-                      _placeholder={{ opacity: 1, color: 'blackAlpha.600' }}
+                      _placeholder={{ opacity: 1, color: 'fg.placeholder' }}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
@@ -164,9 +164,9 @@ const HomePage = () => {
                         icon={<SearchIcon />}
                         isRound
                         size='sm'
-                        color="blackAlpha.900"
+                        color="fg.strong"
                         bg="none"
-                        _hover={{ color: 'whiteAlpha.900', bg: 'blackAlpha.800' }}
+                        _hover={{ color: 'fg.onInverse', bg: 'bg.inverse' }}
                       />
                     </InputRightElement>
                   </InputGroup>
@@ -190,14 +190,14 @@ const HomePage = () => {
                     <Input
                       rounded='full'
                       variant='filled'
-                      bg="blackAlpha.100"
-                      _hover={{ bg: "blackAlpha.200" }}
-                      _focus={{ bg: "blackAlpha.100", borderColor: "blackAlpha.900" }}
+                      bg="bg.muted"
+                      _hover={{ bg: "bg.mutedHover" }}
+                      _focus={{ bg: "bg.muted", borderColor: "border.focus" }}
                       pr='2rem'
                       mb='1'
                       type='text'
                       placeholder='Enter a YouTube link'
-                      _placeholder={{ opacity: 1, color: 'blackAlpha.600' }}
+                      _placeholder={{ opacity: 1, color: 'fg.placeholder' }}
                       value={videoLink}
                       onChange={handleLinkChange}
                       onKeyDown={handleKeyDown}
@@ -211,9 +211,9 @@ const HomePage = () => {
                         icon={<ArrowForwardIcon />}
                         isRound
                         size='sm'
-                        color="blackAlpha.900"
+                        color="fg.strong"
                         bg="none"
-                        _hover={{ color: 'whiteAlpha.900', bg: 'blackAlpha.800' }}
+                        _hover={{ color: 'fg.onInverse', bg: 'bg.inverse' }}
                       />
                     </InputRightElement>
                   </InputGroup>
@@ -231,7 +231,7 @@ const HomePage = () => {
                               alignItems='center'
                               gap='2px'
                               fontWeight='semibold'
-                              color='blackAlpha.800'
+                              color='fg.default'
                               href={`https://www.youtube.com/`}
                               target="_blank"
                               rel="noopener noreferrer"

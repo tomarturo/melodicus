@@ -94,19 +94,7 @@ const ShareTimestamps = ({ videoId, savedSections }: ShareTimestampsProps) => {
         leftIcon={<Icon as={Paperclip} />}
         size='lg'
         width="153px"
-        rounded='full'
-        variant='filled'
-        bg="blackAlpha.100"
-        border="1px"
-        color="blackAlpha.800"
-        borderColor="blackAlpha.200"
-        _hover={{ 
-          boxShadow: "0 0 0 1px", 
-          boxShadowColor: "blackAlpha.900", 
-          bg:"blackAlpha.200", 
-          borderColor:"blackAlpha.700", 
-          color:"blackAlpha.900"
-        }}
+        variant='pill'
         aria-label="Save"
       >
         Save
@@ -129,12 +117,12 @@ const ShareTimestamps = ({ videoId, savedSections }: ShareTimestampsProps) => {
                   variant="filled"
                   rounded='full'
                   size="md"
-                  bg="blackAlpha.100"
+                  bg="bg.muted"
                   fontFamily="mono"
                   fontSize="sm"
                   overflow="hidden"
                   whiteSpace="nowrap"
-                  _hover={{boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"}}
+                  _hover={{boxShadow: "0 0 0 1px", boxShadowColor: "fg.default", bg: "bg.mutedHover", borderColor: "border.emphasis", color: "fg.strong"}}
                 />
               </Box>
             </VStack>
@@ -146,11 +134,11 @@ const ShareTimestamps = ({ videoId, savedSections }: ShareTimestampsProps) => {
                 size="md"
                 rounded="full"
                 bg="none"
-                color="blackAlpha.800"
+                color="fg.default"
                 border="1px"
-                borderColor="blackAlpha.300"
+                borderColor="border.strong"
                 _hover={{
-                  boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
+                  boxShadow: "0 0 0 1px", boxShadowColor: "fg.default", bg: "bg.mutedHover", borderColor: "border.emphasis", color: "fg.strong"
                 }}
                 onClick={handleOpenInNewTab}
               >
@@ -159,12 +147,12 @@ const ShareTimestamps = ({ videoId, savedSections }: ShareTimestampsProps) => {
               <Button
                 size="md"
                 rounded="full"
-                bg="blackAlpha.100"
+                bg="bg.muted"
                 border="1px"
-                color="blackAlpha.800"
-                borderColor="blackAlpha.200"
+                color="fg.default"
+                borderColor="border.default"
                 _hover={{
-                  boxShadow: "0 0 0 1px", boxShadowColor: "blackAlpha.800", bg: "blackAlpha.200", borderColor: "blackAlpha.700", color: "blackAlpha.900"
+                  boxShadow: "0 0 0 1px", boxShadowColor: "fg.default", bg: "bg.mutedHover", borderColor: "border.emphasis", color: "fg.strong"
                 }}
                 onClick={handleCopyShareableLink}
               >

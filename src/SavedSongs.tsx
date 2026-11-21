@@ -32,7 +32,7 @@ const SavedSongs = () => {
     content = (
       <Stack spacing="8">
         {!user && (
-          <Text fontSize="sm" color="blackAlpha.700">
+          <Text fontSize="sm" color="fg.muted">
             These are saved in this browser. Log in to keep them in your account.
           </Text>
         )}
@@ -82,7 +82,7 @@ const SavedSongs = () => {
   return (
     <Flex direction="column" minH="100vh">
       <Header />
-      <Flex direction="column" flex="1" bg="#FAF9F6" borderRadius={['none', 'none', 'xl']} overflow="hidden">
+      <Flex direction="column" flex="1" bg="bg.panel" borderRadius={['none', 'none', 'xl']} overflow="hidden">
         <Container w="100%" pt="12" pb="8">
           {content}
         </Container>
