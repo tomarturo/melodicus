@@ -144,7 +144,7 @@ const SearchResults = () => {
     <Flex direction="column" flex="1" bg="bg.panel" borderRadius={['none', 'none', 'xl']} minH="0" overflowY="auto" overscrollBehavior="contain">
       <Container w="100%" pt={{ base: 8, md: 12 }} pb={12}>
         {/* The purple marks the query, so it needs no quotes. */}
-        <Heading as="h1" size="md" mb={6} textAlign="center" sx={{ textWrap: 'balance' }}>
+        <Heading as="h1" size="md" fontWeight="semibold" mb={6} textAlign="center" sx={{ textWrap: 'balance' }}>
           Results for{' '}
           <Text as="span" color="purple.700">
             {query}
