@@ -17,6 +17,8 @@ interface LoopSelectionBarProps {
   onUpdate: (section: Section) => void;
   /** Drops a new selection, back to the hint. */
   onCancel: () => void;
+  /** Puts an edited saved loop back to its saved edges. */
+  onReset: (section: Section) => void;
 }
 
 /**
@@ -24,8 +26,8 @@ interface LoopSelectionBarProps {
  * Centered, with the times beside the action, so the action sits where the eye
  * already is. Always the same height, so the video area above doesn't jump.
  */
-const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate, onCancel }: LoopSelectionBarProps) => (
-  <Flex h="40px" mt={3} align="center" justify="center" gap={3} data-testid="loop-selection">
+const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate, onCancel, onReset }: LoopSelectionBarProps) => (
+  <Flex h="40px" mt={3} align="center" justify="center" gap={{ base: 2, md: 3 }} data-testid="loop-selection">
     {status.kind === 'none' ? (
       <Text fontSize="sm" color="fg.muted">
         Drag on the track to make a loop
@@ -52,14 +54,14 @@ const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate, onCancel 
         >
           Save loop
         </Button>
-        <Button variant="ghost" size="sm" rounded="full" isDisabled={isBusy} onClick={onCancel}>
+        <Button variant="ghost" size="sm" rounded="full" px={{ base: 2, md: 3 }} isDisabled={isBusy} onClick={onCancel}>
           Cancel
         </Button>
       </HStack>
     )}
     {status.kind === 'modified' && (
-      <HStack spacing={2} flexShrink={0}>
-        <Button variant="ghost" size="sm" rounded="full" isDisabled={isBusy} onClick={onSaveNew} aria-label="Save as new loop">
+      <HStack spacing={{ base: 0, md: 2 }} flexShrink={0}>
+        <Button variant="ghost" size="sm" rounded="full" px={{ base: 2, md: 3 }} isDisabled={isBusy} onClick={onSaveNew} aria-label="Save as new loop">
           <Box as="span" display={fromTablet}>
             Save as new
           </Box>
@@ -70,11 +72,12 @@ const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate, onCancel 
         <Button
           variant="pill"
           size="sm"
-          leftIcon={<Icon as={ArrowsClockwise} boxSize="18px" />}
           isLoading={isBusy}
           onClick={() => onUpdate(status.section)}
           aria-label={`Update “${status.section.name || 'Unnamed'}”`}
         >
+          {/* No icon on phones, where the times need the room. */}
+          <Icon as={ArrowsClockwise} boxSize="18px" me={2} display={{ base: 'none', md: 'inline-block' }} />
           {/* Phones drop the name, so the times beside it stay readable. */}
           <Box as="span" display={fromTablet}>
             Update “{status.section.name || 'Unnamed'}”
@@ -82,6 +85,9 @@ const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate, onCancel 
           <Box as="span" display={phoneOnly}>
             Update
           </Box>
+        </Button>
+        <Button variant="ghost" size="sm" rounded="full" px={{ base: 2, md: 3 }} isDisabled={isBusy} onClick={() => onReset(status.section)}>
+          Reset
         </Button>
       </HStack>
     )}

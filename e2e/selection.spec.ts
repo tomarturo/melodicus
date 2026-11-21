@@ -88,6 +88,16 @@ test('dragging a saved loop’s edge offers Update, which moves that loop', asyn
   await expect(row(page)).toContainText('Solo ·');
 });
 
+test('Reset puts an edited saved loop back to its saved edges', async ({ page }) => {
+  await openWith(page, [SOLO]);
+  await page.getByRole('button', { name: 'Solo', exact: true }).click();
+  await dragRightEdge(page, 60);
+  await page.getByRole('button', { name: 'Reset', exact: true }).click();
+  await expect(row(page)).toContainText('Solo · 0:30.0 – 0:45.0');
+  await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);
+  expect(await storedLoops(page)).toEqual([SOLO]);
+});
+
 test('Save as new keeps the original loop and adds another', async ({ page }) => {
   await openWith(page, [SOLO]);
   await page.getByRole('button', { name: 'Solo', exact: true }).click();

@@ -152,6 +152,12 @@ export class PlayerController {
     });
   }
 
+  /** Puts a saved loop's edges back where they were, without moving playback. */
+  resetLoop(start: number, end: number, origin: string) {
+    this.setLoop({ start, end });
+    this.update({ loopOrigin: origin });
+  }
+
   /** Records that the current selection is now stored as a saved loop. */
   setLoopOrigin(origin: string | null) {
     this.update({ loopOrigin: origin });
