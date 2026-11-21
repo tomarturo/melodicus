@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import { Select, HStack, IconButton } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Select, type SystemStyleObject } from '@chakra-ui/react';
 import { Plus, Minus } from '@phosphor-icons/react';
 import { HOVER_EDGE, HOVER_RING } from './theme';
 
@@ -11,39 +11,60 @@ interface PlaybackRateSelectorProps {
   onRateChange: (rate: number) => void;
 }
 
+// Each part of the split button fills on hover; the outline belongs to the whole.
+const segment: SystemStyleObject = {
+  h: '100%',
+  rounded: 'none',
+  bg: 'transparent',
+  color: 'fg.default',
+  _hover: { bg: 'bg.mutedHover', color: 'fg.strong', _disabled: { bg: 'transparent', color: 'fg.default' } },
+  _active: { bg: 'bg.mutedHover' },
+  // Drawn inside, since the rounded outline clips anything outside.
+  _focusVisible: { boxShadow: 'inset 0 0 0 2px var(--chakra-colors-border-focus)' },
+};
+
+const Divider = () => <Box w="1px" h="24px" bg="border.strong" flexShrink={0} aria-hidden />;
+
+/** Speed as one split button: step down, pick from the list, step up. */
 function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps) {
   const index = RATES.indexOf(rate);
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => onRateChange(parseFloat(event.target.value));
 
   return (
-    <HStack maxW="fit-content">
+    <Flex
+      role="group"
+      aria-label="Playback speed"
+      align="center"
+      h="48px"
+      rounded="full"
+      overflow="hidden"
+      bg="bg.muted"
+      border="1px"
+      borderColor="border.default"
+      flexShrink={0}
+      // The same hover edge as the pill buttons beside it.
+      _hover={{ boxShadow: HOVER_RING, borderColor: HOVER_EDGE }}
+    >
       <IconButton
-        size="sm"
-        variant="pill"
-        // On phones the select alone, so the controls fit one row.
-        display={{ base: 'none', md: 'inline-flex' }}
+        sx={segment}
+        w="44px"
+        minW="44px"
+        pl="1"
         isDisabled={index <= 0}
         onClick={() => onRateChange(RATES[index - 1]!)}
-        icon={<Minus size={20} />}
+        icon={<Minus size={18} />}
         aria-label="Decrease playback rate"
       />
+      <Divider />
       <Select
+        variant="unstyled"
         size="lg"
-        variant="filled"
-        rounded="full"
-        bg="bg.muted"
-        border="1px"
-        color="fg.default"
-        borderColor="border.default"
-        minW="100px"
-        _hover={{
-          // Matches the pill buttons beside it.
-          boxShadow: HOVER_RING,
-          bg: 'bg.mutedHover',
-          borderColor: HOVER_EDGE,
-          color: 'fg.strong',
-        }}
+        h="100%"
+        w="84px"
+        pl="4"
+        fontWeight="semibold"
+        sx={segment}
         aria-label="Playback rate"
         value={rate.toString()}
         onChange={handleChange}
@@ -54,16 +75,18 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
           </option>
         ))}
       </Select>
+      <Divider />
       <IconButton
-        size="sm"
-        variant="pill"
-        display={{ base: 'none', md: 'inline-flex' }}
-        icon={<Plus size={20} />}
+        sx={segment}
+        w="44px"
+        minW="44px"
+        pr="1"
+        icon={<Plus size={18} />}
         onClick={() => onRateChange(RATES[index + 1]!)}
         isDisabled={index === RATES.length - 1}
         aria-label="Increase playback rate"
       />
-    </HStack>
+    </Flex>
   );
 }
 
