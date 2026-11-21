@@ -58,6 +58,18 @@ test('the row under the track hints, then shows a new selection with Save loop',
   expect(await storedLoops(page)).toHaveLength(1);
 });
 
+test('Cancel drops a new selection, back to the hint', async ({ page }) => {
+  await openWith(page, []);
+  await dragSelection(page, 0.5, 0.6);
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(row(page)).toHaveText('Drag on the track to make a loop');
+  // The loop spans the whole video again.
+  const region = await page.locator('[part~="region"][part~="loop"]').first().boundingBox();
+  const track = await page.locator('[part~="canvases"]').first().boundingBox();
+  expect(region!.width).toBeGreaterThan(track!.width * 0.95);
+  expect(await storedLoops(page)).toHaveLength(0);
+});
+
 test('dragging a saved loop’s edge offers Update, which moves that loop', async ({ page }) => {
   await openWith(page, [SOLO]);
   await page.getByRole('button', { name: 'Solo', exact: true }).click();

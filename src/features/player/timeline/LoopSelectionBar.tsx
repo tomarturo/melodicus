@@ -15,6 +15,8 @@ interface LoopSelectionBarProps {
   isBusy: boolean;
   onSaveNew: () => void;
   onUpdate: (section: Section) => void;
+  /** Drops a new selection, back to the hint. */
+  onCancel: () => void;
 }
 
 /**
@@ -22,7 +24,7 @@ interface LoopSelectionBarProps {
  * Centered, with the times beside the action, so the action sits where the eye
  * already is. Always the same height, so the video area above doesn't jump.
  */
-const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate }: LoopSelectionBarProps) => (
+const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate, onCancel }: LoopSelectionBarProps) => (
   <Flex h="40px" mt={3} align="center" justify="center" gap={3} data-testid="loop-selection">
     {status.kind === 'none' ? (
       <Text fontSize="sm" color="fg.muted">
@@ -40,16 +42,20 @@ const LoopSelectionBar = ({ loop, status, isBusy, onSaveNew, onUpdate }: LoopSel
     )}
 
     {status.kind === 'new' && (
-      <Button
-        variant="pill"
-        size="sm"
-        leftIcon={<Icon as={PlusCircle} boxSize="18px" />}
-        isLoading={isBusy}
-        onClick={onSaveNew}
-        flexShrink={0}
-      >
-        Save loop
-      </Button>
+      <HStack spacing={1} flexShrink={0}>
+        <Button
+          variant="pill"
+          size="sm"
+          leftIcon={<Icon as={PlusCircle} boxSize="18px" />}
+          isLoading={isBusy}
+          onClick={onSaveNew}
+        >
+          Save loop
+        </Button>
+        <Button variant="ghost" size="sm" rounded="full" isDisabled={isBusy} onClick={onCancel}>
+          Cancel
+        </Button>
+      </HStack>
     )}
     {status.kind === 'modified' && (
       <HStack spacing={2} flexShrink={0}>

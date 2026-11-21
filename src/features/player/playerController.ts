@@ -142,6 +142,16 @@ export class PlayerController {
     this.update({ loopOrigin: null });
   }
 
+  /** Drops the selection: the loop goes back to spanning the whole video. */
+  clearLoop() {
+    const { duration } = this.state;
+    this.update({
+      loop: duration ? fullLoop(duration) : { start: 0, end: 0 },
+      hasCustomLoop: false,
+      loopOrigin: null,
+    });
+  }
+
   /** Records that the current selection is now stored as a saved loop. */
   setLoopOrigin(origin: string | null) {
     this.update({ loopOrigin: origin });

@@ -98,6 +98,7 @@ const WaveformTimeline = ({
         status={status}
         isBusy={isSavingLoop}
         onSaveNew={onSaveLoop}
+        onCancel={() => controller.clearLoop()}
         onUpdate={onUpdateLoop}
       />
     </Box>
