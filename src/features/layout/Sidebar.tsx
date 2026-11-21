@@ -49,8 +49,16 @@ function SidebarItem({
   expanded,
   trailing,
   labelFont,
+  labelWeight = 'medium',
   ...rest
-}: { icon: ReactNode; label: string; expanded: boolean; trailing?: ReactNode; labelFont?: string } & FlexProps & {
+}: {
+  icon: ReactNode;
+  label: string;
+  expanded: boolean;
+  trailing?: ReactNode;
+  labelFont?: string;
+  labelWeight?: string;
+} & FlexProps & {
     to?: string;
     href?: string;
     target?: string;
@@ -64,7 +72,7 @@ function SidebarItem({
       <Text
         as="span"
         fontSize="sm"
-        fontWeight="medium"
+        fontWeight={labelWeight}
         fontFamily={labelFont}
         flex="1"
         textAlign="left"
@@ -219,6 +227,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
           as="button"
           expanded={expanded}
           label="Log in"
+          labelWeight="bold"
           icon={<Icon as={SignIn} boxSize="22px" />}
           onClick={authDialog.onOpen}
         />
