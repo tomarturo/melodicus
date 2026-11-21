@@ -34,7 +34,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   const { repo } = useSectionsRepository();
 
   const { controller, hostRef } = usePlayerController(videoId);
-  const { isPlaying, duration: videoLength, loop } = usePlayerState(controller);
+  const { isPlaying, duration: videoLength, loop, playbackRate } = usePlayerState(controller);
   const { title: videoTitle, thumbnailUrl: videoThumbnail } = useVideoDetails(videoId, controller);
 
   const sectionsQuery = useSectionsQuery(videoId);
@@ -158,6 +158,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
       <Box flexShrink={0}>
         <VideoControls
           isPlaying={isPlaying}
+          playbackRate={playbackRate}
           onPlayPause={() => controller.togglePlay()}
           onRestartLoop={() => controller.restartLoop()}
           onPlaybackRateChange={(rate) => controller.setPlaybackRate(rate)}

@@ -187,3 +187,20 @@ test.describe('on a touch screen', () => {
     expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toBe('');
   });
 });
+
+test('the playback speed survives rotating an iPad, and each control exists once', async ({ page }) => {
+  await page.setViewportSize({ width: 1180, height: 820 });
+  await openVideo(page);
+  await page.getByRole('combobox', { name: 'Playback rate' }).selectOption('1.5');
+
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await expect(page.getByRole('combobox', { name: 'Playback rate' })).toHaveValue('1.5');
+  await page.getByRole('button', { name: 'Increase playback rate' }).click();
+  await expect(page.getByRole('combobox', { name: 'Playback rate' })).toHaveValue('1.75');
+  expect(await page.evaluate(() => (window as unknown as { __fakeYt: { player: { rate: number } } }).__fakeYt.player.rate)).toBe(1.75);
+
+  for (const name of ['Add loop', 'Save', 'Play or Pause', 'Restart Loop', 'Increase playback rate', 'Decrease playback rate']) {
+    await expect(page.getByRole('button', { name, exact: true }), name).toHaveCount(1);
+  }
+  await expect(page.getByRole('combobox', { name: 'Playback rate' })).toHaveCount(1);
+});

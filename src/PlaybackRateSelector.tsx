@@ -1,75 +1,64 @@
-import { useState, type ChangeEvent } from 'react';
-import { Select, HStack, IconButton } from "@chakra-ui/react";
+import type { ChangeEvent } from 'react';
+import { Select, HStack, IconButton } from '@chakra-ui/react';
 import { Plus, Minus } from '@phosphor-icons/react';
-function PlaybackRateSelector({ onRateChange }: { onRateChange: (rate: number) => void }) {
-  const rates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-  const [currentRate, setCurrentRate] = useState(1);
 
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const numericValue = parseFloat(event.target.value);
-    setCurrentRate(numericValue);
-    onRateChange(numericValue);
-  };
+const RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
-  const onPlusClick = () => {
-    const currentIndex = rates.indexOf(currentRate)
-    if (currentIndex < rates.length -1) {
-      const newRate = rates[currentIndex + 1];
-      setCurrentRate(newRate);
-      onRateChange(newRate);   
-    }
-  };
+interface PlaybackRateSelectorProps {
+  /** The current speed, from the player controller. */
+  rate: number;
+  onRateChange: (rate: number) => void;
+}
 
-  const onMinusClick = () => {
-    const currentIndex = rates.indexOf(currentRate)
-    if (currentIndex > 0) {
-      const newRate = rates[currentIndex - 1];
-      setCurrentRate(newRate);
-      onRateChange(newRate);
-    }
-  };
+function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps) {
+  const index = RATES.indexOf(rate);
+
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => onRateChange(parseFloat(event.target.value));
 
   return (
-    <HStack 
-      maxW='fit-content'
-      > 
+    <HStack maxW="fit-content">
       <IconButton
         size="sm"
-        variant='pill'
-        isDisabled={currentRate === rates[0]}
-        onClick={onMinusClick}
+        variant="pill"
+        isDisabled={index <= 0}
+        onClick={() => onRateChange(RATES[index - 1]!)}
         icon={<Minus size={20} />}
-        aria-label='Increase playback rate'
+        aria-label="Decrease playback rate"
       />
       <Select
         size="lg"
-        variant='filled'
-        rounded='full'
+        variant="filled"
+        rounded="full"
         bg="bg.muted"
         border="1px"
         color="fg.default"
         borderColor="border.default"
-        minW="100px" 
+        minW="100px"
         _hover={{
-          boxShadow: "0 0 0 1px", boxShadowColor: "fg.default", bg: "bg.mutedHover", borderColor: "border.emphasis", color: "fg.strong"
+          boxShadow: '0 0 0 1px',
+          boxShadowColor: 'fg.default',
+          bg: 'bg.mutedHover',
+          borderColor: 'border.emphasis',
+          color: 'fg.strong',
         }}
-        value={currentRate.toString()}
+        aria-label="Playback rate"
+        value={rate.toString()}
         onChange={handleChange}
       >
-        {rates.map((rate) => (
-          <option key={rate} value={rate}>
-            {rate}x
+        {RATES.map((option) => (
+          <option key={option} value={option}>
+            {option}x
           </option>
         ))}
       </Select>
-        <IconButton
-          size="sm"
-          variant='pill'
-          icon={<Plus size={20} />}
-          onClick={onPlusClick}
-          isDisabled={currentRate === rates[rates.length - 1]}
-          aria-label='Increase playback rate'
-        />
+      <IconButton
+        size="sm"
+        variant="pill"
+        icon={<Plus size={20} />}
+        onClick={() => onRateChange(RATES[index + 1]!)}
+        isDisabled={index === RATES.length - 1}
+        aria-label="Increase playback rate"
+      />
     </HStack>
   );
 }

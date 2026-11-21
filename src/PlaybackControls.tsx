@@ -11,7 +11,7 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }: PlaybackCo
   return (
     <HStack gap="2" justify="center" w="full">
       <Button
-        width= "128px"
+        minW="128px"
         size='lg'
         variant='pill'
         aria-label='Play or Pause'
@@ -21,7 +21,7 @@ const PlaybackControls = ({ isPlaying, playPauseClick, restartLoop }: PlaybackCo
         {isPlaying ? 'Pause' : 'Play'}
       </Button>
       <Button
-        width= "128px"
+        minW="128px"
         leftIcon={<Icon as={Repeat} />}
         size='lg'
         variant='pill'

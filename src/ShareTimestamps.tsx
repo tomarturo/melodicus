@@ -93,7 +93,7 @@ const ShareTimestamps = ({ videoId, savedSections }: ShareTimestampsProps) => {
         onClick={handleOpen}
         leftIcon={<Icon as={Paperclip} />}
         size='lg'
-        width="153px"
+        minW="153px"
         variant='pill'
         aria-label="Save"
       >

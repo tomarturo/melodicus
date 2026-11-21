@@ -1,12 +1,13 @@
-import { Flex, Button, Icon } from '@chakra-ui/react';
+import { Box, Button, Grid, Icon } from '@chakra-ui/react';
+import { PlusCircle } from '@phosphor-icons/react';
 import PlaybackControls from './PlaybackControls';
 import PlaybackRateSelector from './PlaybackRateSelector';
 import ShareTimestamps from './ShareTimestamps';
-import { PlusCircle } from '@phosphor-icons/react';
 import type { Section } from './features/sections/types';
 
 interface VideoControlsProps {
   isPlaying: boolean;
+  playbackRate: number;
   onPlayPause: () => void;
   onRestartLoop: () => void;
   onPlaybackRateChange: (rate: number) => void;
@@ -15,8 +16,20 @@ interface VideoControlsProps {
   savedSections: Section[];
 }
 
+/**
+ * Each control is rendered once and placed by grid areas per screen size:
+ *
+ *   phone              tablet                    desktop
+ *   [ transport ]      [transport]    [add]      [transport][speed] … [add][save]
+ *   [   speed   ]      [  speed  ]   [save]
+ *   [save] [add]
+ *
+ * (They used to be three separate copies, one per size, which meant three
+ * speed selectors with their own state and three Save dialogs.)
+ */
 const VideoControls = ({
   isPlaying,
+  playbackRate,
   onPlayPause,
   onRestartLoop,
   onPlaybackRateChange,
@@ -24,126 +37,35 @@ const VideoControls = ({
   videoId,
   savedSections,
 }: VideoControlsProps) => (
-  <Flex
-    direction="column"
+  <Grid
     pt={4}
     pb={8}
-    px={["12px", "12px", 8]}
+    px={['12px', '12px', 8]}
     gap={3}
+    alignItems="center"
+    templateAreas={[
+      `"transport transport" "speed speed" "save add"`,
+      `"transport transport" "speed speed" "save add"`,
+      `"transport add" "speed save"`,
+      `"transport speed . add save"`,
+    ]}
+    templateColumns={['1fr 1fr', '1fr 1fr', 'auto 1fr', 'auto auto 1fr auto auto']}
   >
-    {/* 320px+ and 480px+: Play/Restart row */}
-    <Flex
-      display={["flex", "flex", "none"]} // Hide on tablet+ 
-      gap={3}
-    >
-      <PlaybackControls
-        isPlaying={isPlaying}
-        playPauseClick={onPlayPause}
-        restartLoop={onRestartLoop}
-        // flex="1"
-      />
-    </Flex>
-
-    {/* 320px+ and 480px+: Speed control row */}
-    <Flex
-      display={["flex", "flex", "none"]} // Hide on tablet+
-      justifyContent="center"
-    >
-      <PlaybackRateSelector onRateChange={onPlaybackRateChange} />
-    </Flex>
-
-    {/* 320px+ and 480px+: Add Loop/Save row */}
-    <Flex
-      display={["flex", "flex", "none"]} // Hide on tablet+
-      gap={3}
-      justify="center"
-    >
-      <ShareTimestamps
-        videoId={videoId}
-        savedSections={savedSections}
-      />
-      <Button
-        onClick={onNewLoop}
-        leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
-        variant='pill'
-        size='lg'
-        aria-label='Add loop'
-      >
+    <Box gridArea="transport">
+      <PlaybackControls isPlaying={isPlaying} playPauseClick={onPlayPause} restartLoop={onRestartLoop} />
+    </Box>
+    <Box gridArea="speed" justifySelf="center">
+      <PlaybackRateSelector rate={playbackRate} onRateChange={onPlaybackRateChange} />
+    </Box>
+    <Box gridArea="add" justifySelf={['start', 'start', 'end', 'auto']}>
+      <Button onClick={onNewLoop} leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />} variant="pill" size="lg">
         Add loop
       </Button>
-    </Flex>
-
-    {/* 768px+: Two-column layout */}
-    <Flex
-      display={["none", "none", "flex", "none"]} // Show only on tablet
-      justify="space-between"
-      align="start"
-    >
-      {/* Left column: Play/Restart and Speed control - fixed width */}
-      <Flex
-        direction="column"
-        gap={3}
-        justify="center"
-        width="fit-content" // Or set to the exact width of Play+Restart buttons
-      >
-        <PlaybackControls
-          isPlaying={isPlaying}
-          playPauseClick={onPlayPause}
-          restartLoop={onRestartLoop}
-        />
-        <Flex justify="center">
-          <PlaybackRateSelector onRateChange={onPlaybackRateChange} />
-        </Flex>
-      </Flex>
-
-      {/* Right column: Add Loop and Save */}
-      <Flex
-        direction="column"
-        gap={3}
-        align="flex-end"
-      >
-        <Button
-          onClick={onNewLoop}
-          leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
-          variant='pill'
-          size='lg'
-          aria-label='Add loop'
-        >
-          Add loop
-        </Button>
-        <ShareTimestamps videoId={videoId} savedSections={savedSections} />
-      </Flex>
-    </Flex>
-
-    {/* 992px+: Single row layout */}
-    <Flex
-      display={["none", "none", "none", "flex"]} // Show only on desktop+
-      justify="space-between"
-      align="center"
-      gap={6}
-    >
-      <Flex gap={3} align="center">
-        <PlaybackControls
-          isPlaying={isPlaying}
-          playPauseClick={onPlayPause}
-          restartLoop={onRestartLoop}
-        />
-        <PlaybackRateSelector onRateChange={onPlaybackRateChange} />
-      </Flex>
-      <Flex gap={3} align="center">
-        <Button
-          onClick={onNewLoop}
-          leftIcon={<Icon as={PlusCircle} w="20px" h="20px" />}
-          variant='pill'
-          size='lg'
-          aria-label='Add loop'
-        >
-          Add loop
-        </Button>
-        <ShareTimestamps videoId={videoId} savedSections={savedSections} />
-      </Flex>
-    </Flex>
-  </Flex>
+    </Box>
+    <Box gridArea="save" justifySelf={['end', 'end', 'end', 'auto']}>
+      <ShareTimestamps videoId={videoId} savedSections={savedSections} />
+    </Box>
+  </Grid>
 );
 
 export default VideoControls;
