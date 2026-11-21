@@ -27,3 +27,12 @@ export const convertDurationToSeconds = (duration: string): number => {
   // Sub-millisecond precision means nothing for a practice loop and only bloats
   // the base64 sharing URL, so round before anything is persisted.
   export const roundSeconds = (seconds: number | string): number => Math.round(Number(seconds) * 1000) / 1000;
+
+/** A clock time for the timeline: 0:30, 4:05, 1:02:03. Minutes aren't padded. */
+export const formatClockTime = (seconds: number): string => {
+  const whole = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(whole / 3600);
+  const minutes = Math.floor((whole % 3600) / 60);
+  const secs = String(whole % 60).padStart(2, '0');
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${secs}` : `${minutes}:${secs}`;
+};
