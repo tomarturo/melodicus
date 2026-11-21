@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Flex, Icon, Image, Kbd, Text, useDisclosure, type FlexProps } from '@chakra-ui/react';
-import { ArrowSquareOut, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
+import { ArrowUpRight, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../../AuthModal';
 import { useSavedSongsQuery } from '../sections/queries';
@@ -41,8 +41,9 @@ function SidebarItem({
   label,
   expanded,
   trailing,
+  labelFont,
   ...rest
-}: { icon: ReactNode; label: string; expanded: boolean; trailing?: ReactNode } & FlexProps & {
+}: { icon: ReactNode; label: string; expanded: boolean; trailing?: ReactNode; labelFont?: string } & FlexProps & {
     to?: string;
     href?: string;
     target?: string;
@@ -53,7 +54,15 @@ function SidebarItem({
       <Flex w="24px" justify="center" flexShrink={0}>
         {icon}
       </Flex>
-      <Text as="span" fontSize="sm" fontWeight="medium" flex="1" textAlign="left" display={expanded ? 'block' : 'none'}>
+      <Text
+        as="span"
+        fontSize="sm"
+        fontWeight="medium"
+        fontFamily={labelFont}
+        flex="1"
+        textAlign="left"
+        display={expanded ? 'block' : 'none'}
+      >
         {label}
       </Text>
       {expanded && trailing}
@@ -198,9 +207,12 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
         target="_blank"
         rel="noopener noreferrer"
         expanded={expanded}
-        label="GitHub"
+        label="tomarturo"
+        // The handle in the system monospace, as it reads on GitHub.
+        labelFont="mono"
+        aria-label="tomarturo on GitHub"
         icon={<Icon as={GithubLogo} boxSize="22px" />}
-        trailing={<Icon as={ArrowSquareOut} boxSize="14px" color="chrome.fgMuted" />}
+        trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
       />
       <SidebarItem
         as="a"
@@ -212,7 +224,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
         // The © is the icon, so the name spells it out.
         aria-label="© 2025 HeyTK"
         icon={<Icon as={Copyright} boxSize="22px" />}
-        trailing={<Icon as={ArrowSquareOut} boxSize="14px" color="chrome.fgMuted" />}
+        trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
       />
       <AuthModal isOpen={authDialog.isOpen} onClose={authDialog.onClose} />
     </Flex>

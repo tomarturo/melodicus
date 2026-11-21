@@ -114,7 +114,7 @@ test.describe('video page', () => {
 test('the copyright and GitHub link sit in the sidebar, not under the page', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
-  const github = page.getByRole('link', { name: 'GitHub' });
+  const github = page.getByRole('link', { name: 'tomarturo on GitHub' });
   await expect(github).toHaveAttribute('href', 'https://github.com/tomarturo/melodicus');
   const copyright = page.getByRole('link', { name: '© 2025 HeyTK' });
   await expect(copyright).toHaveAttribute('href', 'https://www.heytk.net');
@@ -131,6 +131,6 @@ test('on a phone, the drawer holds the copyright and GitHub link', async ({ page
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await page.getByRole('button', { name: 'Open menu' }).click();
-  await expect(page.getByRole('dialog').getByRole('link', { name: 'GitHub' })).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('link', { name: 'tomarturo on GitHub' })).toBeVisible();
   await expect(page.getByRole('dialog').getByRole('link', { name: '© 2025 HeyTK' })).toBeVisible();
 });
