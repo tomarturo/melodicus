@@ -1,7 +1,21 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
-import { Container, Heading, Icon, IconButton, Input, InputGroup, InputRightElement, Link, Stack, Text } from '@chakra-ui/react';
+import {
+  Badge,
+  Center,
+  Container,
+  HStack,
+  Heading,
+  Icon,
+  IconButton,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Link,
+  Stack,
+  Text,
+} from '@chakra-ui/react';
 import { ArrowRight, ArrowUpRight } from '@phosphor-icons/react';
 
 /**
@@ -79,10 +93,18 @@ const SearchQuotaError = ({ query }: { query: string }) => {
               />
             </InputRightElement>
           </InputGroup>
+          {/* The same try-again badge as the search field's empty-search error. */}
           {isInvalid && (
-            <Text role="alert" fontSize="sm" color="red.700" mt={2}>
-              That doesn’t look like a YouTube link. Copy it from the address bar or the Share button.
-            </Text>
+            <Center mt={3} role="alert">
+              <HStack alignItems={['start', 'start', 'center']}>
+                <Badge colorScheme="red" mt={[1, 1, 0]}>
+                  try again
+                </Badge>
+                <Text fontSize="sm" color="red.500" textAlign={['left', 'left', 'center']}>
+                  That doesn’t look like a YouTube link.
+                </Text>
+              </HStack>
+            </Center>
           )}
         </form>
       </Stack>

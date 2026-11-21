@@ -29,7 +29,7 @@ test('results lead with the query, read cleanly, and mark songs already saved', 
   });
   await page.goto('/search/little%20wing');
 
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Results for “little wing”');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Results for little wing');
   await expect(page.getByRole('heading', { name: 'Hendrix\'s intro & outro' })).toBeVisible();
   await expect(page.getByText('Guitar & Co')).toBeVisible();
   await expect(page.getByText('Noise')).toHaveCount(0);
@@ -48,7 +48,7 @@ test('searching again stays in the app and escapes the query', async ({ page }) 
   await field.fill('AC/DC #1');
   await field.press('Enter');
   await expect(page).toHaveURL(/\/search\/AC%2FDC%20%231$/);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Results for “AC/DC #1”');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Results for AC/DC #1');
   expect(await page.evaluate(() => (window as unknown as { stayedInApp?: boolean }).stayedInApp)).toBe(true);
 });
 
