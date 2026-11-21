@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
-import { ArrowSquareOut } from '@phosphor-icons/react';
+import { ArrowUpRight } from '@phosphor-icons/react';
 import { Flex, IconButton, Icon, Link, Heading, Text, Input, InputGroup, InputRightElement, Container, } from '@chakra-ui/react';
 
 const NullVideoPage = () => {
@@ -29,7 +29,7 @@ const NullVideoPage = () => {
             target="_blank"
             rel="noopener noreferrer"
             >
-            Follow this link<Icon as={ArrowSquareOut}></Icon>
+            Follow this link<Icon as={ArrowUpRight}></Icon>
             </Link>{' '}
             to open YouTube in a new tab. Find the song you want to learn, then copy and paste its link below.
         </Text>

@@ -97,8 +97,8 @@ test.describe('search dialog', () => {
     await expect(dialog(page)).toBeVisible();
 
     await input(page).fill('wing');
-    await expect(dialog(page).getByRole('option')).toHaveText(['Search YouTube for “wing”', 'Little Wing']);
-    await expect(dialog(page).getByRole('option', { selected: true })).toHaveText('Search YouTube for “wing”');
+    await expect(dialog(page).getByRole('option')).toHaveText(['Find songs for “wing”', 'Little Wing']);
+    await expect(dialog(page).getByRole('option', { selected: true })).toHaveText('Find songs for “wing”');
     await input(page).press('ArrowDown');
     await input(page).press('Enter');
     await expect(page).toHaveURL(/\/video\/otherVideo1$/);
@@ -129,7 +129,7 @@ test.describe('search dialog', () => {
     await page.goto('/');
     await pressShortcut(page);
     await input(page).fill('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-    await expect(dialog(page).getByRole('option')).toHaveText(['Open this YouTube video']);
+    await expect(dialog(page).getByRole('option')).toHaveText(['Open in Melodicus']);
     await input(page).press('Enter');
     await expect(page).toHaveURL(/\/video\/dQw4w9WgXcQ$/);
   });
