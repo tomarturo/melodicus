@@ -1,0 +1,15 @@
+import { Icon, type IconProps } from '@chakra-ui/react';
+
+/**
+ * The Melodicus logomark (the dots, bar and M) drawn in the current text
+ * color, for light surfaces. The favicon file is off-white for the dark frame.
+ */
+const Logomark = (props: IconProps) => (
+  <Icon viewBox="0 0 124 124" fill="currentColor" {...props}>
+    <path d="M33 99.6436H29V25H33V99.6436ZM69.1514 75.1514H70.0293L90.6533 25H110.18V99.6436H94.8213V51.0596H94.2002L74.8193 99.2783H64.3613L44.9805 50.8779H44.3584V99.6436H37V25H48.5273L69.1514 75.1514Z" />
+    <circle cx="19" cy="44.7354" r="6" />
+    <circle cx="19" cy="79.7354" r="6" />
+  </Icon>
+);
+
+export default Logomark;

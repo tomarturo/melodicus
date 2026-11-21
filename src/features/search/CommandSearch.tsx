@@ -14,7 +14,8 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react';
-import { MagnifyingGlass, YoutubeLogo, ArrowUpRight } from '@phosphor-icons/react';
+import { MagnifyingGlass } from '@phosphor-icons/react';
+import Logomark from '../../components/Logomark';
 import { useSavedSongsQuery } from '../sections/queries';
 import { actionPath, commandActions, type CommandAction } from './commandSearch';
 
@@ -69,16 +70,17 @@ function ActionRow({ action }: { action: CommandAction }) {
     case 'open-video':
       return (
         <>
-          <Icon as={ArrowUpRight} boxSize="20px" mx="14px" />
-          <Text>Open this YouTube video</Text>
+          {/* It opens here, in the player, not on YouTube. */}
+          <Logomark boxSize="22px" mx="13px" color="fg.strong" />
+          <Text>Open in Melodicus</Text>
         </>
       );
     case 'search-youtube':
       return (
         <>
-          <Icon as={YoutubeLogo} boxSize="20px" mx="14px" />
+          <Icon as={MagnifyingGlass} boxSize="20px" mx="14px" />
           <Text noOfLines={1}>
-            Search YouTube for <Text as="span" fontWeight="semibold">“{action.query}”</Text>
+            Find songs for <Text as="span" fontWeight="semibold">“{action.query}”</Text>
           </Text>
         </>
       );
@@ -120,7 +122,8 @@ function CommandSearchDialog({ onClose }: { onClose: () => void }) {
       <ModalOverlay />
       <ModalContent mt={['4', '16', '24']} mx="3" overflow="hidden" aria-label="Search">
         <InputGroup size="lg">
-          <InputLeftElement pointerEvents="none">
+          {/* As tall as the field, so the icon centers on the text line. */}
+          <InputLeftElement pointerEvents="none" h="56px">
             <Icon as={MagnifyingGlass} color="fg.muted" />
           </InputLeftElement>
           <Input
