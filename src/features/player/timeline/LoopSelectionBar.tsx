@@ -1,10 +1,7 @@
-import { Box, Button, Flex, Icon, Text } from '@chakra-ui/react';
-import { ArrowsClockwise, PlusCircle } from '@phosphor-icons/react';
+import { Button, Flex, Text } from '@chakra-ui/react';
 import type { Section } from '../../sections/types';
 import type { SelectionStatus } from '../selection';
 
-const fromTablet = { base: 'none', md: 'inline' } as const;
-const phoneOnly = { base: 'inline', md: 'none' } as const;
 
 interface LoopSelectionBarProps {
   status: SelectionStatus;
@@ -40,7 +37,7 @@ const LoopSelectionBar = ({ status, isBusy, onSaveNew, onUpdate, onCancel, onRes
     {status.kind === 'new' && (
       <>
         {/* Loud: it answers the drag the person just made. */}
-        <Button variant="loud" size="sm" leftIcon={<Icon as={PlusCircle} boxSize="18px" />} isLoading={isBusy} onClick={onSaveNew}>
+        <Button variant="loud" size="sm" isLoading={isBusy} onClick={onSaveNew}>
           Save loop
         </Button>
         <Button {...quiet} isDisabled={isBusy} onClick={onCancel}>
@@ -51,22 +48,10 @@ const LoopSelectionBar = ({ status, isBusy, onSaveNew, onUpdate, onCancel, onRes
 
     {status.kind === 'modified' && (
       <>
-        {/* Loud like Save loop: it answers the edit just made. */}
-        <Button
-          variant="loud"
-          size="sm"
-          leftIcon={<Icon as={ArrowsClockwise} boxSize="18px" />}
-          isLoading={isBusy}
-          onClick={() => onUpdate(status.section)}
-          aria-label={`Update “${status.section.name || 'Unnamed'}”`}
-        >
-          {/* A long name would crowd a phone; the selected pill names the loop there. */}
-          <Box as="span" display={fromTablet} maxW="16ch" overflow="hidden" textOverflow="ellipsis">
-            Update “{status.section.name || 'Unnamed'}”
-          </Box>
-          <Box as="span" display={phoneOnly}>
-            Update
-          </Box>
+        {/* Loud like Save loop: it answers the edit just made. The selected
+            pill names the loop, so the label doesn't have to. */}
+        <Button variant="loud" size="sm" isLoading={isBusy} onClick={() => onUpdate(status.section)}>
+          Update loop
         </Button>
         <Button {...quiet} isDisabled={isBusy} onClick={onSaveNew} aria-label="Save as new loop">
           Save as new

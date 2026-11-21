@@ -116,7 +116,7 @@ test('dragging a saved loop’s edge offers Update, which moves that loop', asyn
   await dragRightEdge(page, 60);
   // The pill stays selected while its loop is edited.
   await expect(activePill(page)).toHaveText('Solo');
-  await page.getByRole('button', { name: 'Update “Solo”' }).click();
+  await page.getByRole('button', { name: 'Update loop' }).click();
   await expect(page.getByText('“Solo” updated')).toBeVisible();
 
   const [loop] = await storedLoops(page);
