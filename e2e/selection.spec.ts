@@ -55,7 +55,7 @@ test('the row under the track hints, then offers Save loop for a new selection',
 
   // Once saved, the selection is that loop: its pill is selected, and the row says how to change it.
   await expect(activePill(page)).toHaveText('Bridge');
-  await expect(row(page)).toHaveText('Drag the loop’s edges to change it');
+  await expect(row(page)).toHaveText('Drag the edges to adjust this loop');
   await expect(page.getByRole('button', { name: 'Save loop', exact: true })).toHaveCount(0);
   expect(await storedLoops(page)).toHaveLength(1);
 });
@@ -133,7 +133,7 @@ test('Cancel puts an edited saved loop back to its saved edges', async ({ page }
   await page.getByRole('button', { name: 'Solo', exact: true }).click();
   await dragRightEdge(page, 60);
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-  await expect(row(page)).toHaveText('Drag the loop’s edges to change it');
+  await expect(row(page)).toHaveText('Drag the edges to adjust this loop');
   await expect(activePill(page)).toHaveText('Solo');
   await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);
   expect(await storedLoops(page)).toEqual([SOLO]);
