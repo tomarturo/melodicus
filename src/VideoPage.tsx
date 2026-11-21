@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Flex } from '@chakra-ui/react';
+import { Trash } from '@phosphor-icons/react';
 import { roundSeconds } from './utils/formatTime';
 import { errorCause } from './lib/errors';
 import { useNotify } from './lib/notify';
@@ -88,6 +89,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         if (!section) return;
         notify({
           title: `Deleted “${section.name || 'Unnamed'}”`,
+          icon: { as: Trash, color: 'red.300' },
           duration: 5000,
           action: { label: 'Undo', onClick: () => restoreSection(section) },
         });

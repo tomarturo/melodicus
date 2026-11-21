@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, type ElementType } from 'react';
 import { Box, Button, Flex, Icon, IconButton, Text, useToast } from '@chakra-ui/react';
 import { CheckCircle, Warning, WarningCircle, X } from '@phosphor-icons/react';
 
@@ -14,6 +14,8 @@ export interface Notice {
   description?: string;
   /** A single action, like Undo or Try again. Taking it closes the toast. */
   action?: { label: string; onClick: () => void };
+  /** An icon of its own, in place of the tone's (e.g. a trash can for a deletion). */
+  icon?: { as: ElementType; color: string };
   /** In milliseconds. Errors default to staying until closed. */
   duration?: number | null;
 }
@@ -23,7 +25,7 @@ const DEFAULT_DURATION_MS = 4000;
 const TONE_ICON = {
   success: { icon: CheckCircle, color: 'green.300' },
   warning: { icon: Warning, color: 'orange.300' },
-  error: { icon: WarningCircle, color: 'red.300' },
+  error: { icon: WarningCircle, color: 'yellow.300' },
 } as const;
 
 interface NoticeViewProps extends Notice {
@@ -31,8 +33,8 @@ interface NoticeViewProps extends Notice {
   isClosable: boolean;
 }
 
-const NoticeView = ({ tone = 'neutral', title, description, action, onClose, isClosable }: NoticeViewProps) => {
-  const toneIcon = tone === 'neutral' ? null : TONE_ICON[tone];
+const NoticeView = ({ tone = 'neutral', title, description, action, icon, onClose, isClosable }: NoticeViewProps) => {
+  const toneIcon = icon ? { icon: icon.as, color: icon.color } : tone === 'neutral' ? null : TONE_ICON[tone];
   return (
     <Flex
       // Chakra's wrapper is already a polite status region; errors interrupt.
