@@ -8,6 +8,9 @@ import {
   MagnifyingGlass,
   Minus,
   MusicNotes,
+  NumberCircleOne,
+  NumberCircleThree,
+  NumberCircleTwo,
   Plus,
   Repeat,
   ShareFat,
@@ -156,9 +159,9 @@ const SpeedPicture = () => (
 // ---------------------------------------------------------------- Sections
 
 const STEPS = [
-  { title: 'Find a song', body: 'Search by title and artist, or paste a YouTube link.', picture: <SearchPicture /> },
-  { title: 'Loop the hard part', body: 'Drag across the timeline to mark a section. It repeats until you stop it.', picture: <LoopPicture /> },
-  { title: 'Slow it down', body: 'Drop to half speed to hear every note, then speed back up as it sticks.', picture: <SpeedPicture /> },
+  { number: NumberCircleOne, title: 'Find a song', body: 'Search by title and artist, or paste a YouTube link.', picture: <SearchPicture /> },
+  { number: NumberCircleTwo, title: 'Loop the hard part', body: 'Drag across the timeline to mark a section. It repeats until you stop it.', picture: <LoopPicture /> },
+  { number: NumberCircleThree, title: 'Slow it down', body: 'Drop to half speed to hear every note, then speed back up as it sticks.', picture: <SpeedPicture /> },
 ];
 
 const HowItWorks = () => (
@@ -172,17 +175,11 @@ const HowItWorks = () => (
       </Text>
     </Stack>
     <SimpleGrid as="ol" listStyleType="none" columns={{ base: 1, md: 3 }} spacing={5}>
-      {STEPS.map((step, index) => (
+      {STEPS.map((step) => (
         <Stack as="li" key={step.title} spacing={3.5}>
           <Stage>{step.picture}</Stage>
-          <Flex as="h3" align="center" gap={2.5} fontSize="lg" fontWeight="semibold" color="fg.strong">
-            <Flex as="span" w="24px" h="24px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="ink" color="white" fontSize="13px" fontWeight="bold" lineHeight={1} aria-hidden>
-              {/* Trimmed to the digit's own height, so it centers in the circle
-                  (as in HintBadge); line-height 1 covers browsers without text-box. */}
-              <Box as="span" display="block" sx={{ textBox: 'trim-both cap alphabetic' }}>
-                {index + 1}
-              </Box>
-            </Flex>
+          <Flex as="h3" align="center" gap={2} fontSize="lg" fontWeight="semibold" color="fg.strong">
+            <Icon as={step.number} weight="fill" boxSize="28px" color="ink" flexShrink={0} aria-hidden />
             {step.title}
           </Flex>
           <Text color="fg.muted" fontSize="15px" lineHeight="1.5">
