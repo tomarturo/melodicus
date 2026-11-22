@@ -106,7 +106,7 @@ const SearchPicture = () => (
 );
 
 const Grip = ({ left }: { left: string }) => (
-  <Box position="absolute" top="50%" left={left} w="12px" h="22px" mt="-11px" ml="-6px" bg="white" border="2px solid" borderColor="purple.700" borderRadius="5px" />
+  <Box position="absolute" top="50%" left={left} w="10px" h="26px" mt="-13px" ml="-5px" bg="white" border="2px solid" borderColor="purple.700" borderRadius="4px" />
 );
 
 const LoopPicture = () => (
