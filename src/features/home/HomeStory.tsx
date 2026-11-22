@@ -111,8 +111,8 @@ const Grip = ({ left }: { left: string }) => (
 const LoopPicture = () => (
   <Stack w="100%" spacing={3}>
     <Flex as="ul" listStyleType="none" gap={1.5}>
-      <LoopPill>full guitar solo</LoopPill>
-      <LoopPill active>solo section 1</LoopPill>
+      <LoopPill>Full guitar solo</LoopPill>
+      <LoopPill active>Solo section 1</LoopPill>
     </Flex>
     <Box position="relative" h="56px" borderRadius="lg" bg="bg.muted" overflow="hidden">
       <Box position="absolute" insetY={0} left={0} w="32%" bg="bg.mutedHover" />
@@ -129,8 +129,8 @@ const LoopPicture = () => (
       />
     </Box>
     <Box position="relative" h="16px" fontSize="xs" fontWeight="semibold" color="fg.muted" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-      <Text as="span" position="absolute" left="44%" transform="translateX(-50%)">2:48</Text>
-      <Text as="span" position="absolute" left="74%" transform="translateX(-50%)">3:12</Text>
+      <Text as="span" position="absolute" left="44%" transform="translateX(-50%)">2:16</Text>
+      <Text as="span" position="absolute" left="74%" transform="translateX(-50%)">2:25</Text>
     </Box>
   </Stack>
 );
