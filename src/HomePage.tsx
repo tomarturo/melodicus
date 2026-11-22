@@ -6,6 +6,9 @@ import { Icon, IconButton, Container, Heading, Text, Input, InputGroup, InputRig
 import { ArrowUpRight } from '@phosphor-icons/react';
 import { searchPath } from './lib/youtube';
 import HintRow from './components/HintRow';
+import HomeStory from './features/home/HomeStory';
+import RecentSongs from './features/home/RecentSongs';
+import { useSavedSongsQuery } from './features/sections/queries';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -17,6 +20,8 @@ const HomePage = () => {
   const [isSearchValid, setIsSearchValid] = useState(true);
   const [searchErrorMessage, setSearchErrorMessage] = useState('');
   const [hasSearchSubmitAttempt, setHasSearchSubmitAttempt] = useState(false);
+  const savedSongs = useSavedSongsQuery();
+  const songs = savedSongs.data ?? [];
 
   // YouTube URL validation function
   const validateYouTubeUrl = (url: string) => {
@@ -238,6 +243,13 @@ const HomePage = () => {
             </Tabs>
           </VStack>
         </Container>
+        {/* Below the search: someone's recent songs once they have some, the
+            product story until then. Nothing while that's still unknown. */}
+        {!savedSongs.isPending && (
+          <Container maxW="5xl" mt={{ base: 12, md: 16 }} pb={{ base: 14, md: 20 }}>
+            {songs.length > 0 ? <RecentSongs songs={songs} /> : <HomeStory />}
+          </Container>
+        )}
       </Flex>
     </>
   );
