@@ -269,7 +269,7 @@ const DemoSong = () => {
   );
 };
 
-// ---------------------------------------------------------------- What you get
+// ---------------------------------------------------------------- Built for practice
 
 /** How much of the grid a tile takes: a 2×2 square or a 1×1 square. */
 type Size = 'feature' | 'square';
@@ -387,7 +387,7 @@ const PartsPicture = () => (
 const WhatYouGet = () => (
   <Box as="section" aria-labelledby="what-you-get">
     <Heading id="what-you-get" as="h2" size="lg" color="fg.strong" mb={6}>
-      What you get
+      Built for practice
     </Heading>
     <Grid
       as="ul"
@@ -444,7 +444,27 @@ const WhatYouGet = () => (
   </Box>
 );
 
-const HomeStory = () => (
+/** The page's last word: back up to the search, ready to type. */
+const FindYourSong = ({ onFindSong }: { onFindSong: () => void }) => (
+  <Stack as="section" aria-labelledby="find-your-song" align="center" spacing={6} textAlign="center" py={{ base: 4, md: 8 }}>
+    <Heading id="find-your-song" as="h2" size="xl" color="fg.strong" sx={{ textWrap: 'balance' }}>
+      What do you want to learn first?
+    </Heading>
+    <Button
+      variant="loud"
+      size="lg"
+      h="52px"
+      px={8}
+      fontSize="md"
+      leftIcon={<Icon as={MagnifyingGlass} weight="bold" boxSize="18px" />}
+      onClick={onFindSong}
+    >
+      Find your song
+    </Button>
+  </Stack>
+);
+
+const HomeStory = ({ onFindSong }: { onFindSong: () => void }) => (
   <Stack
     spacing={{ base: 14, md: 20 }}
     sx={{
@@ -455,6 +475,7 @@ const HomeStory = () => (
     <HowItWorks />
     <DemoSong />
     <WhatYouGet />
+    <FindYourSong onFindSong={onFindSong} />
   </Stack>
 );
 

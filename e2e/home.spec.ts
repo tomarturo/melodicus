@@ -9,13 +9,27 @@ test.beforeEach(async ({ page }) => {
 test('a new visitor sees how it works, the demo and what they get', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Tackle hard songs one part at a time' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'What you get' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Built for practice' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Pick up where you left off' })).toHaveCount(0);
 
   // The demo opens as a share link, so its loops come with it.
   await page.getByRole('link', { name: 'Open the demo' }).click();
   await expect(page).toHaveURL(/\/video\/b00h8iKaklQ$/);
   await expect(page.getByRole('dialog')).toContainText('8 loops');
+});
+
+test('Find your song goes back up to the song search, ready to type', async ({ page }) => {
+  await page.goto('/');
+  // Start from the other tab, so the button has to switch back.
+  await page.getByRole('tab', { name: 'Paste a link' }).click();
+  const button = page.getByRole('button', { name: 'Find your song' });
+  await button.scrollIntoViewIfNeeded();
+  await button.click();
+
+  await expect(page.getByRole('tab', { name: 'Find a song' })).toHaveAttribute('aria-selected', 'true');
+  const search = page.getByPlaceholder('Enter a song title & artist');
+  await expect(search).toBeFocused();
+  await expect(search).toBeInViewport();
 });
 
 test('someone with saved songs sees their recent songs instead', async ({ page }) => {
@@ -35,7 +49,7 @@ test('someone with saved songs sees their recent songs instead', async ({ page }
   const recent = page.getByRole('region', { name: 'Pick up where you left off' });
   await expect(recent.getByRole('heading', { level: 3 })).toHaveText(['Little Wing', 'Hotel California', 'Blackbird']);
   await expect(recent.getByText('Solo')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'What you get' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Built for practice' })).toHaveCount(0);
 
   await recent.getByRole('link', { name: 'All my songs' }).click();
   await expect(page).toHaveURL(/\/saved-songs$/);
