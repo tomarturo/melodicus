@@ -48,9 +48,13 @@ const LoopPill = ({ children, active, onDark }: { children: ReactNode; active?: 
 
 // ---------------------------------------------------------------- Pictures
 
-/** The picture at the top of a step's tile, inset on the panel's off-white. */
+/**
+ * The picture at the top of a step's tile, on the tile's own white: an inset
+ * in the page's off-white would stripe page, card, page. A hairline sets it
+ * apart from the copy below.
+ */
 const Stage = ({ children }: { children: ReactNode }) => (
-  <Flex h="168px" align="center" justify="center" p={5} bg="bg.panel" borderRadius="lg" overflow="hidden" aria-hidden>
+  <Flex h="176px" align="center" justify="center" px={6} py={5} borderBottom="1px" borderColor="border.subtle" overflow="hidden" aria-hidden>
     {children}
   </Flex>
 );
@@ -164,9 +168,9 @@ const HowItWorks = () => (
     {/* Each step is one tile: its picture, then its number, title and copy. */}
     <SimpleGrid as="ol" listStyleType="none" columns={{ base: 1, md: 3 }} spacing={6}>
       {STEPS.map((step, index) => (
-        <Stack as="li" key={step.title} spacing={0} p={2} bg="bg.surface" border="1px" borderColor="border.subtle" borderRadius="xl">
+        <Stack as="li" key={step.title} spacing={0} bg="bg.surface" border="1px" borderColor="border.subtle" borderRadius="xl" overflow="hidden">
           <Stage>{step.picture}</Stage>
-          <Stack spacing={2.5} px={3} pt={4} pb={3}>
+          <Stack spacing={2.5} px={5} pt={5} pb={5}>
             <Flex as="h3" align="center" gap={2.5} fontSize="lg" fontWeight="semibold" color="fg.strong">
               <Flex as="span" w="24px" h="24px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="ink" color="white" fontSize="13px" fontWeight="bold" lineHeight={1} aria-hidden>
                 {/* Trimmed to the digit's own height, so it centers in the circle
