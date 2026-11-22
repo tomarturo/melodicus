@@ -291,8 +291,77 @@ const FEATURES: Array<{ icon: ElementType; title: string; body: string; size: Si
   },
 ];
 
-// The demo's parts, shown on the big tile as an example of what's kept.
-const FEATURE_PILLS = DEMO_LOOPS.slice(0, 4);
+// ---- The big tile's picture: the demo's solo, broken into its parts.
+
+// The stretch of the song the picture shows, in seconds (2:10 to 3:05).
+const PARTS_FROM = 130;
+const PARTS_TO = 185;
+const at = (seconds: number) => `${((seconds - PARTS_FROM) / (PARTS_TO - PARTS_FROM)) * 100}%`;
+const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+
+const FULL_SOLO = DEMO_LOOPS[0];
+const SOLO_SECTIONS = DEMO_LOOPS.filter((loop) => loop.name?.startsWith('Solo section'));
+// The part shown as picked, with its grips and the playhead inside it.
+const PICKED = SOLO_SECTIONS[1];
+
+const PartsPicture = () => (
+  <Stack spacing={4} aria-hidden>
+    <Flex as="ul" listStyleType="none" wrap="wrap" gap={1.5}>
+      {DEMO_LOOPS.map((loop) => (
+        <LoopPill key={loop.name} active={loop === PICKED}>
+          {loop.name}
+        </LoopPill>
+      ))}
+    </Flex>
+    <Box>
+      <Box position="relative" h={{ base: "64px", xl: "112px" }} borderRadius="lg" bg="bg.muted" overflow="hidden">
+        {SOLO_SECTIONS.map((loop) => {
+          const picked = loop === PICKED;
+          return (
+            <Box
+              key={loop.name}
+              position="absolute"
+              insetY={0}
+              left={at(loop.start_time)}
+              w={`calc(${at(loop.end_time)} - ${at(loop.start_time)})`}
+              bg={picked ? 'rgba(128, 90, 213, 0.45)' : LOOP_FILL}
+              borderX={picked ? '2px solid' : '1px solid'}
+              borderColor={picked ? 'purple.700' : 'purple.300'}
+            />
+          );
+        })}
+        {PICKED && (
+          <>
+            <Grip left={at(PICKED.start_time)} />
+            <Grip left={at(PICKED.end_time)} />
+            <Box
+              position="absolute"
+              insetY={0}
+              w="2px"
+              bg="ink"
+              left={at(PICKED.start_time)}
+              sx={{
+                '@keyframes home-parts-sweep': { from: { left: at(PICKED.start_time) }, to: { left: at(PICKED.end_time) } },
+                animation: 'home-parts-sweep 2.4s linear infinite',
+                '@media (prefers-reduced-motion: reduce)': { animation: 'none', left: at((PICKED.start_time + PICKED.end_time) / 2) },
+              }}
+            />
+          </>
+        )}
+      </Box>
+      {FULL_SOLO && (
+        <Box position="relative" h="18px" mt={2} fontSize="xs" fontWeight="semibold" color="fg.muted" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+          <Text as="span" position="absolute" left={at(FULL_SOLO.start_time)} transform="translateX(-50%)">
+            {formatClock(FULL_SOLO.start_time)}
+          </Text>
+          <Text as="span" position="absolute" left={at(FULL_SOLO.end_time)} transform="translateX(-50%)">
+            {formatClock(FULL_SOLO.end_time)}
+          </Text>
+        </Box>
+      )}
+    </Box>
+  </Stack>
+);
 
 const WhatYouGet = () => (
   <Box as="section" aria-labelledby="what-you-get">
@@ -326,28 +395,15 @@ const WhatYouGet = () => (
             borderColor="border.subtle"
             borderRadius="xl"
           >
-            <Flex
-              boxSize={isFeature ? '56px' : '48px'}
-              align="center"
-              justify="center"
-              borderRadius="xl"
-              bg="purple.50"
-              color="purple.700"
-              flexShrink={0}
-              aria-hidden
-            >
-              <Icon as={feature.icon} boxSize={isFeature ? '32px' : '28px'} />
-            </Flex>
-            <Stack spacing={isFeature ? 3 : 1.5}>
-              {isFeature && (
-                <Flex as="ul" listStyleType="none" wrap="wrap" gap={1.5} mb={2} aria-hidden>
-                  {FEATURE_PILLS.map((loop, index) => (
-                    <LoopPill key={loop.name} active={index === 1}>
-                      {loop.name}
-                    </LoopPill>
-                  ))}
-                </Flex>
-              )}
+            {/* The big tile shows its promise; the rest an icon. */}
+            {isFeature ? (
+              <PartsPicture />
+            ) : (
+              <Flex boxSize="48px" align="center" justify="center" borderRadius="xl" bg="purple.50" color="purple.700" flexShrink={0} aria-hidden>
+                <Icon as={feature.icon} boxSize="28px" />
+              </Flex>
+            )}
+            <Stack spacing={isFeature ? 2 : 1.5}>
               <Heading as="h3" fontSize={isFeature ? { base: 'xl', lg: '2xl' } : 'lg'} fontWeight="semibold" color="fg.strong">
                 {feature.title}
               </Heading>
