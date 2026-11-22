@@ -294,7 +294,7 @@ const FEATURES: Array<{ icon: ElementType; title: string; body: string; size: Si
     body: 'Everything works right away. Log in when you want to keep your songs.',
     size: 'square',
   },
-  { icon: ShareFat, title: 'Share your loops', body: 'Send a link and your teacher or bandmate gets the same loops.', size: 'square' },
+  { icon: ShareFat, title: 'Share your songs', body: 'Send a link and your teacher or bandmate gets the same loops.', size: 'square' },
 ];
 
 // ---- The big tile's picture: the demo's solo, broken into its parts.
@@ -334,7 +334,7 @@ const PartsPills = () => (
 const PartsPicture = () => (
   <Stack spacing={4} aria-hidden>
     <Box>
-      <Box position="relative" h={{ base: "80px", md: "96px", xl: "136px" }} borderRadius="lg" bg="bg.muted" overflow="hidden">
+      <Box position="relative" h={{ base: "72px", md: "88px" }} borderRadius="lg" bg="bg.muted" overflow="hidden">
         {SOLO_PARTS.map((loop) => {
           const picked = loop === PICKED;
           return (
