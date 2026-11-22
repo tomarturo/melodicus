@@ -15,7 +15,7 @@ test('a new visitor sees how it works, the demo and what they get', async ({ pag
   // The demo opens as a share link, so its loops come with it.
   await page.getByRole('link', { name: 'Open the demo' }).click();
   await expect(page).toHaveURL(/\/video\/b00h8iKaklQ$/);
-  await expect(page.getByRole('dialog')).toContainText('7 loops');
+  await expect(page.getByRole('dialog')).toContainText('8 loops');
 });
 
 test('someone with saved songs sees their recent songs instead', async ({ page }) => {
