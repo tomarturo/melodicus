@@ -22,6 +22,8 @@ const PLAYHEAD_COLOR = '#161719'; // ink
 const HOVER_LINE_COLOR = 'rgba(22, 23, 25, 0.35)'; // ink, faint
 const LOOP_COLOR = 'rgba(128, 90, 213, 0.28)'; // purple.500
 const LOOP_EDGE_COLOR = '#553C9A'; // purple.700
+/** The grip on each edge of a loop, in px. Shared with the homepage's pictures of the timeline. */
+export const LOOP_GRIP = { width: 8, height: 20, border: 1.5 } as const;
 const SECTION_COLOR = 'rgba(85, 60, 154, 0.12)'; // purple.700, well under the loop
 // A saved loop's span while its pill is hovered.
 const SECTION_HIGHLIGHT_COLOR = 'rgba(85, 60, 154, 0.28)';
@@ -72,12 +74,12 @@ const TRACK_STYLES = `
     content: '';
     position: absolute;
     top: 50%;
-    width: 8px;
-    height: 20px;
+    width: ${LOOP_GRIP.width}px;
+    height: ${LOOP_GRIP.height}px;
     transform: translateY(-50%);
     background: #FFFFFF;
-    border: 1.5px solid ${LOOP_EDGE_COLOR};
-    border-radius: 4px;
+    border: ${LOOP_GRIP.border}px solid ${LOOP_EDGE_COLOR};
+    border-radius: 9999px;
     box-sizing: border-box;
   }
   [part~="loop"] [part~="region-handle-left"]::after { left: -5px; }

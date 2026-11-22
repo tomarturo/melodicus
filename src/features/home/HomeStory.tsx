@@ -14,6 +14,7 @@ import {
   UserCircleDashed,
 } from '@phosphor-icons/react';
 import { loopPillStyle } from '../player/timeline/LoopPills';
+import { LOOP_GRIP } from '../player/timeline/useWaveformTimeline';
 import { DEMO_LOOPS, DEMO_VIDEO_ID, demoPath } from './demo';
 
 /**
@@ -90,8 +91,20 @@ const SearchPicture = () => (
   </Stack>
 );
 
+/** A loop edge's grip, at the player's own size: a full pill. */
 const Grip = ({ left }: { left: string }) => (
-  <Box position="absolute" top="50%" left={left} w="10px" h="26px" mt="-13px" ml="-5px" bg="white" border="2px solid" borderColor="purple.700" borderRadius="4px" />
+  <Box
+    position="absolute"
+    top="50%"
+    left={left}
+    w={`${LOOP_GRIP.width}px`}
+    h={`${LOOP_GRIP.height}px`}
+    transform="translate(-50%, -50%)"
+    bg="white"
+    border={`${LOOP_GRIP.border}px solid`}
+    borderColor="purple.700"
+    borderRadius="full"
+  />
 );
 
 const LoopPicture = () => (
