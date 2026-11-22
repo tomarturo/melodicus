@@ -208,12 +208,16 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
 
       {user ? (
         <>
-          {expanded && (
-            <Flex align="center" gap="3" px="5" py="2" color="chrome.fgMuted" fontSize="xs">
-              <Icon as={UserCircle} boxSize="22px" flexShrink={0} />
-              <Text noOfLines={1}>{user.email}</Text>
-            </Flex>
-          )}
+          {/* Who's signed in, and the way to their account page. */}
+          <SidebarItem
+            as={RouterLink}
+            to="/account"
+            onClick={onNavigate}
+            expanded={expanded}
+            label={user.email ?? 'Account'}
+            aria-label={expanded ? `Account: ${user.email ?? ''}` : 'Account'}
+            icon={<Icon as={UserCircle} boxSize="22px" />}
+          />
           <SidebarItem
             as="button"
             expanded={expanded}

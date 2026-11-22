@@ -70,6 +70,8 @@ const semanticTokens = {
  *          The demo card's button on the homepage.
  *   pill:  soft fill. Standing controls and dialog actions.
  *   quiet: hairline outline. Secondary choices beside a louder one (Cancel).
+ *   danger: red fill. The action that destroys something for good (Delete
+ *          account), only ever behind a confirmation.
  * Hover thickens the outline with a 1px shadow rather than a wider border, so
  * nothing shifts.
  *
@@ -118,6 +120,19 @@ const components = {
           _disabled: { bg: 'bg.panel', borderColor: 'bg.panel' },
         },
         _active: { bg: 'whiteAlpha.800', borderColor: 'whiteAlpha.800' },
+      },
+      danger: {
+        rounded: 'full',
+        bg: 'red.700',
+        border: '1px',
+        borderColor: 'red.700',
+        color: 'white',
+        _hover: {
+          bg: 'red.800',
+          borderColor: 'red.800',
+          _disabled: { bg: 'red.700', borderColor: 'red.700' },
+        },
+        _active: { bg: 'red.900', borderColor: 'red.900' },
       },
       pill: {
         rounded: 'full',

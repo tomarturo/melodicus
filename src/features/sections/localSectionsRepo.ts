@@ -73,6 +73,20 @@ export class LocalSectionsRepo implements SectionsRepository {
     return section;
   }
 
+  /**
+   * Forgets every song and loop this browser keeps, old-format ones included,
+   * and nothing else in storage. For when the account they'd be copied into
+   * is deleted.
+   */
+  clearAll(): void {
+    const keys: string[] = [];
+    for (let i = 0; i < this.storage.length; i++) {
+      const key = this.storage.key(i);
+      if (key && (key === SONGS_KEY || key.startsWith(sectionsKey('')) || key.startsWith(LEGACY_PREFIX))) keys.push(key);
+    }
+    keys.forEach((key) => this.storage.removeItem(key));
+  }
+
   async renameSection(videoId: string, sectionId: string, name: string | null): Promise<Section> {
     this.migrateLegacy();
     const sections = this.readSections(videoId);
