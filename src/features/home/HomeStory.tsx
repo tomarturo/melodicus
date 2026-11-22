@@ -498,23 +498,24 @@ const CTA_PAD_Y = { base: 10, md: 14 } as const;
 
 /**
  * A repeat sign, as in sheet music: a thick bar, a thin bar and two dots
- * facing the music to repeat. The bars run the band's full height; the dots
- * keep the logomark's size and spacing. The end sign is the start sign
- * mirrored.
+ * facing the music to repeat. The bars run 80% of the band's height,
+ * centered; the dots keep the logomark's size and spacing. In the grey of
+ * the demo card's thumbnail block: whiteAlpha.100 over the card, which is
+ * ink.hover as a solid. The end sign is the start sign mirrored.
  */
 const RepeatSign = ({ end = false }: { end?: boolean }) => (
   <Flex
     alignSelf="stretch"
     my={{ base: -CTA_PAD_Y.base, md: -CTA_PAD_Y.md }}
     direction={end ? 'row-reverse' : 'row'}
-    align="stretch"
+    align="center"
     gap={{ base: '3px', md: '6px' }}
     flexShrink={0}
-    color="purple.300"
+    color="ink.hover"
     aria-hidden
   >
-    <Box w={{ base: '6px', md: '10px' }} bg="currentColor" />
-    <Box w={{ base: '2px', md: '4px' }} bg="currentColor" />
+    <Box w={{ base: '6px', md: '10px' }} h="80%" bg="currentColor" />
+    <Box w={{ base: '2px', md: '4px' }} h="80%" bg="currentColor" />
     <Flex direction="column" justify="center" gap={{ base: '14px', md: '24px' }} ml={end ? 0 : { base: '4px', md: '6px' }} mr={end ? { base: '4px', md: '6px' } : 0}>
       <Box boxSize={{ base: '7px', md: '12px' }} borderRadius="full" bg="currentColor" />
       <Box boxSize={{ base: '7px', md: '12px' }} borderRadius="full" bg="currentColor" />
