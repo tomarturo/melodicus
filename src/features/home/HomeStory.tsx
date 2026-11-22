@@ -529,16 +529,17 @@ const FindYourSong = ({ onFindSong }: { onFindSong: () => void }) => (
     as="section"
     aria-labelledby="find-your-song"
     align="center"
-    justify="center"
-    gap={{ base: 3, sm: 6, md: 12 }}
+    // The signs sit at the band's sides, inside its 24px (32px from tablets) padding.
+    justify="space-between"
+    gap={{ base: 3, sm: 6 }}
     {...DARK_BAND}
     py={CTA_PAD_Y}
     overflow="hidden"
   >
     <RepeatSign />
-    <Stack align="center" spacing={6} textAlign="center" minW="0">
+    <Stack flex="1" align="center" spacing={6} textAlign="center" minW="0">
       <Heading id="find-your-song" as="h2" size="xl" color="white" sx={{ textWrap: 'balance' }}>
-        What do you want to learn first?
+        What will you learn first?
       </Heading>
       <Button
         variant="loudInverse"
