@@ -15,6 +15,10 @@ test.beforeEach(async ({ page }) => {
 const sidebar = (page: Page) => page.getByRole('navigation', { name: 'Main' });
 const toggle = (page: Page) => page.getByRole('button', { name: /sidebar/ });
 const isExpanded = (page: Page, value: boolean) => expect(sidebar(page)).toHaveAttribute('data-expanded', String(value));
+// Behind an open dialog the rest of the page is hidden from the accessibility
+// tree, so these find the rail and its toggle by their markup instead.
+const railBehindDialog = (page: Page) => page.locator('nav[data-expanded]');
+const toggleBehindDialog = (page: Page) => page.locator('button[aria-expanded][aria-label$="sidebar"]');
 
 test.describe('sidebar rail', () => {
   test('replaces the top bar, and expands on hover to list saved songs', async ({ page }) => {
@@ -43,6 +47,16 @@ test.describe('sidebar rail', () => {
     await isExpanded(page, false);
   });
 
+  test('Log in closes the rail, then opens the login dialog', async ({ page }) => {
+    await page.goto('/');
+    await page.mouse.move(700, 300);
+    await sidebar(page).hover();
+    await isExpanded(page, true);
+    await sidebar(page).getByRole('button', { name: 'Log in' }).click();
+    await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
+    await expect(railBehindDialog(page)).toHaveAttribute('data-expanded', 'false');
+  });
+
   test('My songs leads to the saved songs page', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: 'My songs' }).click();
@@ -62,6 +76,16 @@ test.describe('sidebar rail', () => {
       await page.getByTestId('sidebar-backdrop').tap({ position: { x: 900, y: 400 } });
       await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
     });
+
+    test('Log in closes the opened rail, then opens the login dialog', async ({ page }) => {
+      await page.goto('/');
+      await toggle(page).tap();
+      await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+      await sidebar(page).getByRole('button', { name: 'Log in' }).tap();
+      await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
+      await expect(toggleBehindDialog(page)).toHaveAttribute('aria-expanded', 'false');
+      await expect(page.getByTestId('sidebar-backdrop')).toHaveCount(0);
+    });
   });
 });
 
@@ -76,6 +100,16 @@ test.describe('on a phone', () => {
     await drawer.getByText('Little Wing').click();
     await expect(page).toHaveURL(/\/video\/otherVideo1$/);
     await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
+  test('Log in closes the drawer, then opens the login dialog', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Open menu' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Log in' }).click();
+    await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
+    // One dialog in the page, the login: the drawer has gone. Counted in the
+    // markup, since an open dialog hides any other from the accessibility tree.
+    await expect(page.locator('[role="dialog"]')).toHaveCount(1);
   });
 });
 

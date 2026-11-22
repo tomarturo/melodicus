@@ -14,6 +14,7 @@ import {
   useMediaQuery,
 } from '@chakra-ui/react';
 import { CaretLeft, CaretRight, List } from '@phosphor-icons/react';
+import AuthModal from '../../AuthModal';
 import { EXPANDED_WIDTH, RAIL_WIDTH, Sidebar } from './Sidebar';
 
 // 'hover': open while the mouse is over it. 'pinned': opened with the toggle,
@@ -32,7 +33,7 @@ const HOVER_QUERY = '(hover: hover) and (pointer: fine)';
 const APP_MAX_WIDTH = 1600;
 const APP_INSET = `max(0px, calc((100vw - ${APP_MAX_WIDTH}px) / 2))`;
 
-function Rail() {
+function Rail({ onLogIn }: { onLogIn: () => void }) {
   const [state, setState] = useState<RailState>('closed');
   const [canHover] = useMediaQuery(HOVER_QUERY);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -98,7 +99,7 @@ function Rail() {
           if (state === 'hover') setState('closed');
         }}
       >
-        <Sidebar expanded={expanded} onNavigate={close} showShortcut={canHover} />
+        <Sidebar expanded={expanded} onNavigate={close} showShortcut={canHover} onLogIn={onLogIn} />
         {/* With a mouse, hovering opens the rail. A touch screen has no hover,
             so it gets a button instead. */}
         {!canHover && (
@@ -130,7 +131,7 @@ function Rail() {
 }
 
 /** Phones: a top bar with a menu button that opens the sidebar as a drawer. */
-function PhoneBar() {
+function PhoneBar({ onLogIn }: { onLogIn: () => void }) {
   const drawer = useDisclosure();
   const location = useLocation();
   const { onClose } = drawer;
@@ -152,7 +153,7 @@ function PhoneBar() {
       <Drawer isOpen={drawer.isOpen} onClose={drawer.onClose} placement="left">
         <DrawerOverlay />
         <DrawerContent bg="chrome.bg" maxW={`${EXPANDED_WIDTH}px`}>
-          <Sidebar expanded onNavigate={drawer.onClose} />
+          <Sidebar expanded onNavigate={drawer.onClose} onLogIn={onLogIn} />
         </DrawerContent>
       </Drawer>
     </Flex>
@@ -180,6 +181,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   // straddles that edge.
   const frame = isPhone ? 0 : 5;
   const panelLeft = isPhone || canHover ? 0 : 5;
+  // The sidebar's login dialog, kept here so it outlives the sidebar closing.
+  const authDialog = useDisclosure();
 
   return (
     <Flex
@@ -197,7 +200,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         '@supports not (height: 100dvh)': fitsScreen ? { height: '100vh' } : { minHeight: '100vh' },
       }}
     >
-      {isPhone ? <PhoneBar /> : <Rail />}
+      {isPhone ? <PhoneBar onLogIn={authDialog.onOpen} /> : <Rail onLogIn={authDialog.onOpen} />}
+      <AuthModal isOpen={authDialog.isOpen} onClose={authDialog.onClose} />
       <Flex direction="column" flex="1" minH="0" py={frame} pl={panelLeft} pr={frame}>
         <Box w="100%" display="flex" flexDirection="column" flex="1" minH="0">
           {children}
