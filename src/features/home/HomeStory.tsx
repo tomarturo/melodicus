@@ -10,6 +10,9 @@ import {
   ShareFat,
   CaretDown,
   DeviceMobile,
+  Gauge,
+  Repeat,
+  YoutubeLogo,
   UserCircleDashed,
 } from '@phosphor-icons/react';
 import { DEMO_LOOPS, DEMO_VIDEO_ID, demoPath } from './demo';
@@ -259,60 +262,86 @@ const DemoSong = () => {
 
 // ---------------------------------------------------------------- What you get
 
-const FEATURES: Array<{ icon: ElementType; title: string; body: string; wide?: boolean }> = [
+type Tone = 'purple' | 'lilac' | 'white';
+
+// Each tone: the tile, its icon square, and its text.
+const TONES: Record<Tone, { bg: string; iconBg: string; icon: string; title: string; body: string; border?: string }> = {
+  purple: { bg: 'purple.700', iconBg: 'whiteAlpha.200', icon: 'white', title: 'white', body: 'whiteAlpha.800' },
+  lilac: { bg: 'purple.100', iconBg: 'white', icon: 'purple.700', title: 'fg.strong', body: 'fg.muted' },
+  white: { bg: 'bg.surface', iconBg: 'purple.50', icon: 'purple.700', title: 'fg.strong', body: 'fg.muted', border: 'border.subtle' },
+};
+
+/*
+ * Three columns, every row filled:
+ *   [ Keep track (purple) ............ ][ Share         ]
+ *   [ Any song     ][ Unlimited loops  ][ 0.25x to 2x   ]
+ *   [ Phone        ][ No account needed (lilac) ....... ]
+ */
+const FEATURES: Array<{ icon: ElementType; title: string; body: string; tone: Tone; wide?: boolean }> = [
   {
     icon: MusicNotes,
     title: 'Keep track of every part',
     body: 'Every loop is named and saved with its song, so your parts are there next time.',
+    tone: 'purple',
     wide: true,
   },
-  { icon: ShareFat, title: 'Share your loops', body: 'Send a link and your teacher or bandmate gets the same loops.' },
-  { icon: DeviceMobile, title: 'Works on your phone', body: 'Prop it on the music stand. The controls are sized for thumbs.' },
+  { icon: ShareFat, title: 'Share your loops', body: 'Send a link and your teacher or bandmate gets the same loops.', tone: 'white' },
+  { icon: YoutubeLogo, title: 'Any song on YouTube', body: 'If it’s on YouTube, you can practice it here.', tone: 'lilac' },
+  { icon: Repeat, title: 'Unlimited loops', body: 'Mark as many parts as the song needs.', tone: 'white' },
+  { icon: Gauge, title: '0.25x to 2x', body: 'Slow down without dropping the pitch.', tone: 'lilac' },
+  { icon: DeviceMobile, title: 'Works on your phone', body: 'Prop it on the music stand. The controls are sized for thumbs.', tone: 'white' },
   {
     icon: UserCircleDashed,
     title: 'No account needed',
     body: 'Everything works right away. Log in when you want to keep your songs.',
+    tone: 'lilac',
     wide: true,
   },
 ];
 
-/**
- * A bento of white tiles, each an icon, a title and a line of copy. Wide then
- * narrow, then narrow then wide, so the two rows don't match.
- */
 const WhatYouGet = () => (
   <Box as="section" aria-labelledby="what-you-get">
     <Heading id="what-you-get" as="h2" size="lg" color="fg.strong" mb={6}>
       What you get
     </Heading>
-    <Grid as="ul" listStyleType="none" templateColumns={{ base: 'minmax(0, 1fr)', md: 'repeat(3, minmax(0, 1fr))' }} gap={4}>
-      {FEATURES.map((feature) => (
-        <GridItem
-          as="li"
-          key={feature.title}
-          colSpan={{ base: 1, md: feature.wide ? 2 : 1 }}
-          display="flex"
-          flexDirection="column"
-          gap={4}
-          p={6}
-          bg="bg.surface"
-          border="1px"
-          borderColor="border.subtle"
-          borderRadius="xl"
-        >
-          <Flex boxSize="48px" align="center" justify="center" borderRadius="xl" bg="purple.50" color="purple.700" aria-hidden>
-            <Icon as={feature.icon} boxSize="28px" />
-          </Flex>
-          <Stack spacing={1.5}>
-            <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg.strong">
-              {feature.title}
-            </Heading>
-            <Text color="fg.muted" fontSize="15px" lineHeight="1.5" maxW="44ch">
-              {feature.body}
-            </Text>
-          </Stack>
-        </GridItem>
-      ))}
+    <Grid
+      as="ul"
+      listStyleType="none"
+      templateColumns={{ base: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }}
+      gap={3}
+    >
+      {FEATURES.map((feature, index) => {
+        const tone = TONES[feature.tone];
+        return (
+          <GridItem
+            as="li"
+            key={feature.title}
+            // In two columns only the first tile spans the row, so the other
+            // six pair up with none left alone.
+            colSpan={{ base: 1, sm: index === 0 ? 2 : 1, lg: feature.wide ? 2 : 1 }}
+            display="flex"
+            flexDirection="column"
+            gap={4}
+            p={6}
+            bg={tone.bg}
+            border="1px"
+            borderColor={tone.border ?? 'transparent'}
+            borderRadius="xl"
+          >
+            <Flex boxSize="48px" align="center" justify="center" borderRadius="xl" bg={tone.iconBg} color={tone.icon} aria-hidden>
+              <Icon as={feature.icon} boxSize="28px" />
+            </Flex>
+            <Stack spacing={1.5}>
+              <Heading as="h3" fontSize="lg" fontWeight="semibold" color={tone.title}>
+                {feature.title}
+              </Heading>
+              <Text color={tone.body} fontSize="15px" lineHeight="1.5" maxW="44ch">
+                {feature.body}
+              </Text>
+            </Stack>
+          </GridItem>
+        );
+      })}
     </Grid>
   </Box>
 );
