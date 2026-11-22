@@ -90,3 +90,18 @@ test('with the quota used up, a pasted link opens the video and a bad one is cau
   await page.getByRole('button', { name: 'Open video' }).click();
   await expect(page).toHaveURL(/\/video\/abcdefghijk$/);
 });
+
+test('the video-not-found page catches a bad link and opens a good one', async ({ page }) => {
+  await page.goto('/video/null');
+  await expect(page.getByRole('heading', { name: 'We’re having trouble with the link you provided' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open YouTube' })).toHaveAttribute('href', 'https://www.youtube.com/');
+
+  const link = page.getByRole('textbox', { name: 'YouTube link' });
+  await link.fill('nope');
+  await link.press('Enter');
+  await expect(page.getByRole('alert')).toContainText('doesn’t look like a YouTube link');
+
+  await link.fill('https://www.youtube.com/watch?v=abcdefghijk');
+  await link.press('Enter');
+  await expect(page).toHaveURL(/\/video\/abcdefghijk$/);
+});
