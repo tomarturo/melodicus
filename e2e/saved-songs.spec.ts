@@ -87,11 +87,17 @@ test('a removed song is deleted once its Undo runs out', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Little Wing' })).toHaveCount(0);
 });
 
-test('guests see the temporarily saved banner, whose Log in opens the login dialog', async ({ page }) => {
+test('guests see the repertoire banner: Create account opens sign-up, Log in opens login', async ({ page }) => {
   await mockSupabase(page);
   await seedGuest(page);
   await page.goto('/saved-songs');
-  await expect(page.getByText('Temporarily saved')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Build your repertoire.' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Create account' }).click();
+  await expect(page.getByRole('dialog', { name: 'Create an account' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
   await page.getByRole('button', { name: 'Log in' }).last().click();
   await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
 });
@@ -109,7 +115,7 @@ test('signed in, there is no banner and the loops come from the account', async 
     'Intro',
     'Solo',
   ]);
-  await expect(page.getByText('Temporarily saved')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Build your repertoire.' })).toHaveCount(0);
 });
 
 test('a failed login keeps the dialog open, with the reason under the fields', async ({ page }) => {

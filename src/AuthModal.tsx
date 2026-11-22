@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import {
   Button,
   FormControl,
@@ -21,6 +21,8 @@ import { errorCause } from './lib/errors';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Which form to open on. Defaults to logging in. */
+  initialMode?: 'login' | 'signup';
 }
 
 // The same filled, rounded field as the loop name dialog.
@@ -54,8 +56,14 @@ const COPY = {
   },
 } as const;
 
-const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+const AuthModal = ({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) => {
+  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+  // Each time it opens, start on the form it was opened for.
+  useEffect(() => {
+    if (!isOpen) return;
+    setMode(initialMode);
+    setError(null);
+  }, [isOpen, initialMode]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
