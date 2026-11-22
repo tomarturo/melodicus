@@ -85,7 +85,7 @@ const SearchPicture = () => (
   <Stack w="100%" spacing={2.5}>
     <Flex h="38px" align="center" justify="space-between" pl={3.5} pr={3} borderRadius="full" bg="bg.muted" fontSize="sm" color="fg.default">
       <Text as="span">
-        wonderwall oasis
+        kid charlemagne steely dan
         <Box
           as="span"
           display="inline-block"
@@ -111,8 +111,8 @@ const Grip = ({ left }: { left: string }) => (
 const LoopPicture = () => (
   <Stack w="100%" spacing={3}>
     <Flex as="ul" listStyleType="none" gap={1.5}>
-      <LoopPill>intro</LoopPill>
-      <LoopPill active>solo</LoopPill>
+      <LoopPill>full guitar solo</LoopPill>
+      <LoopPill active>solo section 1</LoopPill>
     </Flex>
     <Box position="relative" h="56px" borderRadius="lg" bg="bg.muted" overflow="hidden">
       <Box position="absolute" insetY={0} left={0} w="32%" bg="bg.mutedHover" />
