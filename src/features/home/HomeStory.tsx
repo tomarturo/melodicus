@@ -493,30 +493,33 @@ const WhatYouGet = () => (
   </Box>
 );
 
-/** The page's last word: back up to the search, ready to type. */
+// The band's vertical padding, which the repeat signs reach past to its edges.
+const CTA_PAD_Y = { base: 10, md: 14 } as const;
+
 /**
  * A repeat sign, as in sheet music: a thick bar, a thin bar and two dots
- * facing the music to repeat. The logomark's dots and bar, drawn the same
- * way (124 units tall, bars from 25 to 99.6, dots of 6 at 44.7 and 79.7).
- * The end sign is the start sign mirrored.
+ * facing the music to repeat. The bars run the band's full height; the dots
+ * keep the logomark's size and spacing. The end sign is the start sign
+ * mirrored.
  */
 const RepeatSign = ({ end = false }: { end?: boolean }) => (
-  <Box
-    as="svg"
-    viewBox="0 0 48 124"
-    h={{ base: '72px', md: '128px' }}
-    w="auto"
+  <Flex
+    alignSelf="stretch"
+    my={{ base: -CTA_PAD_Y.base, md: -CTA_PAD_Y.md }}
+    direction={end ? 'row-reverse' : 'row'}
+    align="stretch"
+    gap={{ base: '3px', md: '6px' }}
     flexShrink={0}
     color="purple.300"
-    fill="currentColor"
-    transform={end ? 'scaleX(-1)' : undefined}
     aria-hidden
   >
-    <rect x="4" y="25" width="10" height="74.6" />
-    <rect x="20" y="25" width="4" height="74.6" />
-    <circle cx="36" cy="44.7" r="6" />
-    <circle cx="36" cy="79.7" r="6" />
-  </Box>
+    <Box w={{ base: '6px', md: '10px' }} bg="currentColor" />
+    <Box w={{ base: '2px', md: '4px' }} bg="currentColor" />
+    <Flex direction="column" justify="center" gap={{ base: '14px', md: '24px' }} ml={end ? 0 : { base: '4px', md: '6px' }} mr={end ? { base: '4px', md: '6px' } : 0}>
+      <Box boxSize={{ base: '7px', md: '12px' }} borderRadius="full" bg="currentColor" />
+      <Box boxSize={{ base: '7px', md: '12px' }} borderRadius="full" bg="currentColor" />
+    </Flex>
+  </Flex>
 );
 
 /** The page's last word: back up to the search, ready to type, between repeat signs. */
@@ -528,7 +531,8 @@ const FindYourSong = ({ onFindSong }: { onFindSong: () => void }) => (
     justify="center"
     gap={{ base: 3, sm: 6, md: 12 }}
     {...DARK_BAND}
-    py={{ base: 10, md: 14 }}
+    py={CTA_PAD_Y}
+    overflow="hidden"
   >
     <RepeatSign />
     <Stack align="center" spacing={6} textAlign="center" minW="0">
