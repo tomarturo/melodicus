@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Flex, Heading, Stack, Text, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Container, Flex, Heading, Icon, Stack, Text, useDisclosure } from '@chakra-ui/react';
+import { SignOut } from '@phosphor-icons/react';
 import { useAuth } from './contexts/AuthContext';
 import { useNotify } from './lib/notify';
 import { useSavedSongsQuery } from './features/sections/queries';
@@ -18,7 +19,7 @@ const Panel = ({ children }: { children: ReactNode }) => (
 
 /** The signed-in person's account: who they're signed in as, and deleting it. */
 const AccountPage = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const notify = useNotify();
   const confirmDialog = useDisclosure();
@@ -50,12 +51,27 @@ const AccountPage = () => {
             Account
           </Heading>
           <Panel>
-            <Text fontSize="sm" color="fg.muted" mb={1}>
-              Signed in as
-            </Text>
-            <Text fontWeight="semibold" color="fg.strong" wordBreak="break-all">
-              {user.email}
-            </Text>
+            <Flex direction={{ base: 'column', sm: 'row' }} align={{ sm: 'center' }} justify="space-between" gap={4}>
+              <Box minW="0">
+                <Text fontSize="sm" color="fg.muted" mb={1}>
+                  Signed in as
+                </Text>
+                <Text fontWeight="semibold" color="fg.strong" wordBreak="break-all">
+                  {user.email}
+                </Text>
+              </Box>
+              {/* Logging out leaves this page, which is for signed-in people only. */}
+              <Button
+                variant="quiet"
+                size="md"
+                flexShrink={0}
+                alignSelf={{ base: 'flex-start', sm: 'center' }}
+                leftIcon={<Icon as={SignOut} boxSize="18px" />}
+                onClick={() => void logout()}
+              >
+                Log out
+              </Button>
+            </Flex>
           </Panel>
           <Panel>
             <Flex direction={{ base: 'column', sm: 'row' }} align={{ sm: 'center' }} justify="space-between" gap={4}>

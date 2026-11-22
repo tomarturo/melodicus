@@ -85,6 +85,16 @@ test('if deleting fails, the dialog stays open with the reason, and nothing chan
   expect(await page.evaluate(() => localStorage.getItem('sb-e2e-auth-token'))).not.toBeNull();
 });
 
+test('Log out is on the account page, not in the sidebar, and leads home', async ({ page }) => {
+  await seedAccount(page);
+  await page.goto('/account');
+  await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Log out' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Log out' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByText('Logged out')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Log in' })).toBeAttached();
+});
+
 test('signed out, the account page sends you home', async ({ page }) => {
   await mockSupabase(page);
   await page.goto('/account');
