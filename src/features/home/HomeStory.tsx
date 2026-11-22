@@ -9,10 +9,8 @@ import {
   Plus,
   ShareFat,
   CaretDown,
-  DeviceMobile,
   Gauge,
   Repeat,
-  YoutubeLogo,
   UserCircleDashed,
 } from '@phosphor-icons/react';
 import { DEMO_LOOPS, DEMO_VIDEO_ID, demoPath } from './demo';
@@ -273,14 +271,13 @@ const DemoSong = () => {
 
 // ---------------------------------------------------------------- What you get
 
-/** How much of the grid a tile takes: a 2×2 square, a 1×1 square, or 2×1. */
-type Size = 'feature' | 'square' | 'wide';
+/** How much of the grid a tile takes: a 2×2 square or a 1×1 square. */
+type Size = 'feature' | 'square';
 
 /*
- * Four columns on laptops, three shapes:
- *   [ Keep track       ][ Share   ][ YouTube ]
- *   [ (2×2)            ][ Loops   ][ Speed   ]
- *   [ Phone (2×1)      ][ No account (2×1)   ]
+ * Four columns on laptops: the big square, and four small ones beside it.
+ *   [ Keep track       ][ Loops      ][ Speed  ]
+ *   [ (2×2)            ][ No account ][ Share  ]
  */
 const FEATURES: Array<{ icon: ElementType; title: string; body: string; size: Size }> = [
   {
@@ -289,17 +286,15 @@ const FEATURES: Array<{ icon: ElementType; title: string; body: string; size: Si
     body: 'Every loop is named and saved with its song, so your parts are there next time.',
     size: 'feature',
   },
-  { icon: ShareFat, title: 'Share your loops', body: 'Send a link and your teacher or bandmate gets the same loops.', size: 'square' },
-  { icon: YoutubeLogo, title: 'Any song on YouTube', body: 'If it’s on YouTube, you can practice it here.', size: 'square' },
   { icon: Repeat, title: 'Unlimited loops', body: 'Mark as many parts as the song needs.', size: 'square' },
   { icon: Gauge, title: '0.25x to 2x', body: 'Slow down without dropping the pitch.', size: 'square' },
-  { icon: DeviceMobile, title: 'Works on your phone', body: 'Prop it on the music stand. The controls are sized for thumbs.', size: 'wide' },
   {
     icon: UserCircleDashed,
     title: 'No account needed',
     body: 'Everything works right away. Log in when you want to keep your songs.',
-    size: 'wide',
+    size: 'square',
   },
+  { icon: ShareFat, title: 'Share your loops', body: 'Send a link and your teacher or bandmate gets the same loops.', size: 'square' },
 ];
 
 // ---- The big tile's picture: the demo's solo, broken into its parts.
@@ -339,7 +334,7 @@ const PartsPills = () => (
 const PartsPicture = () => (
   <Stack spacing={4} aria-hidden>
     <Box>
-      <Box position="relative" h={{ base: "64px", xl: "112px" }} borderRadius="lg" bg="bg.muted" overflow="hidden">
+      <Box position="relative" h={{ base: "80px", md: "96px", xl: "136px" }} borderRadius="lg" bg="bg.muted" overflow="hidden">
         {SOLO_PARTS.map((loop) => {
           const picked = loop === PICKED;
           return (
@@ -398,6 +393,9 @@ const WhatYouGet = () => (
       as="ul"
       listStyleType="none"
       templateColumns={{ base: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' }}
+      // On laptops both rows are one height, near square, growing together
+      // when one tile's copy needs more room.
+      autoRows={{ lg: 'minmax(232px, 1fr)' }}
       gap={3}
     >
       {FEATURES.map((feature) => {
@@ -410,7 +408,6 @@ const WhatYouGet = () => (
             // pair up. Four on laptops, where the small tiles are squares.
             colSpan={{ base: 1, md: isFeature ? 2 : 1, lg: feature.size === 'square' ? 1 : 2 }}
             rowSpan={{ base: 1, lg: isFeature ? 2 : 1 }}
-            aspectRatio={{ base: 'auto', lg: feature.size === 'square' ? '1' : 'auto' }}
             display="flex"
             flexDirection="column"
             justifyContent="space-between"
@@ -423,7 +420,10 @@ const WhatYouGet = () => (
           >
             {/* The big tile shows its promise; the rest an icon. */}
             {isFeature ? (
-              <PartsPicture />
+              // Centered in the room the title and copy leave.
+              <Flex flex="1" direction="column" justify="center">
+                <PartsPicture />
+              </Flex>
             ) : (
               <Flex boxSize="48px" align="center" justify="center" borderRadius="xl" bg="purple.50" color="purple.700" flexShrink={0} aria-hidden>
                 <Icon as={feature.icon} boxSize="28px" />
