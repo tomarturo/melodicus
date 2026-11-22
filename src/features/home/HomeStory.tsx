@@ -43,6 +43,27 @@ const LoopPill = ({
   </Flex>
 );
 
+/**
+ * "+N more" after a row of loop pills: the pill's own height and type size,
+ * so its text sits on the same line as theirs.
+ */
+const MorePill = ({
+  count,
+  display = 'flex',
+  color = 'fg.muted',
+}: {
+  count: number;
+  display?: string | Record<string, string>;
+  color?: string;
+}) => {
+  const { h, fontSize } = loopPillStyle(false);
+  return (
+    <Flex as="li" display={display} align="center" h={h as string} px={1} fontSize={fontSize as string} color={color}>
+      +{count} more
+    </Flex>
+  );
+};
+
 // ---------------------------------------------------------------- Pictures
 
 /**
@@ -256,9 +277,7 @@ const DemoSong = () => {
               </LoopPill>
             ))}
             {rest > 0 && (
-              <Text as="li" fontSize="13px" color="chrome.fgMuted" px={1}>
-                +{rest} more
-              </Text>
+              <MorePill count={rest} color="chrome.fgMuted" />
             )}
           </Flex>
         )}
@@ -311,11 +330,6 @@ const PICKED = SOLO_PARTS[1];
 // Loop names under the track, kept to two rows: fewer on phones.
 const PILLS_SHOWN = { base: 3, md: 5 } as const;
 
-const MorePill = ({ count, display }: { count: number; display: Record<string, string> }) => (
-  <Flex as="li" display={display} align="center" h="26px" px={1} fontSize="13px" color="fg.muted">
-    +{count} more
-  </Flex>
-);
 
 const PartsPills = () => (
   <Flex as="ul" listStyleType="none" wrap="wrap" gap={1.5}>
