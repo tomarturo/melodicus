@@ -168,10 +168,10 @@ const HowItWorks = () => (
   <Box as="section" aria-labelledby="how-it-works">
     <Stack spacing={2} textAlign="center" mb={7}>
       <Heading id="how-it-works" as="h2" size="lg" color="fg.strong" sx={{ textWrap: 'balance' }}>
-        Practice the part you’re stuck on
+        Learn hard songs one part at a time
       </Heading>
       <Text color="fg.muted" fontSize="lg">
-        Find it, loop it, slow it down.
+        Loop each tricky part, slow it down until it’s clean, then play the whole thing through.
       </Text>
     </Stack>
     <SimpleGrid as="ol" listStyleType="none" columns={{ base: 1, md: 3 }} spacing={5}>
