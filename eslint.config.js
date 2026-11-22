@@ -31,6 +31,11 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.browser } },
   },
   {
+    // Node scripts; render.mjs also runs code in the page it renders.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
     files: ['*.config.{js,ts}'],
     languageOptions: { globals: { ...globals.node } },
   },
