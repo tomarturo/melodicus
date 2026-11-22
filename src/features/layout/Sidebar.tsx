@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Box, Flex, Icon, Image, Kbd, Text, useDisclosure, type FlexProps } from '@chakra-ui/react';
+import { Box, Flex, Icon, Image, Kbd, Text, type FlexProps } from '@chakra-ui/react';
 import { ArrowUpRight, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
-import AuthModal from '../../AuthModal';
 import { useSavedSongsQuery } from '../sections/queries';
 import { useCommandSearch } from '../search/CommandSearch';
 
@@ -17,6 +16,11 @@ interface SidebarProps {
   onNavigate?: () => void;
   /** Show the keyboard shortcut for search (not on touch screens). */
   showShortcut?: boolean;
+  /**
+   * Opens the login dialog. It lives with the app shell, not in here, so
+   * closing the sidebar (onNavigate) first doesn't take the dialog with it.
+   */
+  onLogIn: () => void;
 }
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -147,10 +151,9 @@ function SavedSongsList({ onNavigate }: { onNavigate?: () => void }) {
  * links at the foot. Collapsed it is an icon rail; expanded (on hover, by its
  * toggle, or as the phone drawer) it adds labels and the list of saved songs.
  */
-export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarProps) {
+export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }: SidebarProps) {
   const { user, logout } = useAuth();
   const commandSearch = useCommandSearch();
-  const authDialog = useDisclosure();
 
   return (
     <Flex direction="column" h="100%" py="3" gap="1">
@@ -229,7 +232,11 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
           label="Log in"
           labelWeight="bold"
           icon={<Icon as={SignIn} weight="bold" boxSize="22px" />}
-          onClick={authDialog.onOpen}
+          // The sidebar closes first, so the dialog opens on its own.
+          onClick={() => {
+            onNavigate?.();
+            onLogIn();
+          }}
         />
       )}
       {/* Separates the account from the project's links below it. */}
@@ -257,7 +264,6 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false }: SidebarP
         icon={<Icon as={Copyright} boxSize="22px" />}
         trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
       />
-      <AuthModal isOpen={authDialog.isOpen} onClose={authDialog.onClose} />
     </Flex>
   );
 }
