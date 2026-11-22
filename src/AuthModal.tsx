@@ -2,7 +2,6 @@ import { useEffect, useState, type FormEvent } from 'react';
 import {
   Button,
   FormControl,
-  FormHelperText,
   FormLabel,
   Input,
   Modal,
@@ -15,6 +14,8 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
+import { EnvelopeSimple } from '@phosphor-icons/react';
+import Callout from './components/Callout';
 import { useAuth } from './contexts/AuthContext';
 import { errorCause } from './lib/errors';
 
@@ -50,7 +51,7 @@ const RESEND_AFTER_S = 60;
  * The address login codes come from: Supabase's SMTP sender. Shown to people
  * who can't find the email, so keep it in step with supabase/templates/README.md.
  */
-export const LOGIN_EMAIL_FROM = 'hello@melodicus.xyz';
+export const LOGIN_EMAIL_FROM = 'account@melodicus.xyz';
 
 // Codes are 6 digits by default; Supabase allows up to 10.
 const CODE_PATTERN = /^\d{6,10}$/;
@@ -178,14 +179,15 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                   // Pasted codes can arrive with spaces; keep the digits.
                   onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
                 />
-                <FormHelperText fontSize="xs" color="fg.muted" ml={4} lineHeight="1.5">
-                  Not in your inbox? Check your spam folder. Still can’t find it? Search for{' '}
-                  <Text as="span" fontWeight="semibold" color="fg.default">
-                    {LOGIN_EMAIL_FROM}
-                  </Text>
-                  .
-                </FormHelperText>
               </FormControl>
+            )}
+            {step === 'code' && (
+              <Callout icon={EnvelopeSimple}>
+                Not in your inbox? Check your spam folder or search for{' '}
+                <Text as="span" fontWeight="semibold">
+                  {LOGIN_EMAIL_FROM}
+                </Text>
+              </Callout>
             )}
             {error && (
               <Text role="alert" fontSize="sm" color="red.700">

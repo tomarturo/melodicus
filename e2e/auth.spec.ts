@@ -61,7 +61,7 @@ test('logs in with an emailed code: email, then the code, then signed in', async
 
   const codeStep = page.getByRole('dialog', { name: 'Check your email' });
   await expect(codeStep).toContainText(`We sent a code to ${EMAIL}`);
-  await expect(codeStep).toContainText('Check your spam folder. Still can’t find it? Search for hello@melodicus.xyz.');
+  await expect(codeStep).toContainText('Not in your inbox? Check your spam folder or search for account@melodicus.xyz');
   // Pasted codes keep only their digits.
   await codeStep.getByLabel('Code').fill('123 456');
   await expect(codeStep.getByLabel('Code')).toHaveValue('123456');
