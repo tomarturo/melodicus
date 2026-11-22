@@ -1,8 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
+  Box,
   Button,
   FormControl,
   FormLabel,
+  HStack,
   Input,
   Modal,
   ModalBody,
@@ -11,6 +13,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  PinInput,
+  PinInputField,
   Stack,
   Text,
 } from '@chakra-ui/react';
@@ -53,8 +57,29 @@ const RESEND_AFTER_S = 60;
  */
 export const LOGIN_EMAIL_FROM = 'account@melodicus.xyz';
 
-// Codes are 6 digits by default; Supabase allows up to 10.
-const CODE_PATTERN = /^\d{6,10}$/;
+/**
+ * Digits in a login code: one box each. Must match Supabase's Authentication
+ * → Providers → Email → Email OTP Length (see supabase/templates/README.md);
+ * if that changes, change this with it.
+ */
+export const LOGIN_CODE_LENGTH = 6;
+const CODE_PATTERN = new RegExp(`^\\d{${LOGIN_CODE_LENGTH}}$`);
+const CODE_BOXES = Array.from({ length: LOGIN_CODE_LENGTH }, (_, index) => index);
+
+// Each digit's box: the filled look of the app's fields, squared off.
+const codeBoxStyle = {
+  bg: 'bg.muted',
+  borderColor: 'transparent',
+  borderRadius: 'lg',
+  w: { base: '44px', sm: '52px' },
+  h: { base: '52px', sm: '60px' },
+  fontSize: 'xl',
+  fontWeight: 'semibold',
+  color: 'fg.strong',
+  _hover: { bg: 'bg.mutedHover' },
+  _focus: { bg: 'bg.muted', borderColor: 'border.focus' },
+  sx: { fontVariantNumeric: 'tabular-nums' },
+} as const;
 
 /**
  * Logging in and signing up are the same: an email, then the code sent to it.
@@ -69,6 +94,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [error, setError] = useState<string | null>(null);
   // Seconds until another code can be sent.
   const [resendIn, setResendIn] = useState(0);
+  const firstBoxRef = useRef<HTMLInputElement>(null);
 
   // Each time it opens, start from the email; what was typed stays.
   useEffect(() => {
@@ -98,17 +124,22 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     setResendIn(RESEND_AFTER_S);
   };
 
-  const verify = async () => {
-    if (!CODE_PATTERN.test(code)) {
-      setError('Enter the code from the email, digits only.');
+  // Runs from the button, and on its own once the last digit is in.
+  const verify = async (entered = code) => {
+    if (loading) return;
+    if (!CODE_PATTERN.test(entered)) {
+      setError(`Enter the ${LOGIN_CODE_LENGTH}-digit code from the email.`);
       return;
     }
     setLoading(true);
     setError(null);
-    const result = await verifyCode(email.trim(), code);
+    const result = await verifyCode(email.trim(), entered);
     setLoading(false);
     if (result.error) {
       setError('That code didn’t work. Check it, or send a new one: codes expire after an hour.');
+      // Start over from the first box, rather than editing one digit.
+      setCode('');
+      requestAnimationFrame(() => firstBoxRef.current?.focus());
       return;
     }
     onClose();
@@ -161,25 +192,40 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 />
               </FormControl>
             ) : (
-              <FormControl isRequired>
-                <FormLabel fontSize="sm" fontWeight="medium" color="fg.default" requiredIndicator={<></>}>
+              <Box role="group" aria-labelledby="login-code-label">
+                <Text id="login-code-label" fontSize="sm" fontWeight="medium" color="fg.default" mb={2}>
                   Code
-                </FormLabel>
-                <Input
-                  {...fieldStyle}
-                  autoFocus
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  placeholder="123456"
-                  maxLength={10}
-                  letterSpacing="0.2em"
-                  fontWeight="semibold"
-                  sx={{ fontVariantNumeric: 'tabular-nums' }}
-                  value={code}
-                  // Pasted codes can arrive with spaces; keep the digits.
-                  onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
-                />
-              </FormControl>
+                </Text>
+                {/* otp: the number pad, and the code offered from the email on
+                    phones; a pasted or autofilled code fills every box. */}
+                <HStack spacing={{ base: 2, sm: 3 }}>
+                  <PinInput
+                    otp
+                    // The app's field look: filled, with its dark focus edge, not Chakra's blue.
+                    variant="filled"
+                    focusBorderColor="border.focus"
+                    type="number"
+                    autoFocus
+                    placeholder=""
+                    value={code}
+                    isDisabled={loading}
+                    onChange={(value) => {
+                      setCode(value);
+                      setError(null);
+                    }}
+                    onComplete={(value) => void verify(value)}
+                  >
+                    {CODE_BOXES.map((index) => (
+                      <PinInputField
+                        key={index}
+                        ref={index === 0 ? firstBoxRef : undefined}
+                        aria-label={`Digit ${index + 1} of ${LOGIN_CODE_LENGTH}`}
+                        {...codeBoxStyle}
+                      />
+                    ))}
+                  </PinInput>
+                </HStack>
+              </Box>
             )}
             {step === 'code' && (
               <Callout icon={EnvelopeSimple}>

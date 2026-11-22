@@ -62,10 +62,12 @@ test('logs in with an emailed code: email, then the code, then signed in', async
   const codeStep = page.getByRole('dialog', { name: 'Check your email' });
   await expect(codeStep).toContainText(`We sent a code to ${EMAIL}`);
   await expect(codeStep).toContainText('Not in your inbox? Check your spam folder or search for account@melodicus.xyz');
-  // Pasted codes keep only their digits.
-  await codeStep.getByLabel('Code').fill('123 456');
-  await expect(codeStep.getByLabel('Code')).toHaveValue('123456');
-  await codeStep.getByRole('button', { name: 'Log in' }).click();
+  // One box per digit. A code pasted or autofilled into the first box fills
+  // them all, and the last digit logs in without pressing the button.
+  const boxes = codeStep.getByRole('group', { name: 'Code' }).getByRole('textbox');
+  await expect(boxes).toHaveCount(6);
+  await expect(boxes.first()).toBeFocused();
+  await boxes.first().fill('123456');
 
   await expect.poll(() => sent.verify).toEqual([expect.objectContaining({ email: EMAIL, token: '123456', type: 'email' })]);
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -81,10 +83,14 @@ test('a wrong or expired code keeps the dialog open, with a way to get a new one
   await dialog.getByRole('button', { name: 'Email me a code' }).click();
 
   const codeStep = page.getByRole('dialog', { name: 'Check your email' });
-  await codeStep.getByLabel('Code').fill('000000');
-  await codeStep.getByLabel('Code').press('Enter');
+  const boxes = codeStep.getByRole('group', { name: 'Code' }).getByRole('textbox');
+  // Typed a digit at a time, at a person's pace, the cursor moves along the boxes.
+  await expect(boxes.first()).toBeFocused();
+  await page.keyboard.type('000000', { delay: 40 });
   await expect(codeStep.getByRole('alert')).toContainText('That code didn’t work');
-  await expect(codeStep.getByLabel('Code')).toHaveValue('000000');
+  // Cleared, to start again from the first box.
+  for (const box of await boxes.all()) await expect(box).toHaveValue('');
+  await expect(boxes.first()).toBeFocused();
 });
 
 test('a new code can be sent after a minute, and the email can be changed', async ({ page }) => {

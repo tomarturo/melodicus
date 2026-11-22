@@ -38,8 +38,8 @@ Paste each file's whole contents in as the body.
 
 **Authentication → Providers → Email**:
 
-- **Email OTP Length**: 6. The app accepts 6 to 10 digits, and its placeholder
-  shows 6.
+- **Email OTP Length**: 6. The login dialog draws one box per digit, set by
+  `LOGIN_CODE_LENGTH` in `src/AuthModal.tsx`; change both together.
 - **Email OTP Expiration**: 3600 seconds. The app and the emails both say codes
   expire after an hour.
 - Leave **Confirm email** on: entering the code is the confirmation.
