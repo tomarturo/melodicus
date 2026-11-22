@@ -168,10 +168,10 @@ const HowItWorks = () => (
   <Box as="section" aria-labelledby="how-it-works">
     <Stack spacing={2} textAlign="center" mb={7}>
       <Heading id="how-it-works" as="h2" size="lg" color="fg.strong" sx={{ textWrap: 'balance' }}>
-        Three steps to the part you can’t play yet
+        Practice the part you’re stuck on
       </Heading>
       <Text color="fg.muted" fontSize="lg">
-        Melodicus plays YouTube videos with a timeline built for practice.
+        Find it, loop it, slow it down.
       </Text>
     </Stack>
     <SimpleGrid as="ol" listStyleType="none" columns={{ base: 1, md: 3 }} spacing={5}>
