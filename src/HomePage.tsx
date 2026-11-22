@@ -119,7 +119,7 @@ const HomePage = () => {
           <VStack>
             <Flex mb='12' gap={8} direction={'column'}>
               <Heading as='h1' size='3xl' color='fg.strong' textAlign="center">Learn the songs & licks you love</Heading>
-              <Text fontSize='xl' color='fg.default' align="center">Uninterrupted loops. Controlled playback. Zero distractions.</Text>
+              <Text fontSize='xl' color='fg.default' align="center">Any song on YouTube. Unlimited loops. Slow down the hard parts.</Text>
             </Flex>
             <Tabs
               w='100%'
