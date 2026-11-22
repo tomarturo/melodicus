@@ -262,42 +262,37 @@ const DemoSong = () => {
 
 // ---------------------------------------------------------------- What you get
 
-type Tone = 'purple' | 'lilac' | 'white';
-
-// Each tone: the tile, its icon square, and its text.
-const TONES: Record<Tone, { bg: string; iconBg: string; icon: string; title: string; body: string; border?: string }> = {
-  purple: { bg: 'purple.700', iconBg: 'whiteAlpha.200', icon: 'white', title: 'white', body: 'whiteAlpha.800' },
-  lilac: { bg: 'purple.100', iconBg: 'white', icon: 'purple.700', title: 'fg.strong', body: 'fg.muted' },
-  white: { bg: 'bg.surface', iconBg: 'purple.50', icon: 'purple.700', title: 'fg.strong', body: 'fg.muted', border: 'border.subtle' },
-};
+/** How much of the grid a tile takes: a 2×2 square, a 1×1 square, or 2×1. */
+type Size = 'feature' | 'square' | 'wide';
 
 /*
- * Three columns, every row filled:
- *   [ Keep track (purple) ............ ][ Share         ]
- *   [ Any song     ][ Unlimited loops  ][ 0.25x to 2x   ]
- *   [ Phone        ][ No account needed (lilac) ....... ]
+ * Four columns on laptops, three shapes:
+ *   [ Keep track       ][ Share   ][ YouTube ]
+ *   [ (2×2)            ][ Loops   ][ Speed   ]
+ *   [ Phone (2×1)      ][ No account (2×1)   ]
  */
-const FEATURES: Array<{ icon: ElementType; title: string; body: string; tone: Tone; wide?: boolean }> = [
+const FEATURES: Array<{ icon: ElementType; title: string; body: string; size: Size }> = [
   {
     icon: MusicNotes,
     title: 'Keep track of every part',
     body: 'Every loop is named and saved with its song, so your parts are there next time.',
-    tone: 'purple',
-    wide: true,
+    size: 'feature',
   },
-  { icon: ShareFat, title: 'Share your loops', body: 'Send a link and your teacher or bandmate gets the same loops.', tone: 'white' },
-  { icon: YoutubeLogo, title: 'Any song on YouTube', body: 'If it’s on YouTube, you can practice it here.', tone: 'lilac' },
-  { icon: Repeat, title: 'Unlimited loops', body: 'Mark as many parts as the song needs.', tone: 'white' },
-  { icon: Gauge, title: '0.25x to 2x', body: 'Slow down without dropping the pitch.', tone: 'lilac' },
-  { icon: DeviceMobile, title: 'Works on your phone', body: 'Prop it on the music stand. The controls are sized for thumbs.', tone: 'white' },
+  { icon: ShareFat, title: 'Share your loops', body: 'Send a link and your teacher or bandmate gets the same loops.', size: 'square' },
+  { icon: YoutubeLogo, title: 'Any song on YouTube', body: 'If it’s on YouTube, you can practice it here.', size: 'square' },
+  { icon: Repeat, title: 'Unlimited loops', body: 'Mark as many parts as the song needs.', size: 'square' },
+  { icon: Gauge, title: '0.25x to 2x', body: 'Slow down without dropping the pitch.', size: 'square' },
+  { icon: DeviceMobile, title: 'Works on your phone', body: 'Prop it on the music stand. The controls are sized for thumbs.', size: 'wide' },
   {
     icon: UserCircleDashed,
     title: 'No account needed',
     body: 'Everything works right away. Log in when you want to keep your songs.',
-    tone: 'lilac',
-    wide: true,
+    size: 'wide',
   },
 ];
+
+// The demo's parts, shown on the big tile as an example of what's kept.
+const FEATURE_PILLS = DEMO_LOOPS.slice(0, 4);
 
 const WhatYouGet = () => (
   <Box as="section" aria-labelledby="what-you-get">
@@ -307,35 +302,56 @@ const WhatYouGet = () => (
     <Grid
       as="ul"
       listStyleType="none"
-      templateColumns={{ base: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }}
+      templateColumns={{ base: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' }}
       gap={3}
     >
-      {FEATURES.map((feature, index) => {
-        const tone = TONES[feature.tone];
+      {FEATURES.map((feature) => {
+        const isFeature = feature.size === 'feature';
         return (
           <GridItem
             as="li"
             key={feature.title}
-            // In two columns only the first tile spans the row, so the other
-            // six pair up with none left alone.
-            colSpan={{ base: 1, sm: index === 0 ? 2 : 1, lg: feature.wide ? 2 : 1 }}
+            // Two columns on tablets: the big tile spans the row and the rest
+            // pair up. Four on laptops, where the small tiles are squares.
+            colSpan={{ base: 1, md: isFeature ? 2 : 1, lg: feature.size === 'square' ? 1 : 2 }}
+            rowSpan={{ base: 1, lg: isFeature ? 2 : 1 }}
+            aspectRatio={{ base: 'auto', lg: feature.size === 'square' ? '1' : 'auto' }}
             display="flex"
             flexDirection="column"
-            gap={4}
+            justifyContent="space-between"
+            gap={6}
             p={6}
-            bg={tone.bg}
+            bg="bg.surface"
             border="1px"
-            borderColor={tone.border ?? 'transparent'}
+            borderColor="border.subtle"
             borderRadius="xl"
           >
-            <Flex boxSize="48px" align="center" justify="center" borderRadius="xl" bg={tone.iconBg} color={tone.icon} aria-hidden>
-              <Icon as={feature.icon} boxSize="28px" />
+            <Flex
+              boxSize={isFeature ? '56px' : '48px'}
+              align="center"
+              justify="center"
+              borderRadius="xl"
+              bg="purple.50"
+              color="purple.700"
+              flexShrink={0}
+              aria-hidden
+            >
+              <Icon as={feature.icon} boxSize={isFeature ? '32px' : '28px'} />
             </Flex>
-            <Stack spacing={1.5}>
-              <Heading as="h3" fontSize="lg" fontWeight="semibold" color={tone.title}>
+            <Stack spacing={isFeature ? 3 : 1.5}>
+              {isFeature && (
+                <Flex as="ul" listStyleType="none" wrap="wrap" gap={1.5} mb={2} aria-hidden>
+                  {FEATURE_PILLS.map((loop, index) => (
+                    <LoopPill key={loop.name} active={index === 1}>
+                      {loop.name}
+                    </LoopPill>
+                  ))}
+                </Flex>
+              )}
+              <Heading as="h3" fontSize={isFeature ? { base: 'xl', lg: '2xl' } : 'lg'} fontWeight="semibold" color="fg.strong">
                 {feature.title}
               </Heading>
-              <Text color={tone.body} fontSize="15px" lineHeight="1.5" maxW="44ch">
+              <Text color="fg.muted" fontSize={isFeature ? 'md' : '15px'} lineHeight="1.5" maxW="44ch">
                 {feature.body}
               </Text>
             </Stack>
