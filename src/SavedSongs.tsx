@@ -14,6 +14,7 @@ import {
   Portal,
   Stack,
   Text,
+  useBreakpointValue,
   useDisclosure,
 } from '@chakra-ui/react';
 import { DotsThree, MusicNotes, Trash } from '@phosphor-icons/react';
@@ -36,7 +37,13 @@ const formatSavedDate = (iso: string) =>
 const countLabel = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
 // The repertoire grid: one tile per song, filled for the songs saved so far.
-const REPERTOIRE_TILES = 6;
+// Fewer tiles where the banner is narrower: a row of three on phones, a 2x2
+// beside the text on tablets, 3x2 from laptops up.
+const REPERTOIRE_GRID = {
+  base: { columns: 3, tiles: 3 },
+  md: { columns: 2, tiles: 4 },
+  lg: { columns: 3, tiles: 6 },
+} as const;
 
 const RepertoireTile = ({ filled }: { filled: boolean }) => (
   <Flex
@@ -65,15 +72,17 @@ const RepertoireBanner = ({
   onCreateAccount: () => void;
   onLogIn: () => void;
 }) => {
+  const grid = useBreakpointValue(REPERTOIRE_GRID) ?? REPERTOIRE_GRID.base;
   // Always leave at least one empty tile: there's room for more.
-  const filled = Math.min(songCount, REPERTOIRE_TILES - 1);
+  const filled = Math.min(songCount, grid.tiles - 1);
   return (
     <Flex
-      // Side by side only where there's room for the text between grid and buttons.
-      direction={{ base: 'column', lg: 'row' }}
-      align={{ base: 'stretch', lg: 'center' }}
-      gap={{ base: 5, lg: 8 }}
-      p={{ base: 5, lg: 8 }}
+      // A centered column on phones; side by side from tablets up.
+      direction={{ base: 'column', md: 'row' }}
+      align="center"
+      textAlign={{ base: 'center', md: 'left' }}
+      gap={{ base: 5, md: 6, lg: 8 }}
+      p={{ base: 5, md: 6, lg: 8 }}
       bg="bg.surface"
       border="1px"
       borderColor="border.default"
@@ -81,12 +90,12 @@ const RepertoireBanner = ({
     >
       <Box
         display="grid"
-        gridTemplateColumns="repeat(3, 48px)"
+        gridTemplateColumns={`repeat(${grid.columns}, 48px)`}
         gap={2}
         flexShrink={0}
         aria-hidden
       >
-        {Array.from({ length: REPERTOIRE_TILES }, (_, index) => (
+        {Array.from({ length: grid.tiles }, (_, index) => (
           <RepertoireTile key={index} filled={index < filled} />
         ))}
       </Box>
@@ -96,8 +105,8 @@ const RepertoireBanner = ({
         </Heading>
         <Text color="fg.muted">Create a free account to save your songs and loops.</Text>
       </Box>
-      <Stack spacing={3} align="center" flexShrink={0} w={{ base: '100%', lg: 'auto' }}>
-        <Button variant="loud" size="md" px={6} w={{ base: '100%', lg: 'auto' }} onClick={onCreateAccount}>
+      <Stack spacing={3} align="center" flexShrink={0} w={{ base: '100%', md: 'auto' }}>
+        <Button variant="loud" size="md" px={6} w={{ base: '100%', md: 'auto' }} onClick={onCreateAccount}>
           Create account
         </Button>
         <Button
