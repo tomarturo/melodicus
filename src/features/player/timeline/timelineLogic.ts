@@ -75,3 +75,34 @@ export function tickIntervals(pxPerSec: number): { tick: number; secondary: numb
   const secondaryEvery = pxPerSec >= 25 ? 5 : 2;
   return { tick, secondary: tick * secondaryEvery, primary: tick * primaryEvery };
 }
+
+// Lines on the track, spaced like the ruler: short at each tick, medium at
+// the in-between labels, tall at the labelled times, on a faint midline.
+export const TICK_COLOR = 'rgba(22, 23, 25, 0.14)'; // ink, faint
+const TICK_HEIGHTS = { tick: 0.2, secondary: 0.4, primary: 0.72 }; // of the track
+
+/**
+ * The SVG path for the track's tick lines, for the stretch of song from
+ * `from` to `to` seconds drawn `widthPx` wide and `heightPx` tall. Lines are
+ * 1px, snapped to whole pixels so they stay crisp. Lines on the stretch's very
+ * ends are skipped, where they'd sit on the track's rounded edge.
+ */
+export function tickPath({ widthPx, heightPx, from, to }: { widthPx: number; heightPx: number; from: number; to: number }): string {
+  const pxPerSec = widthPx / (to - from);
+  const { tick, secondary, primary } = tickIntervals(pxPerSec);
+  const mid = heightPx / 2;
+  const isMultiple = (time: number, step: number) => Math.abs(time / step - Math.round(time / step)) < 1e-6;
+  let path = `M0 ${mid + 0.5}H${widthPx}`; // the midline
+  for (let time = Math.floor(from / tick) * tick + tick; time < to; time += tick) {
+    if (time <= from) continue;
+    const fraction = isMultiple(time, primary)
+      ? TICK_HEIGHTS.primary
+      : isMultiple(time, secondary)
+        ? TICK_HEIGHTS.secondary
+        : TICK_HEIGHTS.tick;
+    const half = Math.round((heightPx * fraction) / 2);
+    const x = Math.round((time - from) * pxPerSec) + 0.5;
+    path += `M${x} ${mid - half}V${mid + half}`;
+  }
+  return path;
+}

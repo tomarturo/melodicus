@@ -7,7 +7,7 @@ import { formatSecondsToDuration } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
 import { MIN_LOOP } from '../loopLogic';
 import type { PlayerController } from '../playerController';
-import { drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond, tickIntervals } from './timelineLogic';
+import { TICK_COLOR, drawableSections, followScrollLeft, isHorizontalWheel, pixelsPerSecond, tickPath } from './timelineLogic';
 
 // The track is quiet so the loop leads. Light warm greys, flattened against
 // the #FAF9F6 panel rather than left translucent. They have to be opaque: the
@@ -135,37 +135,12 @@ const styleRegion = (region: Region, edgeColor?: string) => {
   });
 };
 
-// Lines on the track, spaced like the ruler: short at each tick, medium at
-// the in-between labels, tall at the labelled times, on a faint midline.
-const TICK_COLOR = 'rgba(22, 23, 25, 0.14)'; // ink, faint
-const TICK_HEIGHTS = { tick: 0.2, secondary: 0.4, primary: 0.72 }; // of the track
-
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-/**
- * Draws the tick lines across the track at the current zoom, as an SVG of
- * crisp 1px lines snapped to whole pixels (background gradients blur them
- * whenever the spacing isn't a whole number of pixels).
- */
+/** Draws the tick lines across the track at the current zoom (see tickPath). */
 const drawTicks = (svg: SVGSVGElement, widthPx: number, duration: number) => {
-  const pxPerSec = widthPx / duration;
-  const { tick, secondary, primary } = tickIntervals(pxPerSec);
-  const mid = TRACK_HEIGHT / 2;
-  const isMultiple = (time: number, step: number) => Math.abs(time / step - Math.round(time / step)) < 1e-6;
-  let path = `M0 ${mid + 0.5}H${widthPx}`; // the midline
-  // Skips 0 and the very end, where a line would sit on the track's rounded edge.
-  for (let time = tick; time < duration; time += tick) {
-    const fraction = isMultiple(time, primary)
-      ? TICK_HEIGHTS.primary
-      : isMultiple(time, secondary)
-        ? TICK_HEIGHTS.secondary
-        : TICK_HEIGHTS.tick;
-    const half = Math.round((TRACK_HEIGHT * fraction) / 2);
-    const x = Math.round(time * pxPerSec) + 0.5;
-    path += `M${x} ${mid - half}V${mid + half}`;
-  }
   svg.setAttribute('viewBox', `0 0 ${widthPx} ${TRACK_HEIGHT}`);
-  svg.firstElementChild?.setAttribute('d', path);
+  svg.firstElementChild?.setAttribute('d', tickPath({ widthPx, heightPx: TRACK_HEIGHT, from: 0, to: duration }));
 };
 
 /** Flags the loop region while it spans the whole song, before any selection, so it isn't drawn. */
@@ -369,10 +344,10 @@ const useWaveformTimeline = ({ controller, duration, sections, highlightedSectio
     // Sized by CSS to the wrapper, never by its own width: anything wider than
     // the wrapper would stretch the scroll area past the end of the song.
     ticks.setAttribute('preserveAspectRatio', 'none');
-    const tickPath = document.createElementNS(SVG_NS, 'path');
-    tickPath.setAttribute('stroke', TICK_COLOR);
-    tickPath.setAttribute('stroke-width', '1');
-    ticks.appendChild(tickPath);
+    const tickLines = document.createElementNS(SVG_NS, 'path');
+    tickLines.setAttribute('stroke', TICK_COLOR);
+    tickLines.setAttribute('stroke-width', '1');
+    ticks.appendChild(tickLines);
     wrapper.appendChild(ticks);
     const redrawTicks = () => {
       const total = wavesurfer.getDuration();

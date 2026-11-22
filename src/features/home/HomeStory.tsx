@@ -1,4 +1,4 @@
-import type { ElementType, ReactNode } from 'react';
+import { useEffect, useRef, useState, type ElementType, type ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Button, Flex, Grid, GridItem, Heading, Icon, Image, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import {
@@ -15,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import { loopPillStyle } from '../player/timeline/LoopPills';
 import { LOOP_GRIP } from '../player/timeline/useWaveformTimeline';
+import { TICK_COLOR, tickPath } from '../player/timeline/timelineLogic';
 import { DEMO_LOOPS, DEMO_VIDEO_ID, demoPath } from './demo';
 
 /**
@@ -328,10 +329,47 @@ const PartsPills = () => (
   </Flex>
 );
 
+/**
+ * The player's tick lines for the stretch the picture shows, drawn by the
+ * same code as the real track at this track's measured size.
+ */
+const TrackTicks = ({ from, to }: { from: number; to: number }) => {
+  const ref = useRef<SVGSVGElement>(null);
+  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    const measure = () => setSize({ width: Math.round(svg.clientWidth), height: Math.round(svg.clientHeight) });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(svg);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <Box
+      as="svg"
+      ref={ref}
+      position="absolute"
+      inset={0}
+      w="100%"
+      h="100%"
+      shapeRendering="crispEdges"
+      viewBox={size ? `0 0 ${size.width} ${size.height}` : undefined}
+      aria-hidden
+    >
+      {size && size.width > 0 && (
+        <path stroke={TICK_COLOR} strokeWidth={1} d={tickPath({ widthPx: size.width, heightPx: size.height, from, to })} />
+      )}
+    </Box>
+  );
+};
+
 const PartsPicture = () => (
   <Stack spacing={4} aria-hidden>
     <Box>
       <Box position="relative" h={{ base: "72px", md: "88px" }} borderRadius="lg" bg="bg.muted" overflow="hidden">
+        {/* Over the track's fill, under the loops, as on the video page. */}
+        <TrackTicks from={PARTS_FROM} to={PARTS_TO} />
         {SOLO_PARTS.map((loop) => {
           const picked = loop === PICKED;
           return (
