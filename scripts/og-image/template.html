@@ -1,0 +1,139 @@
+<!doctype html>
+<!--
+  The social card (public/og-image.png), 1200×630.
+  Edit here, then run: node scripts/og-image/render.mjs
+  The WORDMARK placeholder is replaced with public/wordmark.svg, recolored to ink.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --ink: #161719;
+    --panel: #FAF9F6;
+    --muted: #3F3F46;
+    --purple-300: #B794F4;
+    --purple-700: #553C9A;
+    --card: #161719;
+    --track: #26272A;
+    --tick: #55565B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative;
+    background: var(--panel);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    position: absolute; top: 56px; left: 64px; right: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  header svg { height: 34px; width: auto; display: block; }
+  .url { font-size: 19px; font-weight: 500; color: var(--muted); }
+
+  h1 {
+    position: absolute; top: 128px; left: 64px; width: 1080px;
+    font-size: 84px; line-height: 1.02; font-weight: 700; letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .points {
+    position: absolute; left: 64px; bottom: 136px;
+    font-size: 24px; line-height: 1.35; color: var(--muted); list-style: none;
+  }
+
+  /* A slice of the player: loop pills, speed, and the timeline with a loop. */
+  .card {
+    position: absolute; right: 64px; bottom: 48px; width: 540px;
+    background: var(--card); border-radius: 36px; padding: 26px 28px 20px;
+    color: #fff;
+  }
+  .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+  .pills { display: flex; gap: 10px; }
+  .pill {
+    height: 34px; padding: 0 22px; border-radius: 999px;
+    display: flex; align-items: center; font-size: 15px; font-weight: 500;
+  }
+  .pill.outline { border: 1.5px solid var(--purple-300); color: #E9DDFC; }
+  .pill.filled { background: var(--purple-700); }
+  .speed {
+    height: 38px; display: flex; align-items: stretch;
+    border: 1px solid #3A3B40; border-radius: 999px; background: #202124; overflow: hidden;
+  }
+  .speed > div { display: flex; align-items: center; justify-content: center; }
+  .speed .step { width: 48px; }
+  .speed .rate { width: 80px; gap: 8px; font-size: 15px; font-weight: 600; border-left: 1px solid #3A3B40; border-right: 1px solid #3A3B40; }
+  .speed svg { display: block; }
+
+  .timeline { position: relative; height: 84px; background: var(--track); border-radius: 10px; overflow: hidden; }
+  .ticks { position: absolute; inset: 0; }
+  .loop { position: absolute; top: 0; bottom: 0; left: 50%; width: 30%; background: var(--purple-300); }
+  .edge { position: absolute; top: 0; bottom: 0; width: 3px; background: var(--purple-700); }
+  .grip {
+    position: absolute; top: 50%; width: 16px; height: 28px; margin: -14px 0 0 -8px;
+    background: #fff; border: 2.5px solid var(--purple-700); border-radius: 6px;
+  }
+  .playhead { position: absolute; top: 0; bottom: 0; left: 28%; width: 2px; background: #fff; }
+  .times { position: relative; height: 22px; margin-top: 8px; font-size: 13px; font-weight: 600; color: #A1A1AA; font-variant-numeric: tabular-nums; }
+  .times span { position: absolute; transform: translateX(-50%); }
+</style>
+</head>
+<body>
+  <header>
+    {{WORDMARK}}
+    <span class="url">melodicus.xyz</span>
+  </header>
+
+  <h1>Learn the songs &amp; licks you love</h1>
+
+  <ul class="points">
+    <li>Any song on YouTube.</li>
+    <li>Unlimited loops.</li>
+    <li>Slow down the hard parts.</li>
+  </ul>
+
+  <div class="card">
+    <div class="row">
+      <div class="pills">
+        <div class="pill outline">melody 1</div>
+        <div class="pill filled">chorus 5</div>
+      </div>
+      <div class="speed">
+        <div class="step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <div class="rate">1x <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7h10M7 2v10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+      </div>
+    </div>
+    <div class="timeline">
+      <svg class="ticks" width="100%" height="100%" id="ticks"></svg>
+      <div class="loop"></div>
+      <svg class="ticks" width="100%" height="100%" id="ticks-over"></svg>
+      <div class="edge" style="left: calc(50% - 1.5px)"></div>
+      <div class="edge" style="left: calc(80% - 1.5px)"></div>
+      <div class="grip" style="left: 50%"></div>
+      <div class="grip" style="left: 80%"></div>
+      <div class="playhead"></div>
+    </div>
+    <div class="times"><span style="left: 50%">2:48</span><span style="left: 80%">3:12</span></div>
+  </div>
+
+  <script>
+    // Ruler ticks along the bottom of the track: a tall one every fifth.
+    const W = 484, H = 84, N = 20;
+    for (const [id, color] of [['ticks', '#55565B'], ['ticks-over', 'rgba(85, 60, 154, 0.45)']]) {
+      const svg = document.getElementById(id);
+      let d = '';
+      for (let i = 1; i < N; i++) {
+        const x = (W / N) * i;
+        if (id === 'ticks-over' && (x < W * 0.5 + 4 || x > W * 0.8 - 4)) continue;
+        const h = i % 5 === 0 ? 24 : 12;
+        d += `M${x} ${H - 8}V${H - 8 - h}`;
+      }
+      svg.innerHTML = `<path d="${d}" stroke="${color}" stroke-width="2" stroke-linecap="round"/>`;
+    }
+  </script>
+</body>
+</html>
