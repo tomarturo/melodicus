@@ -165,7 +165,7 @@ const HowItWorks = () => (
   <Box as="section" aria-labelledby="how-it-works">
     <Stack spacing={2} textAlign="center" mb={7}>
       <Heading id="how-it-works" as="h2" size="lg" color="fg.strong" sx={{ textWrap: 'balance' }}>
-        Learn hard songs one part at a time
+        Tackle hard songs one part at a time
       </Heading>
       <Text color="fg.muted" fontSize="lg">
         Loop each tricky part, slow it down until it’s clean, then play the whole thing through.

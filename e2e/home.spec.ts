@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 
 test('a new visitor sees how it works, the demo and what they get', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Learn hard songs one part at a time' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tackle hard songs one part at a time' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'What you get' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Pick up where you left off' })).toHaveCount(0);
 
