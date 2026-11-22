@@ -494,28 +494,58 @@ const WhatYouGet = () => (
 );
 
 /** The page's last word: back up to the search, ready to type. */
+/**
+ * A repeat sign, as in sheet music: a thick bar, a thin bar and two dots
+ * facing the music to repeat. The logomark's dots and bar, drawn the same
+ * way (124 units tall, bars from 25 to 99.6, dots of 6 at 44.7 and 79.7).
+ * The end sign is the start sign mirrored.
+ */
+const RepeatSign = ({ end = false }: { end?: boolean }) => (
+  <Box
+    as="svg"
+    viewBox="0 0 48 124"
+    h={{ base: '72px', md: '128px' }}
+    w="auto"
+    flexShrink={0}
+    color="purple.300"
+    fill="currentColor"
+    transform={end ? 'scaleX(-1)' : undefined}
+    aria-hidden
+  >
+    <rect x="4" y="25" width="10" height="74.6" />
+    <rect x="20" y="25" width="4" height="74.6" />
+    <circle cx="36" cy="44.7" r="6" />
+    <circle cx="36" cy="79.7" r="6" />
+  </Box>
+);
+
+/** The page's last word: back up to the search, ready to type, between repeat signs. */
 const FindYourSong = ({ onFindSong }: { onFindSong: () => void }) => (
-  <Stack
+  <Flex
     as="section"
     aria-labelledby="find-your-song"
     align="center"
-    spacing={6}
-    textAlign="center"
+    justify="center"
+    gap={{ base: 3, sm: 6, md: 12 }}
     {...DARK_BAND}
     py={{ base: 10, md: 14 }}
   >
-    <Heading id="find-your-song" as="h2" size="xl" color="white" sx={{ textWrap: 'balance' }}>
-      What do you want to learn first?
-    </Heading>
-    <Button
-      variant="loudInverse"
-      size="lg"
-      leftIcon={<Icon as={MagnifyingGlass} weight="bold" boxSize="18px" />}
-      onClick={onFindSong}
-    >
-      Find your song
-    </Button>
-  </Stack>
+    <RepeatSign />
+    <Stack align="center" spacing={6} textAlign="center" minW="0">
+      <Heading id="find-your-song" as="h2" size="xl" color="white" sx={{ textWrap: 'balance' }}>
+        What do you want to learn first?
+      </Heading>
+      <Button
+        variant="loudInverse"
+        size="lg"
+        leftIcon={<Icon as={MagnifyingGlass} weight="bold" boxSize="18px" />}
+        onClick={onFindSong}
+      >
+        Find your song
+      </Button>
+    </Stack>
+    <RepeatSign end />
+  </Flex>
 );
 
 const HomeStory = ({ onFindSong }: { onFindSong: () => void }) => (
