@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawableSections, tickIntervals, orderedLoops, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
+import { drawableSections, tickIntervals, tickPath, orderedLoops, followScrollLeft, isHorizontalWheel, pixelsPerSecond } from './timelineLogic';
 
 const section = (id: string, start_time: number, end_time: number) => ({ id, name: null, start_time, end_time });
 
@@ -68,5 +68,17 @@ describe('tickIntervals', () => {
   it('matches the ruler: 5s ticks and 30s labels fitted, 1s and 10s zoomed in', () => {
     expect(tickIntervals(5.5)).toEqual({ tick: 5, secondary: 10, primary: 30 });
     expect(tickIntervals(44)).toEqual({ tick: 1, secondary: 5, primary: 10 });
+  });
+});
+
+describe('tickPath', () => {
+  it('draws the midline and a line per tick, taller on the labelled times', () => {
+    // 100px for 20s is 5px a second: a tick every 5s, labels every 10s and 30s.
+    expect(tickPath({ widthPx: 100, heightPx: 40, from: 0, to: 20 })).toBe('M0 20.5H100M25.5 16V24M50.5 12V28M75.5 16V24');
+  });
+
+  it('places ticks on whole times when the stretch starts mid-song', () => {
+    // 2:10 to 2:30 at the same scale: the ticks land on 2:15, 2:20 and 2:25.
+    expect(tickPath({ widthPx: 100, heightPx: 40, from: 130, to: 150 })).toBe('M0 20.5H100M25.5 16V24M50.5 12V28M75.5 16V24');
   });
 });

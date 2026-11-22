@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type KeyboardEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getYoutubeID from 'get-youtube-id';
 import { ArrowForwardIcon, SearchIcon } from '@chakra-ui/icons';
@@ -6,6 +6,9 @@ import { Icon, IconButton, Container, Heading, Text, Input, InputGroup, InputRig
 import { ArrowUpRight } from '@phosphor-icons/react';
 import { searchPath } from './lib/youtube';
 import HintRow from './components/HintRow';
+import HomeStory from './features/home/HomeStory';
+import RecentSongs from './features/home/RecentSongs';
+import { useSavedSongsQuery } from './features/sections/queries';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -17,6 +20,20 @@ const HomePage = () => {
   const [isSearchValid, setIsSearchValid] = useState(true);
   const [searchErrorMessage, setSearchErrorMessage] = useState('');
   const [hasSearchSubmitAttempt, setHasSearchSubmitAttempt] = useState(false);
+  const [tabIndex, setTabIndex] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // The call to action at the bottom: back up to the song search, ready to type.
+  const goToSearch = () => {
+    setTabIndex(0);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    panelRef.current?.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    // After the tab switch renders; the panel does the scrolling, not the focus.
+    requestAnimationFrame(() => searchInputRef.current?.focus({ preventScroll: true }));
+  };
+  const savedSongs = useSavedSongsQuery();
+  const songs = savedSongs.data ?? [];
 
   // YouTube URL validation function
   const validateYouTubeUrl = (url: string) => {
@@ -109,14 +126,16 @@ const HomePage = () => {
 
   return (
     <>
-      <Flex direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} minH="0" overflowY="auto" overscrollBehavior="contain">
+      <Flex ref={panelRef} direction="column" flex="1" pt='12' bg='bg.panel' borderRadius={['none', 'none', 'xl']} minH="0" overflowY="auto" overscrollBehavior="contain">
         <Container maxW='3xl'>
           <VStack>
             <Flex mb='12' gap={8} direction={'column'}>
               <Heading as='h1' size='3xl' color='fg.strong' textAlign="center">Learn the songs & licks you love</Heading>
-              <Text fontSize='xl' color='fg.default' align="center">Uninterrupted loops. Controlled playback. Zero distractions.</Text>
+              <Text fontSize='xl' color='fg.default' align="center">Any song on YouTube. Unlimited loops. Slow down the hard parts.</Text>
             </Flex>
             <Tabs
+              index={tabIndex}
+              onChange={setTabIndex}
               w='100%'
               align='center'
               isFitted maxW='2xl'>
@@ -141,6 +160,7 @@ const HomePage = () => {
                 <TabPanel px='0'>
                   <InputGroup size='md' mb='2'>
                     <Input
+                      ref={searchInputRef}
                       rounded='full'
                       variant='filled'
                       bg="bg.muted"
@@ -238,6 +258,13 @@ const HomePage = () => {
             </Tabs>
           </VStack>
         </Container>
+        {/* Below the search: someone's recent songs once they have some, the
+            product story until then. Nothing while that's still unknown. */}
+        {!savedSongs.isPending && (
+          <Container maxW="5xl" mt={{ base: 12, md: 16 }} pb={{ base: 14, md: 20 }}>
+            {songs.length > 0 ? <RecentSongs songs={songs} /> : <HomeStory onFindSong={goToSearch} />}
+          </Container>
+        )}
       </Flex>
     </>
   );

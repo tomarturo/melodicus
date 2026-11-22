@@ -66,10 +66,15 @@ const semanticTokens = {
  * row under the timeline, md in dialogs.
  *   loud:  black fill. The action answering what the person just did (Save
  *          loop, Update), and the Share button over the video.
+ *   loudInverse: loud for dark surfaces, an off-white fill with ink text.
+ *          The demo card's button on the homepage.
  *   pill:  soft fill. Standing controls and dialog actions.
  *   quiet: hairline outline. Secondary choices beside a louder one (Cancel).
  * Hover thickens the outline with a 1px shadow rather than a wider border, so
  * nothing shifts.
+ *
+ * Sizes are Chakra's, except lg: the homepage's big calls to action (Open the
+ * demo, Find your song), 52px tall.
  */
 // The hover edge is the darkest text color, border and ring alike, so it
 // reads as one 2px line. Chakra has no boxShadowColor prop, so the color is
@@ -84,6 +89,9 @@ const components = {
     },
   },
   Button: {
+    sizes: {
+      lg: { h: '52px', minW: '52px', px: 8, fontSize: 'md' },
+    },
     variants: {
       loud: {
         rounded: 'full',
@@ -97,6 +105,19 @@ const components = {
           _disabled: { bg: 'ink', borderColor: 'ink' },
         },
         _active: { bg: 'ink.active', borderColor: 'ink.active' },
+      },
+      loudInverse: {
+        rounded: 'full',
+        bg: 'bg.panel',
+        border: '1px',
+        borderColor: 'bg.panel',
+        color: 'ink',
+        _hover: {
+          bg: 'white',
+          borderColor: 'white',
+          _disabled: { bg: 'bg.panel', borderColor: 'bg.panel' },
+        },
+        _active: { bg: 'whiteAlpha.800', borderColor: 'whiteAlpha.800' },
       },
       pill: {
         rounded: 'full',

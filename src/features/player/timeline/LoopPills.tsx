@@ -1,9 +1,24 @@
 import { useMemo } from 'react';
-import { Flex, Icon, Menu, MenuButton, MenuItem, MenuList, Portal } from '@chakra-ui/react';
+import { Flex, Icon, Menu, MenuButton, MenuItem, MenuList, Portal, type SystemStyleObject } from '@chakra-ui/react';
 import { CaretDown, PencilSimpleLine, Trash } from '@phosphor-icons/react';
 import { formatSecondsToDuration } from '../../../utils/formatTime';
 import type { Section } from '../../sections/types';
 import { orderedLoops } from './timelineLogic';
+
+/**
+ * A loop pill's look, picked or not. Shared with the homepage's pictures of
+ * the player, so they show the same pills.
+ */
+export const loopPillStyle = (active: boolean): SystemStyleObject => ({
+  h: '30px',
+  borderRadius: 'full',
+  bg: active ? 'purple.700' : 'purple.50',
+  color: active ? 'bg.panel' : 'purple.800',
+  borderWidth: '1px',
+  borderColor: active ? 'purple.700' : 'purple.200',
+  fontSize: 'xs',
+  whiteSpace: 'nowrap',
+});
 
 interface LoopPillsProps {
   sections: Section[];
@@ -42,14 +57,7 @@ const LoopPills = ({
             as="li"
             key={section.id}
             align="center"
-            h="30px"
-            borderRadius="full"
-            bg={active ? 'purple.700' : 'purple.50'}
-            color={active ? 'bg.panel' : 'purple.800'}
-            borderWidth="1px"
-            borderColor={active ? 'purple.700' : 'purple.200'}
-            fontSize="xs"
-            whiteSpace="nowrap"
+            sx={loopPillStyle(active)}
             onMouseEnter={() => onHighlight(section.id)}
             onMouseLeave={() => onHighlight(null)}
           >
