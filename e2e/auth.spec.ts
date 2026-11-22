@@ -69,7 +69,8 @@ test('logs in with an emailed code: email, then the code, then signed in', async
 
   await expect.poll(() => sent.verify).toEqual([expect.objectContaining({ email: EMAIL, token: '123456', type: 'email' })]);
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Log out' })).toBeAttached();
+  // Signed in: the sidebar no longer offers Log in.
+  await expect(page.getByRole('button', { name: 'Log in' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Build your repertoire.' })).toHaveCount(0);
 });
 
