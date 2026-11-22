@@ -28,9 +28,20 @@ const LOOP_FILL = 'rgba(128, 90, 213, 0.28)';
 const DEMO_PILLS = 3;
 
 /** A loop name as it looks above the timeline. */
-const LoopPill = ({ children, active, onDark }: { children: ReactNode; active?: boolean; onDark?: boolean }) => (
+const LoopPill = ({
+  children,
+  active,
+  onDark,
+  display = 'flex',
+}: {
+  children: ReactNode;
+  active?: boolean;
+  onDark?: boolean;
+  display?: string | Record<string, string>;
+}) => (
   <Flex
     as="li"
+    display={display}
     align="center"
     h="26px"
     px={3}
@@ -304,15 +315,29 @@ const SOLO_SECTIONS = DEMO_LOOPS.filter((loop) => loop.name?.startsWith('Solo se
 // The part shown as picked, with its grips and the playhead inside it.
 const PICKED = SOLO_SECTIONS[1];
 
+// Loop names under the track, kept to two rows: fewer on phones.
+const PILLS_SHOWN = { base: 3, md: 5 } as const;
+
+const MorePill = ({ count, display }: { count: number; display: Record<string, string> }) => (
+  <Flex as="li" display={display} align="center" h="26px" px={1} fontSize="13px" color="fg.muted">
+    +{count} more
+  </Flex>
+);
+
+const PartsPills = () => (
+  <Flex as="ul" listStyleType="none" wrap="wrap" gap={1.5}>
+    {DEMO_LOOPS.slice(0, PILLS_SHOWN.md).map((loop, index) => (
+      <LoopPill key={loop.name} active={loop === PICKED} display={index < PILLS_SHOWN.base ? 'flex' : { base: 'none', md: 'flex' }}>
+        {loop.name}
+      </LoopPill>
+    ))}
+    <MorePill count={DEMO_LOOPS.length - PILLS_SHOWN.base} display={{ base: 'flex', md: 'none' }} />
+    <MorePill count={DEMO_LOOPS.length - PILLS_SHOWN.md} display={{ base: 'none', md: 'flex' }} />
+  </Flex>
+);
+
 const PartsPicture = () => (
   <Stack spacing={4} aria-hidden>
-    <Flex as="ul" listStyleType="none" wrap="wrap" gap={1.5}>
-      {DEMO_LOOPS.map((loop) => (
-        <LoopPill key={loop.name} active={loop === PICKED}>
-          {loop.name}
-        </LoopPill>
-      ))}
-    </Flex>
     <Box>
       <Box position="relative" h={{ base: "64px", xl: "112px" }} borderRadius="lg" bg="bg.muted" overflow="hidden">
         {SOLO_SECTIONS.map((loop) => {
@@ -360,6 +385,7 @@ const PartsPicture = () => (
         </Box>
       )}
     </Box>
+    <PartsPills />
   </Stack>
 );
 
