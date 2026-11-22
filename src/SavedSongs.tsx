@@ -14,9 +14,10 @@ import {
   Portal,
   Stack,
   Text,
+  useBreakpointValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import { DotsThree, Trash } from '@phosphor-icons/react';
+import { DotsThree, MusicNotes, Trash } from '@phosphor-icons/react';
 import { useAuth } from './contexts/AuthContext';
 import { errorCause, errorMessage } from './lib/errors';
 import { useNotify } from './lib/notify';
@@ -35,48 +36,100 @@ const formatSavedDate = (iso: string) =>
 
 const countLabel = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
-/**
- * A small picture of the timeline: the track, the part played, and a loop with
- * its grips. The app's own visual language, as the banner's mark.
- */
-const LoopGlyph = () => (
-  <Box as="svg" viewBox="0 0 88 40" w="88px" h="40px" flexShrink={0} aria-hidden>
-    <rect x="0" y="6" width="88" height="28" rx="6" fill="#EBEAE7" />
-    <path d="M6 6h22v28H6a6 6 0 0 1-6-6V12a6 6 0 0 1 6-6z" fill="#D2D1CE" />
-    <rect x="28" y="6" width="34" height="28" fill="rgba(128, 90, 213, 0.28)" />
-    <rect x="28" y="6" width="2" height="28" fill="#553C9A" />
-    <rect x="60" y="6" width="2" height="28" fill="#553C9A" />
-    <rect x="25" y="14" width="8" height="12" rx="3" fill="#FFFFFF" stroke="#553C9A" strokeWidth="1.5" />
-    <rect x="57" y="14" width="8" height="12" rx="3" fill="#FFFFFF" stroke="#553C9A" strokeWidth="1.5" />
-  </Box>
-);
+// The repertoire grid: one tile per song, filled for the songs saved so far.
+// Fewer tiles where the banner is narrower: a row of three on phones, a 2x2
+// beside the text on tablets, 3x2 from laptops up.
+const REPERTOIRE_GRID = {
+  base: { columns: 3, tiles: 3 },
+  md: { columns: 2, tiles: 4 },
+  lg: { columns: 3, tiles: 6 },
+} as const;
 
-/** For guests: their songs live in this browser only until they log in. */
-const TemporarilySavedBanner = ({ onLogIn }: { onLogIn: () => void }) => (
+const RepertoireTile = ({ filled }: { filled: boolean }) => (
   <Flex
     align="center"
-    gap={4}
-    wrap={{ base: 'wrap', sm: 'nowrap' }}
-    p={4}
-    bg="bg.surface"
-    border="1px"
-    borderColor="border.default"
-    borderRadius="xl"
+    justify="center"
+    boxSize="48px"
+    borderRadius="lg"
+    {...(filled
+      ? { bg: 'purple.700', color: 'white' }
+      : { border: '2px dashed', borderColor: 'purple.200', color: 'purple.300' })}
   >
-    <LoopGlyph />
-    <Box flex="1" minW="200px">
-      <Text fontWeight="semibold" color="fg.strong">
-        Temporarily saved
-      </Text>
-      <Text fontSize="sm" color="fg.muted">
-        Log in to keep your songs and loops in your account.
-      </Text>
-    </Box>
-    <Button variant="loud" size="sm" onClick={onLogIn} flexShrink={0}>
-      Log in
-    </Button>
+    <Icon as={MusicNotes} boxSize="24px" />
   </Flex>
 );
+
+/**
+ * For guests: a grid that starts to fill as songs are saved, and the way to
+ * keep them. Their songs live only in this browser until they have an account.
+ */
+const RepertoireBanner = ({
+  songCount,
+  onCreateAccount,
+  onLogIn,
+}: {
+  songCount: number;
+  onCreateAccount: () => void;
+  onLogIn: () => void;
+}) => {
+  const grid = useBreakpointValue(REPERTOIRE_GRID) ?? REPERTOIRE_GRID.base;
+  // Always leave at least one empty tile: there's room for more.
+  const filled = Math.min(songCount, grid.tiles - 1);
+  return (
+    <Flex
+      // A centered column on phones; side by side from tablets up.
+      direction={{ base: 'column', md: 'row' }}
+      align="center"
+      textAlign={{ base: 'center', md: 'left' }}
+      gap={{ base: 5, md: 6, lg: 8 }}
+      p={{ base: 5, md: 6, lg: 8 }}
+      bg="bg.surface"
+      border="1px"
+      borderColor="border.default"
+      borderRadius="2xl"
+    >
+      <Box
+        display="grid"
+        gridTemplateColumns={`repeat(${grid.columns}, 48px)`}
+        gap={2}
+        flexShrink={0}
+        aria-hidden
+      >
+        {Array.from({ length: grid.tiles }, (_, index) => (
+          <RepertoireTile key={index} filled={index < filled} />
+        ))}
+      </Box>
+      <Box flex="1" minW="0">
+        <Heading as="h2" size="md" color="fg.strong" mb={1}>
+          Build your repertoire.
+        </Heading>
+        <Text color="fg.muted">Create a free account to save your songs and loops.</Text>
+      </Box>
+      {/* One line on phones; stacked beside the text from tablets up. */}
+      <Stack
+        direction={{ base: 'row', md: 'column' }}
+        spacing={{ base: 5, md: 3 }}
+        align="center"
+        justify="center"
+        flexShrink={0}
+      >
+        <Button variant="loud" size="md" px={6} onClick={onCreateAccount}>
+          Create account
+        </Button>
+        <Button
+          variant="link"
+          color="fg.strong"
+          fontWeight="semibold"
+          textDecoration="underline"
+          textUnderlineOffset="3px"
+          onClick={onLogIn}
+        >
+          Log in
+        </Button>
+      </Stack>
+    </Flex>
+  );
+};
 
 /** A song's loops by name, as small pills like the ones above the timeline. */
 const LoopChips = ({ loops }: { loops: SavedSongWithLoops['loops'] }) => {
@@ -145,6 +198,11 @@ const SavedSongs = () => {
   const { user } = useAuth();
   const notify = useNotify();
   const authDialog = useDisclosure();
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
+  const openAuth = (mode: 'login' | 'signup') => {
+    setAuthMode(mode);
+    authDialog.onOpen();
+  };
   const songsQuery = useSavedSongsQuery();
   const deleteSong = useDeleteSavedSong();
 
@@ -221,7 +279,7 @@ const SavedSongs = () => {
 
   return (
     <Flex direction="column" flex="1" bg="bg.panel" borderRadius={['none', 'none', 'xl']} minH="0" overflowY="auto" overscrollBehavior="contain">
-      <Container w="100%" pt={{ base: 6, md: 12 }} pb="8">
+      <Container w="100%" maxW="3xl" pt={{ base: 6, md: 12 }} pb="8">
         <Stack spacing={6}>
           <Flex align="baseline" justify="space-between" gap={4}>
             <Heading as="h1" size="lg">
@@ -233,11 +291,17 @@ const SavedSongs = () => {
               </Text>
             )}
           </Flex>
-          {!user && <TemporarilySavedBanner onLogIn={authDialog.onOpen} />}
+          {!user && (
+            <RepertoireBanner
+              songCount={songs.length}
+              onCreateAccount={() => openAuth('signup')}
+              onLogIn={() => openAuth('login')}
+            />
+          )}
           {content}
         </Stack>
       </Container>
-      <AuthModal isOpen={authDialog.isOpen} onClose={authDialog.onClose} />
+      <AuthModal isOpen={authDialog.isOpen} onClose={authDialog.onClose} initialMode={authMode} />
     </Flex>
   );
 };
