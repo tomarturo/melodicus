@@ -13,6 +13,7 @@ import {
   Repeat,
   UserCircleDashed,
 } from '@phosphor-icons/react';
+import { loopPillStyle } from '../player/timeline/LoopPills';
 import { DEMO_LOOPS, DEMO_VIDEO_ID, demoPath } from './demo';
 
 /**
@@ -25,33 +26,17 @@ const LOOP_FILL = 'rgba(128, 90, 213, 0.28)';
 // How many of the demo's loop names to show before summing up the rest.
 const DEMO_PILLS = 3;
 
-/** A loop name as it looks above the timeline. */
+/** A loop name as it looks above the timeline, drawn with the player's own pill style. */
 const LoopPill = ({
   children,
-  active,
-  onDark,
+  active = false,
   display = 'flex',
 }: {
   children: ReactNode;
   active?: boolean;
-  onDark?: boolean;
   display?: string | Record<string, string>;
 }) => (
-  <Flex
-    as="li"
-    display={display}
-    align="center"
-    h="26px"
-    px={3}
-    borderRadius="full"
-    fontSize="13px"
-    fontWeight="medium"
-    whiteSpace="nowrap"
-    border="1.5px solid"
-    borderColor={active ? 'purple.700' : 'purple.300'}
-    bg={active ? 'purple.700' : onDark ? 'transparent' : 'bg.surface'}
-    color={active ? 'white' : onDark ? 'purple.100' : 'purple.700'}
-  >
+  <Flex as="li" display={display} align="center" px={3} fontWeight="medium" sx={loopPillStyle(active)}>
     {children}
   </Flex>
 );
@@ -201,6 +186,14 @@ const HowItWorks = () => (
   </Box>
 );
 
+/** The homepage's dark bands: the demo and the closing call to action share one look. */
+const DARK_BAND = {
+  bg: 'ink',
+  color: 'chrome.fg',
+  borderRadius: '2xl',
+  p: { base: 6, md: 8 },
+} as const;
+
 const DemoSong = () => {
   const shown = DEMO_LOOPS.slice(0, DEMO_PILLS);
   const rest = DEMO_LOOPS.length - shown.length;
@@ -211,10 +204,7 @@ const DemoSong = () => {
       templateColumns={{ base: 'minmax(0, 1fr)', md: 'minmax(0, 1.1fr) minmax(0, 1fr)' }}
       gap={7}
       alignItems="center"
-      bg="ink"
-      color="chrome.fg"
-      borderRadius="2xl"
-      p={{ base: 6, md: 8 }}
+      {...DARK_BAND}
     >
       <Box>
         <Heading id="demo-song" as="h2" size="lg" color="white" mb={2.5}>
@@ -228,14 +218,8 @@ const DemoSong = () => {
         <Button
           as={RouterLink}
           to={demoPath()}
+          variant="loudInverse"
           size="lg"
-          h="44px"
-          fontSize="md"
-          borderRadius="full"
-          bg="bg.panel"
-          color="ink"
-          _hover={{ bg: 'white' }}
-          _active={{ bg: 'whiteAlpha.800' }}
           rightIcon={<Icon as={ArrowRight} weight="bold" boxSize="16px" />}
         >
           Open the demo
@@ -253,7 +237,7 @@ const DemoSong = () => {
         {shown.length > 0 && (
           <Flex as="ul" listStyleType="none" wrap="wrap" gap={1.5} align="center">
             {shown.map((loop, index) => (
-              <LoopPill key={loop.name} active={index === 0} onDark>
+              <LoopPill key={loop.name} active={index === 0}>
                 {loop.name}
               </LoopPill>
             ))}
@@ -446,16 +430,21 @@ const WhatYouGet = () => (
 
 /** The page's last word: back up to the search, ready to type. */
 const FindYourSong = ({ onFindSong }: { onFindSong: () => void }) => (
-  <Stack as="section" aria-labelledby="find-your-song" align="center" spacing={6} textAlign="center" py={{ base: 4, md: 8 }}>
-    <Heading id="find-your-song" as="h2" size="xl" color="fg.strong" sx={{ textWrap: 'balance' }}>
+  <Stack
+    as="section"
+    aria-labelledby="find-your-song"
+    align="center"
+    spacing={6}
+    textAlign="center"
+    {...DARK_BAND}
+    py={{ base: 10, md: 14 }}
+  >
+    <Heading id="find-your-song" as="h2" size="xl" color="white" sx={{ textWrap: 'balance' }}>
       What do you want to learn first?
     </Heading>
     <Button
-      variant="loud"
+      variant="loudInverse"
       size="lg"
-      h="52px"
-      px={8}
-      fontSize="md"
       leftIcon={<Icon as={MagnifyingGlass} weight="bold" boxSize="18px" />}
       onClick={onFindSong}
     >

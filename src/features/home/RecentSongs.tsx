@@ -1,6 +1,7 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Flex, Heading, Image, Link, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { SongPill } from '../songs/SongListRow';
+import { HOVER_EDGE, HOVER_RING } from '../../theme';
 import type { SavedSongWithLoops } from '../sections/types';
 
 /** Shown in place of the product story once someone has saved songs. */
@@ -28,8 +29,8 @@ const SongCard = ({ song }: { song: SavedSongWithLoops }) => {
       borderColor="border.subtle"
       borderRadius="xl"
       transition="box-shadow .15s, border-color .15s"
-      _hover={{ borderColor: 'fg.strong', boxShadow: '0 0 0 1px var(--chakra-colors-fg-strong)' }}
-      _focusVisible={{ outline: 'none', borderColor: 'fg.strong', boxShadow: '0 0 0 1px var(--chakra-colors-fg-strong)' }}
+      _hover={{ borderColor: HOVER_EDGE, boxShadow: HOVER_RING }}
+      _focusVisible={{ outline: 'none', borderColor: HOVER_EDGE, boxShadow: HOVER_RING }}
     >
       <Image
         src={`https://img.youtube.com/vi/${song.videoId}/mqdefault.jpg`}
