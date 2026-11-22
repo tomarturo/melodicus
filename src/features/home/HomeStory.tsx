@@ -192,7 +192,7 @@ const HowItWorks = () => (
         Tackle hard songs one part at a time
       </Heading>
       <Text color="fg.muted" fontSize="lg">
-        Loop each tricky part, slow it down until it’s clean, then play the whole thing through.
+        Loop each challenging part. Slow it down to learn it. Then play through the entire thing.
       </Text>
     </Stack>
     {/* Each step is one tile: its picture, then its number, title and copy. */}
