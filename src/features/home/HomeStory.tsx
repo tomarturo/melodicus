@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ElementType, ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Button, Flex, Grid, GridItem, Heading, Icon, Image, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import {
@@ -9,8 +9,9 @@ import {
   Plus,
   ShareFat,
   CaretDown,
+  DeviceMobile,
+  UserCircleDashed,
 } from '@phosphor-icons/react';
-import { SongPill } from '../songs/SongListRow';
 import { DEMO_LOOPS, DEMO_VIDEO_ID, demoPath } from './demo';
 
 /**
@@ -258,147 +259,60 @@ const DemoSong = () => {
 
 // ---------------------------------------------------------------- What you get
 
-/** A tile in the bento: a picture, a hairline, then a title and a line of copy. */
-const FeatureTile = ({ title, body, picture, wide }: { title: string; body: string; picture: ReactNode; wide?: boolean }) => (
-  <GridItem
-    as="li"
-    colSpan={{ base: 1, md: wide ? 2 : 1 }}
-    display="flex"
-    flexDirection="column"
-    bg="bg.surface"
-    border="1px"
-    borderColor="border.subtle"
-    borderRadius="xl"
-    overflow="hidden"
-  >
-    <Stage>{picture}</Stage>
-    <Stack spacing={1.5} p={5}>
-      <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg.strong">
-        {title}
-      </Heading>
-      <Text color="fg.muted" fontSize="15px" lineHeight="1.5">
-        {body}
-      </Text>
-    </Stack>
-  </GridItem>
-);
+const FEATURES: Array<{ icon: ElementType; title: string; body: string; wide?: boolean }> = [
+  {
+    icon: MusicNotes,
+    title: 'Keep track of every part',
+    body: 'Every loop is named and saved with its song, so your parts are there next time.',
+    wide: true,
+  },
+  { icon: ShareFat, title: 'Share your loops', body: 'Send a link and your teacher or bandmate gets the same loops.' },
+  { icon: DeviceMobile, title: 'Works on your phone', body: 'Prop it on the music stand. The controls are sized for thumbs.' },
+  {
+    icon: UserCircleDashed,
+    title: 'No account needed',
+    body: 'Everything works right away. Log in when you want to keep your songs.',
+    wide: true,
+  },
+];
 
-/** A song as My songs lists it: the demo, with its parts. */
-const SavedSongPicture = () => {
-  const shown = DEMO_LOOPS.slice(0, 3);
-  const rest = DEMO_LOOPS.length - shown.length;
-  return (
-    <Flex w="100%" maxW="460px" gap={4} align="center">
-      {/* A background, so a thumbnail that can't load leaves a plain tile. */}
-      <Box
-        w={{ base: '96px', sm: '150px' }}
-        flexShrink={0}
-        aspectRatio={16 / 9}
-        borderRadius="lg"
-        bg="bg.muted"
-        bgImage={`url(https://img.youtube.com/vi/${DEMO_VIDEO_ID}/mqdefault.jpg)`}
-        bgSize="cover"
-        bgPosition="center"
-      />
-      <Stack spacing={2} minW="0">
-        <Box>
-          <Text fontWeight="semibold" color="fg.strong" noOfLines={1}>
-            Kid Charlemagne
-          </Text>
-          <Text fontSize="sm" color="fg.muted">
-            {DEMO_LOOPS.length} loops · Steely Dan
-          </Text>
-        </Box>
-        <Flex as="ul" listStyleType="none" wrap="wrap" gap={1.5}>
-          {shown.map((loop) => (
-            <SongPill key={loop.name}>{loop.name}</SongPill>
-          ))}
-          {rest > 0 && (
-            <Flex as="li" align="center" h="24px" px={1} fontSize="xs" color="fg.muted">
-              +{rest} more
-            </Flex>
-          )}
-        </Flex>
-      </Stack>
-    </Flex>
-  );
-};
-
-/** The share dialog's link and its button. */
-const SharePicture = () => (
-  <Stack w="100%" spacing={3} align="center">
-    <Box w="100%" h="38px" lineHeight="38px" px={4} borderRadius="full" bg="bg.muted" fontFamily="mono" fontSize="xs" color="fg.default" noOfLines={1} wordBreak="break-all">
-      {`melodicus.xyz${demoPath()}`}
-    </Box>
-    <Flex h="32px" align="center" gap={2} px={4} borderRadius="full" bg="ink" color="white" fontSize="sm" fontWeight="semibold">
-      <Icon as={ShareFat} boxSize="14px" />
-      Copy link
-    </Flex>
-  </Stack>
-);
-
-/** A phone rising from the bottom of the tile, with the player on it. */
-const PhonePicture = () => (
-  <Box position="relative" w="132px" h="100%" alignSelf="flex-end" mb={-5}>
-    <Stack position="absolute" inset={0} top={1} spacing={2} p={2} pb={0} bg="ink" borderTopRadius="22px">
-      <Box mx="auto" w="34px" h="5px" borderRadius="full" bg="whiteAlpha.300" />
-      <Box h="56px" borderRadius="md" bg="whiteAlpha.200" />
-      <Box position="relative" h="26px" borderRadius="sm" bg="whiteAlpha.200" overflow="hidden">
-        <Box position="absolute" insetY={0} left="38%" w="34%" bg="purple.300" borderX="2px solid" borderColor="purple.700" />
-      </Box>
-      <Flex justify="space-between" align="center" px={1}>
-        <Box w="18px" h="18px" borderRadius="full" bg="whiteAlpha.300" />
-        <Box w="26px" h="26px" borderRadius="full" bg="white" />
-        <Box w="18px" h="18px" borderRadius="full" bg="whiteAlpha.300" />
-      </Flex>
-    </Stack>
-  </Box>
-);
-
-/** The repertoire grid guests see on My songs, starting to fill. */
-const GuestPicture = () => (
-  <Box display="grid" gridTemplateColumns={{ base: 'repeat(6, 36px)', sm: 'repeat(6, 44px)' }} gap={{ base: 1.5, sm: 2 }}>
-    {Array.from({ length: 6 }, (_, index) => {
-      const filled = index < 2;
-      return (
-        <Flex
-          key={index}
-          align="center"
-          justify="center"
-          boxSize={{ base: '36px', sm: '44px' }}
-          borderRadius="lg"
-          {...(filled
-            ? { bg: 'purple.700', color: 'white' }
-            : { border: '2px dashed', borderColor: 'purple.200', color: 'purple.300' })}
-        >
-          <Icon as={MusicNotes} boxSize={{ base: '18px', sm: '22px' }} />
-        </Flex>
-      );
-    })}
-  </Box>
-);
-
+/**
+ * A bento of white tiles, each an icon, a title and a line of copy. Wide then
+ * narrow, then narrow then wide, so the two rows don't match.
+ */
 const WhatYouGet = () => (
   <Box as="section" aria-labelledby="what-you-get">
-    <Heading id="what-you-get" as="h2" size="lg" color="fg.strong" mb={7}>
+    <Heading id="what-you-get" as="h2" size="lg" color="fg.strong" mb={6}>
       What you get
     </Heading>
-    {/* Wide, narrow; then narrow, wide, so the two rows don't match. */}
-    <Grid as="ul" listStyleType="none" templateColumns={{ base: 'minmax(0, 1fr)', md: 'repeat(3, minmax(0, 1fr))' }} gap={6}>
-      <FeatureTile
-        wide
-        title="Keep track of every part"
-        body="Every loop is named and saved with its song, so your parts are there next time."
-        picture={<SavedSongPicture />}
-      />
-      <FeatureTile title="Share your loops" body="Send a link and your teacher or bandmate gets the same loops." picture={<SharePicture />} />
-      <FeatureTile title="Works on your phone" body="Prop it on the music stand. The controls are sized for thumbs." picture={<PhonePicture />} />
-      <FeatureTile
-        wide
-        title="No account needed"
-        body="Everything works right away. Log in when you want to keep your songs."
-        picture={<GuestPicture />}
-      />
+    <Grid as="ul" listStyleType="none" templateColumns={{ base: 'minmax(0, 1fr)', md: 'repeat(3, minmax(0, 1fr))' }} gap={4}>
+      {FEATURES.map((feature) => (
+        <GridItem
+          as="li"
+          key={feature.title}
+          colSpan={{ base: 1, md: feature.wide ? 2 : 1 }}
+          display="flex"
+          flexDirection="column"
+          gap={4}
+          p={6}
+          bg="bg.surface"
+          border="1px"
+          borderColor="border.subtle"
+          borderRadius="xl"
+        >
+          <Flex boxSize="48px" align="center" justify="center" borderRadius="xl" bg="purple.50" color="purple.700" aria-hidden>
+            <Icon as={feature.icon} boxSize="28px" />
+          </Flex>
+          <Stack spacing={1.5}>
+            <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg.strong">
+              {feature.title}
+            </Heading>
+            <Text color="fg.muted" fontSize="15px" lineHeight="1.5" maxW="44ch">
+              {feature.body}
+            </Text>
+          </Stack>
+        </GridItem>
+      ))}
     </Grid>
   </Box>
 );
