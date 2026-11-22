@@ -115,7 +115,7 @@ const LoopPicture = () => (
   <Stack w="100%" spacing={3}>
     <Flex as="ul" listStyleType="none" gap={1.5}>
       <LoopPill>Full guitar solo</LoopPill>
-      <LoopPill active>Solo section 1</LoopPill>
+      <LoopPill active>Solo part 1</LoopPill>
     </Flex>
     <Box position="relative" h="56px" borderRadius="lg" bg="bg.muted" overflow="hidden">
       <Box position="absolute" insetY={0} left={0} w="32%" bg="bg.mutedHover" />
@@ -311,9 +311,9 @@ const at = (seconds: number) => `${((seconds - PARTS_FROM) / (PARTS_TO - PARTS_F
 const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
 const FULL_SOLO = DEMO_LOOPS[0];
-const SOLO_SECTIONS = DEMO_LOOPS.filter((loop) => loop.name?.startsWith('Solo section'));
+const SOLO_PARTS = DEMO_LOOPS.filter((loop) => loop.name?.startsWith('Solo part'));
 // The part shown as picked, with its grips and the playhead inside it.
-const PICKED = SOLO_SECTIONS[1];
+const PICKED = SOLO_PARTS[1];
 
 // Loop names under the track, kept to two rows: fewer on phones.
 const PILLS_SHOWN = { base: 3, md: 5 } as const;
@@ -340,7 +340,7 @@ const PartsPicture = () => (
   <Stack spacing={4} aria-hidden>
     <Box>
       <Box position="relative" h={{ base: "64px", xl: "112px" }} borderRadius="lg" bg="bg.muted" overflow="hidden">
-        {SOLO_SECTIONS.map((loop) => {
+        {SOLO_PARTS.map((loop) => {
           const picked = loop === PICKED;
           return (
             <Box
