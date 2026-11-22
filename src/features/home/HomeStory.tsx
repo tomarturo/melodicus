@@ -48,19 +48,9 @@ const LoopPill = ({ children, active, onDark }: { children: ReactNode; active?: 
 
 // ---------------------------------------------------------------- Pictures
 
+/** The picture at the top of a step's tile, inset on the panel's off-white. */
 const Stage = ({ children }: { children: ReactNode }) => (
-  <Flex
-    h="168px"
-    align="center"
-    justify="center"
-    p={5}
-    bg="bg.surface"
-    border="1px"
-    borderColor="border.subtle"
-    borderRadius="xl"
-    overflow="hidden"
-    aria-hidden
-  >
+  <Flex h="168px" align="center" justify="center" p={5} bg="bg.panel" borderRadius="lg" overflow="hidden" aria-hidden>
     {children}
   </Flex>
 );
@@ -171,23 +161,26 @@ const HowItWorks = () => (
         Loop each tricky part, slow it down until it’s clean, then play the whole thing through.
       </Text>
     </Stack>
-    <SimpleGrid as="ol" listStyleType="none" columns={{ base: 1, md: 3 }} spacing={5}>
+    {/* Each step is one tile: its picture, then its number, title and copy. */}
+    <SimpleGrid as="ol" listStyleType="none" columns={{ base: 1, md: 3 }} spacing={6}>
       {STEPS.map((step, index) => (
-        <Stack as="li" key={step.title} spacing={3.5}>
+        <Stack as="li" key={step.title} spacing={0} p={2} bg="bg.surface" border="1px" borderColor="border.subtle" borderRadius="xl">
           <Stage>{step.picture}</Stage>
-          <Flex as="h3" align="center" gap={2.5} fontSize="lg" fontWeight="semibold" color="fg.strong">
-            <Flex as="span" w="24px" h="24px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="ink" color="white" fontSize="13px" fontWeight="bold" lineHeight={1} aria-hidden>
-              {/* Trimmed to the digit's own height, so it centers in the circle
-                  (as in HintBadge); line-height 1 covers browsers without text-box. */}
-              <Box as="span" display="block" sx={{ textBox: 'trim-both cap alphabetic' }}>
-                {index + 1}
-              </Box>
+          <Stack spacing={2.5} px={3} pt={4} pb={3}>
+            <Flex as="h3" align="center" gap={2.5} fontSize="lg" fontWeight="semibold" color="fg.strong">
+              <Flex as="span" w="24px" h="24px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="ink" color="white" fontSize="13px" fontWeight="bold" lineHeight={1} aria-hidden>
+                {/* Trimmed to the digit's own height, so it centers in the circle
+                    (as in HintBadge); line-height 1 covers browsers without text-box. */}
+                <Box as="span" display="block" sx={{ textBox: 'trim-both cap alphabetic' }}>
+                  {index + 1}
+                </Box>
+              </Flex>
+              {step.title}
             </Flex>
-            {step.title}
-          </Flex>
-          <Text color="fg.muted" fontSize="15px" lineHeight="1.5">
-            {step.body}
-          </Text>
+            <Text color="fg.muted" fontSize="15px" lineHeight="1.5">
+              {step.body}
+            </Text>
+          </Stack>
         </Stack>
       ))}
     </SimpleGrid>
