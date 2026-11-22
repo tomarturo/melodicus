@@ -105,8 +105,15 @@ const RepertoireBanner = ({
         </Heading>
         <Text color="fg.muted">Create a free account to save your songs and loops.</Text>
       </Box>
-      <Stack spacing={3} align="center" flexShrink={0} w={{ base: '100%', md: 'auto' }}>
-        <Button variant="loud" size="md" px={6} w={{ base: '100%', md: 'auto' }} onClick={onCreateAccount}>
+      {/* One line on phones; stacked beside the text from tablets up. */}
+      <Stack
+        direction={{ base: 'row', md: 'column' }}
+        spacing={{ base: 5, md: 3 }}
+        align="center"
+        justify="center"
+        flexShrink={0}
+      >
+        <Button variant="loud" size="md" px={6} onClick={onCreateAccount}>
           Create account
         </Button>
         <Button
