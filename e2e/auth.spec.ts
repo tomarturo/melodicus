@@ -61,7 +61,7 @@ test('logs in with an emailed code: email, then the code, then signed in', async
 
   const codeStep = page.getByRole('dialog', { name: 'Check your email' });
   await expect(codeStep).toContainText(`We sent a code to ${EMAIL}`);
-  await expect(codeStep).toContainText('Not in your inbox? Check your spam folder or search for account@melodicus.xyz');
+  await expect(codeStep).toContainText('Not in your inbox? Check your spam folder or search for login@melodicus.xyz');
   // One box per digit. A code pasted or autofilled into the first box fills
   // them all, and the last digit logs in without pressing the button.
   const boxes = codeStep.getByRole('group', { name: 'Code' }).getByRole('textbox');

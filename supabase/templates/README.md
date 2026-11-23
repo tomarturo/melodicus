@@ -16,7 +16,7 @@ hour. Before launch:
    `melodicus.xyz` with it by adding the DNS records it gives you (SPF and
    DKIM, plus DMARC).
 2. **Authentication → SMTP Settings**: turn on custom SMTP and enter the
-   provider's details. Sender: `Melodicus <account@melodicus.xyz>`. The login
+   provider's details. Sender: `Melodicus <login@melodicus.xyz>`. The login
    dialog tells people to search for this address (`LOGIN_EMAIL_FROM` in
    `src/AuthModal.tsx`), so change both together.
 3. **Authentication → Rate Limits**: raise "emails sent per hour" to suit

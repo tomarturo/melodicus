@@ -55,7 +55,7 @@ const RESEND_AFTER_S = 60;
  * The address login codes come from: Supabase's SMTP sender. Shown to people
  * who can't find the email, so keep it in step with supabase/templates/README.md.
  */
-export const LOGIN_EMAIL_FROM = 'account@melodicus.xyz';
+export const LOGIN_EMAIL_FROM = 'login@melodicus.xyz';
 
 /**
  * Digits in a login code: one box each. Must match Supabase's Authentication
