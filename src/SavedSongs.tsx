@@ -198,11 +198,6 @@ const SavedSongs = () => {
   const { user } = useAuth();
   const notify = useNotify();
   const authDialog = useDisclosure();
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
-  const openAuth = (mode: 'login' | 'signup') => {
-    setAuthMode(mode);
-    authDialog.onOpen();
-  };
   const songsQuery = useSavedSongsQuery();
   const deleteSong = useDeleteSavedSong();
 
@@ -294,14 +289,15 @@ const SavedSongs = () => {
           {!user && (
             <RepertoireBanner
               songCount={songs.length}
-              onCreateAccount={() => openAuth('signup')}
-              onLogIn={() => openAuth('login')}
+              // One dialog for both: an email, then the code sent to it.
+              onCreateAccount={authDialog.onOpen}
+              onLogIn={authDialog.onOpen}
             />
           )}
           {content}
         </Stack>
       </Container>
-      <AuthModal isOpen={authDialog.isOpen} onClose={authDialog.onClose} initialMode={authMode} />
+      <AuthModal isOpen={authDialog.isOpen} onClose={authDialog.onClose} />
     </Flex>
   );
 };

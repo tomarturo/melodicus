@@ -53,7 +53,7 @@ test.describe('sidebar rail', () => {
     await sidebar(page).hover();
     await isExpanded(page, true);
     await sidebar(page).getByRole('button', { name: 'Log in' }).click();
-    await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Log in or sign up' })).toBeVisible();
     await expect(railBehindDialog(page)).toHaveAttribute('data-expanded', 'false');
   });
 
@@ -82,7 +82,7 @@ test.describe('sidebar rail', () => {
       await toggle(page).tap();
       await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
       await sidebar(page).getByRole('button', { name: 'Log in' }).tap();
-      await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Log in or sign up' })).toBeVisible();
       await expect(toggleBehindDialog(page)).toHaveAttribute('aria-expanded', 'false');
       await expect(page.getByTestId('sidebar-backdrop')).toHaveCount(0);
     });
@@ -106,7 +106,7 @@ test.describe('on a phone', () => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Open menu' }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Log in' }).click();
-    await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Log in or sign up' })).toBeVisible();
     // One dialog in the page, the login: the drawer has gone. Counted in the
     // markup, since an open dialog hides any other from the accessibility tree.
     await expect(page.locator('[role="dialog"]')).toHaveCount(1);

@@ -1,9 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
+  Box,
   Button,
   FormControl,
-  FormHelperText,
   FormLabel,
+  HStack,
   Input,
   Modal,
   ModalBody,
@@ -12,17 +13,19 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  PinInput,
+  PinInputField,
   Stack,
   Text,
 } from '@chakra-ui/react';
+import { EnvelopeSimple } from '@phosphor-icons/react';
+import Callout from './components/Callout';
 import { useAuth } from './contexts/AuthContext';
 import { errorCause } from './lib/errors';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Which form to open on. Defaults to logging in. */
-  initialMode?: 'login' | 'signup';
 }
 
 // The same filled, rounded field as the loop name dialog.
@@ -35,59 +38,126 @@ const fieldStyle = {
   _placeholder: { opacity: 1, color: 'fg.placeholder' },
 } as const;
 
-const COPY = {
-  login: {
-    title: 'Log in',
-    intro: 'Pick up your songs and loops where you left off.',
-    submit: 'Log in',
-    busy: 'Logging in',
-    failed: 'Couldn’t log in',
-    switchPrompt: 'New to Melodicus?',
-    switchAction: 'Create an account',
-  },
-  signup: {
-    title: 'Create an account',
-    intro: 'Keep your songs and loops, on any device.',
-    submit: 'Create account',
-    busy: 'Creating account',
-    failed: 'Couldn’t create your account',
-    switchPrompt: 'Already have an account?',
-    switchAction: 'Log in',
-  },
+// The secondary actions under the main button: underlined text links.
+const linkButtonStyle = {
+  variant: 'link',
+  size: 'sm',
+  color: 'fg.strong',
+  fontWeight: 'semibold',
+  textDecoration: 'underline',
+  textUnderlineOffset: '3px',
 } as const;
 
-const AuthModal = ({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) => {
-  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
-  // Each time it opens, start on the form it was opened for.
-  useEffect(() => {
-    if (!isOpen) return;
-    setMode(initialMode);
-    setError(null);
-  }, [isOpen, initialMode]);
+// Supabase sends at most one code a minute to an address.
+const RESEND_AFTER_S = 60;
+
+/**
+ * The address login codes come from: Supabase's SMTP sender. Shown to people
+ * who can't find the email, so keep it in step with supabase/templates/README.md.
+ */
+export const LOGIN_EMAIL_FROM = 'login@melodicus.xyz';
+
+/**
+ * Digits in a login code: one box each. Must match Supabase's Authentication
+ * → Providers → Email → Email OTP Length (see supabase/templates/README.md);
+ * if that changes, change this with it.
+ */
+export const LOGIN_CODE_LENGTH = 6;
+const CODE_PATTERN = new RegExp(`^\\d{${LOGIN_CODE_LENGTH}}$`);
+const CODE_BOXES = Array.from({ length: LOGIN_CODE_LENGTH }, (_, index) => index);
+
+// Each digit's box: the filled look of the app's fields, squared off.
+const codeBoxStyle = {
+  bg: 'bg.muted',
+  borderColor: 'transparent',
+  borderRadius: 'lg',
+  w: { base: '44px', sm: '52px' },
+  h: { base: '52px', sm: '60px' },
+  fontSize: 'xl',
+  fontWeight: 'semibold',
+  color: 'fg.strong',
+  _hover: { bg: 'bg.mutedHover' },
+  _focus: { bg: 'bg.muted', borderColor: 'border.focus' },
+  sx: { fontVariantNumeric: 'tabular-nums' },
+} as const;
+
+/**
+ * Logging in and signing up are the same: an email, then the code sent to it.
+ * New addresses get an account on the way.
+ */
+const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
+  const { sendCode, verifyCode } = useAuth();
+  const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, signup } = useAuth();
-  const copy = COPY[mode];
+  // When another code can be sent (a timestamp), and the seconds left until
+  // then. Counted from the deadline, not tick by tick, so it stays right
+  // when timers run late (a tab in the background).
+  const [resendAt, setResendAt] = useState(0);
+  const [resendIn, setResendIn] = useState(0);
+  const firstBoxRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
+  // Each time it opens, start from the email; what was typed stays.
+  useEffect(() => {
+    if (!isOpen) return;
+    setStep('email');
+    setCode('');
+    setError(null);
+  }, [isOpen]);
+
+  useEffect(() => {
+    const update = () => setResendIn(Math.max(0, Math.ceil((resendAt - Date.now()) / 1000)));
+    update();
+    if (resendAt <= Date.now()) return undefined;
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [resendAt]);
+
+  const send = async () => {
     setLoading(true);
     setError(null);
-    const result = mode === 'login' ? await login(email, password) : await signup(email, password);
+    const result = await sendCode(email.trim());
     setLoading(false);
-    // On failure the dialog stays open, with what was typed, to try again.
     if (result.error) {
-      setError(errorCause(result.error));
+      setError(`Couldn’t send a code. ${errorCause(result.error)}`);
       return;
     }
-    setPassword('');
+    setCode('');
+    setStep('code');
+    setResendAt(Date.now() + RESEND_AFTER_S * 1000);
+  };
+
+  // Runs from the button, and on its own once the last digit is in.
+  const verify = async (entered = code) => {
+    if (loading) return;
+    if (!CODE_PATTERN.test(entered)) {
+      setError(`Enter the ${LOGIN_CODE_LENGTH}-digit code from the email.`);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const result = await verifyCode(email.trim(), entered);
+    setLoading(false);
+    if (result.error) {
+      setError('That code didn’t work. Check it, or send a new one: codes expire after an hour.');
+      // Start over from the first box, rather than editing one digit.
+      setCode('');
+      requestAnimationFrame(() => firstBoxRef.current?.focus());
+      return;
+    }
     onClose();
   };
 
-  const switchMode = () => {
-    setMode(mode === 'login' ? 'signup' : 'login');
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    void (step === 'email' ? send() : verify());
+  };
+
+  const changeEmail = () => {
+    setStep('email');
+    setCode('');
     setError(null);
   };
 
@@ -95,69 +165,108 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) =
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent as="form" onSubmit={handleSubmit} noValidate={false}>
-        <ModalHeader pb={1}>{copy.title}</ModalHeader>
+        <ModalHeader pb={1}>{step === 'email' ? 'Log in or sign up' : 'Check your email'}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Text fontSize="sm" color="fg.muted" mb={5}>
-            {copy.intro}
+            {step === 'email' ? (
+              'Enter your email and we’ll send you a code. No password needed. New here? The code creates your account.'
+            ) : (
+              <>
+                We sent a code to{' '}
+                <Text as="span" fontWeight="semibold" color="fg.strong">
+                  {email.trim()}
+                </Text>
+                . Enter it here to log in.
+              </>
+            )}
           </Text>
           <Stack spacing={4}>
-            <FormControl isRequired>
-              <FormLabel fontSize="sm" fontWeight="medium" color="fg.default" requiredIndicator={<></>}>
-                Email
-              </FormLabel>
-              <Input
-                {...fieldStyle}
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel fontSize="sm" fontWeight="medium" color="fg.default" requiredIndicator={<></>}>
-                Password
-              </FormLabel>
-              <Input
-                {...fieldStyle}
-                type="password"
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                minLength={mode === 'signup' ? 6 : undefined}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-              {mode === 'signup' && (
-                <FormHelperText fontSize="xs" color="fg.muted" ml={4}>
-                  At least 6 characters
-                </FormHelperText>
-              )}
-            </FormControl>
+            {step === 'email' ? (
+              <FormControl isRequired>
+                <FormLabel fontSize="sm" fontWeight="medium" color="fg.default" requiredIndicator={<></>}>
+                  Email
+                </FormLabel>
+                <Input
+                  {...fieldStyle}
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+              </FormControl>
+            ) : (
+              <Box role="group" aria-labelledby="login-code-label">
+                <Text id="login-code-label" fontSize="sm" fontWeight="medium" color="fg.default" mb={2}>
+                  Code
+                </Text>
+                {/* otp: the number pad, and the code offered from the email on
+                    phones; a pasted or autofilled code fills every box. */}
+                <HStack spacing={{ base: 2, sm: 3 }}>
+                  <PinInput
+                    otp
+                    // The app's field look: filled, with its dark focus edge, not Chakra's blue.
+                    variant="filled"
+                    focusBorderColor="border.focus"
+                    type="number"
+                    autoFocus
+                    placeholder=""
+                    value={code}
+                    isDisabled={loading}
+                    onChange={(value) => {
+                      setCode(value);
+                      setError(null);
+                    }}
+                    onComplete={(value) => void verify(value)}
+                  >
+                    {CODE_BOXES.map((index) => (
+                      <PinInputField
+                        key={index}
+                        ref={index === 0 ? firstBoxRef : undefined}
+                        aria-label={`Digit ${index + 1} of ${LOGIN_CODE_LENGTH}`}
+                        {...codeBoxStyle}
+                      />
+                    ))}
+                  </PinInput>
+                </HStack>
+              </Box>
+            )}
+            {step === 'code' && (
+              <Callout icon={EnvelopeSimple}>
+                Not in your inbox? Check your spam folder or search for{' '}
+                <Text as="span" fontWeight="semibold">
+                  {LOGIN_EMAIL_FROM}
+                </Text>
+              </Callout>
+            )}
             {error && (
               <Text role="alert" fontSize="sm" color="red.700">
-                {copy.failed}. {error}
+                {error}
               </Text>
             )}
           </Stack>
         </ModalBody>
         <ModalFooter flexDirection="column" gap={4} pt={6}>
-          <Button type="submit" variant="loud" w="100%" isLoading={loading} loadingText={copy.busy}>
-            {copy.submit}
+          <Button
+            type="submit"
+            variant="loud"
+            w="100%"
+            isLoading={loading}
+            loadingText={step === 'email' ? 'Sending code' : 'Logging in'}
+          >
+            {step === 'email' ? 'Email me a code' : 'Log in'}
           </Button>
-          <Text fontSize="sm" color="fg.muted">
-            {copy.switchPrompt}{' '}
-            <Button
-              variant="link"
-              size="sm"
-              color="fg.strong"
-              fontWeight="semibold"
-              textDecoration="underline"
-              textUnderlineOffset="3px"
-              onClick={switchMode}
-            >
-              {copy.switchAction}
-            </Button>
-          </Text>
+          {step === 'code' && (
+            <Stack direction="row" spacing={5} fontSize="sm">
+              <Button {...linkButtonStyle} isDisabled={resendIn > 0 || loading} onClick={() => void send()}>
+                {resendIn > 0 ? `Send a new code in ${resendIn}s` : 'Send a new code'}
+              </Button>
+              <Button {...linkButtonStyle} isDisabled={loading} onClick={changeEmail}>
+                Use a different email
+              </Button>
+            </Stack>
+          )}
         </ModalFooter>
       </ModalContent>
     </Modal>
