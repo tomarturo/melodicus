@@ -84,9 +84,13 @@ test('a wrong or expired code keeps the dialog open, with a way to get a new one
 
   const codeStep = page.getByRole('dialog', { name: 'Check your email' });
   const boxes = codeStep.getByRole('group', { name: 'Code' }).getByRole('textbox');
-  // Typed a digit at a time, at a person's pace, the cursor moves along the boxes.
-  await expect(boxes.first()).toBeFocused();
-  await page.keyboard.type('000000', { delay: 40 });
+  // Typed a digit at a time, the cursor moves along the boxes. Chakra moves it
+  // on the next animation frame, which headless WebKit can run late, so each
+  // digit waits for the cursor to arrive instead of racing it.
+  for (let index = 0; index < 6; index++) {
+    await expect(boxes.nth(index)).toBeFocused();
+    await page.keyboard.press('0');
+  }
   await expect(codeStep.getByRole('alert')).toContainText('That code didn’t work');
   // Cleared, to start again from the first box.
   for (const box of await boxes.all()) await expect(box).toHaveValue('');
