@@ -53,6 +53,8 @@ test('a signed-in user imports loops into their account', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Import 2 loops' }).click();
   await expect(page.getByText('2 loops added')).toBeVisible();
+  // Once the dialog has gone: while it fades out it still lists "Intro" too.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByText('Intro', { exact: true })).toBeVisible();
 
   expect(db.tables.saved_songs).toMatchObject([{ video_id: VIDEO_ID, title: VIDEO_TITLE }]);

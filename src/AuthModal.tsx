@@ -92,7 +92,10 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Seconds until another code can be sent.
+  // When another code can be sent (a timestamp), and the seconds left until
+  // then. Counted from the deadline, not tick by tick, so it stays right
+  // when timers run late (a tab in the background).
+  const [resendAt, setResendAt] = useState(0);
   const [resendIn, setResendIn] = useState(0);
   const firstBoxRef = useRef<HTMLInputElement>(null);
 
@@ -105,10 +108,12 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (resendIn <= 0) return undefined;
-    const timer = setTimeout(() => setResendIn((seconds) => seconds - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [resendIn]);
+    const update = () => setResendIn(Math.max(0, Math.ceil((resendAt - Date.now()) / 1000)));
+    update();
+    if (resendAt <= Date.now()) return undefined;
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [resendAt]);
 
   const send = async () => {
     setLoading(true);
@@ -121,7 +126,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     }
     setCode('');
     setStep('code');
-    setResendIn(RESEND_AFTER_S);
+    setResendAt(Date.now() + RESEND_AFTER_S * 1000);
   };
 
   // Runs from the button, and on its own once the last digit is in.
