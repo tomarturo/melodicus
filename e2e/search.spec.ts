@@ -6,7 +6,7 @@ const item = (videoId: string, title: string, channelTitle = 'A channel') => ({
   snippet: { title, description: 'Noise', channelTitle, thumbnails: { medium: { url: '' } } },
 });
 
-const mockSearch = (page: Page, respond: Parameters<Page['route']>[1]) => page.route('**/youtube/v3/search**', respond);
+const mockSearch = (page: Page, respond: Parameters<Page['route']>[1]) => page.route('**/api/youtube-search**', respond);
 
 test.beforeEach(async ({ page }) => {
   await mockYouTube(page);

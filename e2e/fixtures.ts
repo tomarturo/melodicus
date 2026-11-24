@@ -14,7 +14,7 @@ const fakeIframeApi = readFileSync(new URL('./fakeYouTubeIframeApi.js', import.m
  * that plays on a simulated clock.
  */
 export async function mockYouTube(page: Page, { player = false }: { player?: boolean } = {}) {
-  await page.route('**/youtube/v3/videos**', (route) =>
+  await page.route('**/api/youtube-video**', (route) =>
     route.fulfill({
       json: {
         items: [

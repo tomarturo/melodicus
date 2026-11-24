@@ -13,10 +13,10 @@ describe('env', () => {
   });
 
   it('reports missing variables by name', async () => {
-    vi.stubEnv('VITE_YOUTUBE_API_KEY', '');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
     vi.stubEnv('VITE_SUPABASE_URL', 'not a url');
     const { envError } = await import('./env');
-    expect(envError).toContain('VITE_YOUTUBE_API_KEY');
+    expect(envError).toContain('VITE_SUPABASE_ANON_KEY');
     expect(envError).toContain('VITE_SUPABASE_URL');
   });
 });

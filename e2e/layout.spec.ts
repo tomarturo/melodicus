@@ -4,7 +4,7 @@ import { VIDEO_ID, mockSupabase, mockYouTube } from './fixtures';
 test.beforeEach(async ({ page }) => {
   await mockYouTube(page);
   await mockSupabase(page);
-  await page.route('**/youtube/v3/search**', (route) =>
+  await page.route('**/api/youtube-search**', (route) =>
     route.fulfill({
       json: {
         items: Array.from({ length: 20 }, (_, i) => ({
