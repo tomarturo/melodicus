@@ -2,8 +2,7 @@
 
 Practice any song on YouTube: loop the hard parts and slow them down until they stick. **Try it at [melodicus.xyz](https://melodicus.xyz).**
 
-<!-- A screenshot of the player goes here: public/readme/player.png, then
-     ![The Melodicus player: a song's timeline with named loops, and the playback controls](public/readme/player.png) -->
+![The Melodicus player: a song from YouTube, its timeline split into named loops, and the playback controls](public/readme/player.webp)
 
 ## Why
 
