@@ -180,8 +180,10 @@ function SavedSongsList({ onNavigate }: { onNavigate?: () => void }) {
       </Box>
     );
 
+  // Laid out at the open sidebar's full width from the start, so while the rail
+  // widens the text is uncovered as it is, instead of re-wrapping as it goes.
   return (
-    <Box px="3" fontSize="sm">
+    <Box px="3" fontSize="sm" w={`${EXPANDED_WIDTH}px`}>
       {body}
     </Box>
   );
@@ -243,7 +245,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         icon={<Icon as={MusicNotes} boxSize={NAV_ICON} />}
       />
 
-      <Box flex="1" overflowY="auto" mt="2" minH="0">
+      <Box flex="1" overflowY="auto" overflowX="hidden" mt="2" minH="0">
         {expanded && <SavedSongsList onNavigate={onNavigate} />}
       </Box>
 
