@@ -38,19 +38,28 @@ const LOGOMARK_CLIP = '22px';
 // Where an item's label starts: its margin and padding, the icon, the gap.
 const LABEL_INSET = '56px'; // mx 8 + px 12 + icon 24 + gap 12
 
-// The footer's text links: the labels' color, underlined so they read as links
-// beside the plain year.
+// The foot of the rail (Support and the © row) is secondary: the lighter grey,
+// brightening to the labels' color on hover. Set through sx, so a row's own
+// hover background is added to, not replaced.
+const FOOT_COLOR: FlexProps = {
+  color: 'chrome.fgMuted',
+  sx: { transition: 'color 0.15s', '&:hover': { color: 'chrome.fg' } },
+};
+
+// The footer's text links: underlined so they read as links beside the plain year.
 const footerLinkStyle = {
-  color: 'chrome.fg',
+  // The row's color: muted, brightening with the row on hover.
+  color: 'inherit',
   textDecoration: 'underline',
   textUnderlineOffset: '3px',
-  _hover: { color: 'white', textDecoration: 'underline' },
+  _hover: { textDecoration: 'underline' },
   _focusVisible: { outline: '2px solid', outlineColor: 'chrome.fg', outlineOffset: '2px', borderRadius: 'sm' },
 } as const;
 
 // The © row: a row's shape and alignment, without a row's hover, since its
 // links are the things to click.
 const footerRowStyles: FlexProps = {
+  ...FOOT_COLOR,
   align: 'center',
   gap: '3',
   h: '44px',
@@ -270,17 +279,18 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         label="Support"
         aria-label={`Email support: ${SUPPORT_EMAIL}`}
         icon={<Icon as={EnvelopeSimple} boxSize={LINK_ICON} />}
+        {...FOOT_COLOR}
       />
       {/* The © row: an icon like the rows above, and in place of a label, the
           year and the reference links on one line. A fixed-height row like the others, so
           opening the rail moves nothing; the links show when it's open. */}
       <Flex as="nav" aria-label="About Melodicus" {...footerRowStyles}>
         {/* The same size and color as the Support icon above it. */}
-        <Flex w="24px" justify="center" flexShrink={0} color="chrome.fg" aria-hidden>
+        <Flex w="24px" justify="center" flexShrink={0} aria-hidden>
           <Icon as={Copyright} boxSize={LINK_ICON} />
         </Flex>
-        {/* The same size, weight and color as the labels above, such as Support. */}
-        <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1.5" fontSize="sm" fontWeight="medium" color="chrome.fg">
+        {/* The same size, weight and color as the Support label above. */}
+        <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1.5" fontSize="sm" fontWeight="medium">
           {/* Plain text: the year beside the © icon (named for screen readers). */}
           <Text as="span">
             <VisuallyHidden>Copyright </VisuallyHidden>2026
