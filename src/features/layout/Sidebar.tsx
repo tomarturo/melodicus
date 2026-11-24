@@ -1,12 +1,18 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Box, Flex, Icon, Image, Kbd, Text, type FlexProps } from '@chakra-ui/react';
-import { ArrowUpRight, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, ShieldCheck, SignIn, UserCircle } from '@phosphor-icons/react';
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../../lib/contact';
+import { Box, Flex, Icon, Image, Kbd, Link, Text, VisuallyHidden, type FlexProps } from '@chakra-ui/react';
+import { ArrowUpRight, Copyright, EnvelopeSimple, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSavedSongsQuery } from '../sections/queries';
 import { useCommandSearch } from '../search/CommandSearch';
 
 export const RAIL_WIDTH = 64;
+
+// Icon sizes: the app's own navigation, then the smaller Support and © icons
+// at the foot, so they read as secondary.
+const NAV_ICON = '22px';
+const LINK_ICON = '18px';
 export const EXPANDED_WIDTH = 288;
 
 interface SidebarProps {
@@ -31,6 +37,41 @@ const LOGOMARK_CLIP = '22px';
 
 // Where an item's label starts: its margin and padding, the icon, the gap.
 const LABEL_INSET = '56px'; // mx 8 + px 12 + icon 24 + gap 12
+
+// The Support row is secondary: the lighter grey, brightening to the labels'
+// color on hover, since the whole row is its link. Set through sx, so the row's
+// own hover background is added to, not replaced.
+const FOOT_COLOR: FlexProps = {
+  color: 'chrome.fgMuted',
+  sx: { transition: 'color 0.15s', '&:hover': { color: 'chrome.fg' } },
+};
+
+// The footer's text links: underlined so they read as links beside the plain year.
+const footerLinkStyle = {
+  // Muted like the rest of the row; only the link under the pointer brightens.
+  color: 'chrome.fgMuted',
+  textDecoration: 'underline',
+  textUnderlineOffset: '3px',
+  transition: 'color 0.15s',
+  _hover: { color: 'chrome.fg', textDecoration: 'underline' },
+  _focusVisible: { outline: '2px solid', outlineColor: 'chrome.fg', outlineOffset: '2px', borderRadius: 'sm' },
+} as const;
+
+// The © row: a row's shape and alignment, without a row's hover, since its
+// links are the things to click.
+const footerRowStyles: FlexProps = {
+  // Muted, and not brightened as a whole: only its links are clickable.
+  color: 'chrome.fgMuted',
+  align: 'center',
+  gap: '3',
+  h: '44px',
+  flexShrink: 0,
+  // No right padding: the line of links needs the width; nothing sits after it.
+  pl: '3',
+  mx: '2',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+};
 
 const itemStyles: FlexProps = {
   align: 'center',
@@ -180,7 +221,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         as="button"
         expanded={expanded}
         label="Search"
-        icon={<Icon as={MagnifyingGlass} boxSize="22px" />}
+        icon={<Icon as={MagnifyingGlass} boxSize={NAV_ICON} />}
         trailing={
           showShortcut ? (
             <Kbd bg="chrome.hover" color="chrome.fgMuted" borderColor="chrome.border" fontSize="xs">
@@ -199,7 +240,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         onClick={onNavigate}
         expanded={expanded}
         label="My songs"
-        icon={<Icon as={MusicNotes} boxSize="22px" />}
+        icon={<Icon as={MusicNotes} boxSize={NAV_ICON} />}
       />
 
       <Box flex="1" overflowY="auto" mt="2" minH="0">
@@ -215,7 +256,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
           expanded={expanded}
           label={user.email ?? 'Account'}
           aria-label={expanded ? `Account: ${user.email ?? ''}` : 'Account'}
-          icon={<Icon as={UserCircle} boxSize="22px" />}
+          icon={<Icon as={UserCircle} boxSize={NAV_ICON} />}
         />
       ) : (
         <SidebarItem
@@ -223,7 +264,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
           expanded={expanded}
           label="Log in"
           labelWeight="bold"
-          icon={<Icon as={SignIn} weight="bold" boxSize="22px" />}
+          icon={<Icon as={SignIn} weight="bold" boxSize={NAV_ICON} />}
           // The sidebar closes first, so the dialog opens on its own.
           onClick={() => {
             onNavigate?.();
@@ -235,35 +276,51 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
       <Box h="1px" bg="chrome.border" mx="5" my="2" flexShrink={0} aria-hidden />
       <SidebarItem
         as="a"
-        href="https://github.com/tomarturo/melodicus"
-        target="_blank"
-        rel="noopener noreferrer"
+        href={SUPPORT_MAILTO}
         expanded={expanded}
-        label="View source"
-        aria-label="View source on GitHub"
-        icon={<Icon as={GithubLogo} boxSize="22px" />}
-        trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
+        label="Support"
+        aria-label={`Email support: ${SUPPORT_EMAIL}`}
+        icon={<Icon as={EnvelopeSimple} boxSize={LINK_ICON} />}
+        {...FOOT_COLOR}
       />
-      <SidebarItem
-        as={RouterLink}
-        to="/privacy"
-        onClick={onNavigate}
-        expanded={expanded}
-        label="Privacy"
-        icon={<Icon as={ShieldCheck} boxSize="22px" />}
-      />
-      <SidebarItem
-        as="a"
-        href="https://www.linkedin.com/in/tomkurzeka"
-        target="_blank"
-        rel="noopener noreferrer"
-        expanded={expanded}
-        label="2026 Tom Kurzeka"
-        // The © is the icon, so the name spells it out.
-        aria-label="© 2026 Tom Kurzeka"
-        icon={<Icon as={Copyright} boxSize="22px" />}
-        trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
-      />
+      {/* The © row: an icon like the rows above, and in place of a label, the
+          year and the reference links on one line. A fixed-height row like the others, so
+          opening the rail moves nothing; the links show when it's open. */}
+      <Flex as="nav" aria-label="About Melodicus" {...footerRowStyles}>
+        {/* The same size and color as the Support icon above it. */}
+        <Flex w="24px" justify="center" flexShrink={0} aria-hidden>
+          <Icon as={Copyright} boxSize={LINK_ICON} />
+        </Flex>
+        {/* The same size, weight and color as the Support label above. */}
+        <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1.5" fontSize="sm" fontWeight="medium">
+          {/* Plain text: the year beside the © icon (named for screen readers). */}
+          <Text as="span">
+            <VisuallyHidden>Copyright </VisuallyHidden>2026
+          </Text>
+          <Text as="span" aria-hidden>
+            •
+          </Text>
+          <Link as={RouterLink} to="/privacy" onClick={onNavigate} {...footerLinkStyle}>
+            Privacy
+          </Link>
+          <Text as="span" aria-hidden>
+            •
+          </Text>
+          {/* The arrow says it leaves the app. */}
+          <Link
+            href="https://github.com/tomarturo/melodicus"
+            isExternal
+            aria-label="View source on GitHub"
+            display="inline-flex"
+            alignItems="center"
+            gap="0.5"
+            {...footerLinkStyle}
+          >
+            Source
+            <Icon as={ArrowUpRight} boxSize="14px" aria-hidden />
+          </Link>
+        </Flex>
+      </Flex>
     </Flex>
   );
 }
