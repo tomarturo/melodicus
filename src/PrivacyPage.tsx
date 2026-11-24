@@ -23,11 +23,13 @@ const PrivacyPage = () => (
         <Section title="Analytics">
           <Text>
             Melodicus uses Google Analytics to count visits and see which features get used: the pages you open, the
-            YouTube videos you play, and your browser, device and country.
+            YouTube videos you play, what you do with loops (saving, renaming, playing, sharing), and your browser,
+            device and country.
           </Text>
           <Text>
-            It doesn’t record what you type into search, or the loops in share links. If you’re in the EU, the EEA,
-            the UK or Switzerland, Google Analytics stores no cookies on your device.
+            It records what you search for, to learn which songs people look for, but leaves out anything that looks
+            like an email address, a link or a phone number. It doesn’t record the loops in share links. If you’re in
+            the EU, the EEA, the UK or Switzerland, Google Analytics stores no cookies on your device.
           </Text>
           <Text>Melodicus shows no ads, and nothing is used for advertising.</Text>
         </Section>

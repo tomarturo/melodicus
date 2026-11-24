@@ -35,8 +35,8 @@ export type AnalyticsEvent =
   | { name: 'login'; params: { method: 'email_code' } }
   | { name: 'logout'; params?: undefined }
   | { name: 'account_delete'; params?: undefined }
-  // No search_term: what people type stays out of GA.
-  | { name: 'search'; params: { result_count: number } }
+  // search_term goes through searchTermForAnalytics first.
+  | { name: 'search'; params: { search_term: string; result_count: number } }
   | { name: 'video_open'; params: { video_id: string; video_title: string; from_page: string; from_share_link: boolean } }
   | { name: 'loop_create'; params: { storage: Storage; duration_s: number; named: boolean } }
   | { name: 'loop_rename'; params: { storage: Storage } }
@@ -71,11 +71,36 @@ export function pageName(pathname: string): string {
 
 /**
  * The path as GA may see it. The search route's path is what someone typed,
- * so it's replaced. The query string and hash never get here: share links
+ * so it's replaced: the search event carries the term, filtered. The query string and hash never get here: share links
  * keep their loops in them.
  */
 export function analyticsPath(pathname: string): string {
   return pathname.startsWith('/search/') ? '/search/:query' : pathname;
+}
+
+// GA cuts event parameter values off at 100 characters.
+const MAX_PARAM_LENGTH = 100;
+export const SEARCH_TERM_NOT_RECORDED = '(not recorded)';
+
+// What might identify someone rather than a song: an email address, a link or
+// a domain, or a long run of digits like a phone number.
+const LOOKS_PERSONAL = [
+  /@/,
+  /https?:|www\./i,
+  /\b[a-z0-9-]+\.(com|net|org|io|co|me|app|xyz|be|ly)\b/i,
+  /\d[\d\s().-]{6,}\d/,
+];
+
+/**
+ * A search as GA records it: lowercased, with spaces tidied, so the same
+ * search counts as one. Anything that might identify someone is replaced with
+ * "(not recorded)", since GA's terms forbid personal data and its values can't
+ * be deleted one by one.
+ */
+export function searchTermForAnalytics(query: string): string {
+  const term = query.trim().replace(/\s+/g, ' ').toLowerCase();
+  if (!term || LOOKS_PERSONAL.some((pattern) => pattern.test(term))) return SEARCH_TERM_NOT_RECORDED;
+  return term.slice(0, MAX_PARAM_LENGTH);
 }
 
 const pageFields = (pathname: string) => ({

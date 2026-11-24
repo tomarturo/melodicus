@@ -63,8 +63,8 @@ calls `useLocation()` and runs `trackPageView` whenever `pathname` changes.
   (`shareFormat.ts`). Send `page_location` as `origin + pathname` only.
 - **Remove the query string.** Legacy share links (`decodeLegacyShare`) put loops in `?…`.
 - `/search/:query` puts what the user typed in the path. Send it as
-  `/search/:query` and put the term in a `search` event (1.4), or leave it out
-  completely if you'd rather not collect search terms.
+  `/search/:query`, and send the term in the `search` event instead (1.4),
+  where it's filtered first.
 - `/video/:videoId` is fine to send as is: it's a public YouTube ID and is
   how you'll see which songs people learn.
 
@@ -84,7 +84,7 @@ recommended event names are marked ★. Loop and song events carry
 | `login` ★ | A login code is verified for an existing account | `method: 'email_code'` |
 | `logout` | Logging out succeeds | — |
 | `account_delete` | An account is deleted | — |
-| `search` ★ | Search results show (once per query) | `result_count` (never the search term) |
+| `search` ★ | Search results show (once per query) | `search_term` (filtered, see below), `result_count` |
 | `video_open` | A video page has loaded the video's title | `video_id`, `video_title`, `from_page`, `from_share_link` |
 | `loop_create` | A new loop is saved | `storage`, `duration_s`, `named` |
 | `loop_rename` | A loop is renamed | `storage` |
@@ -107,13 +107,18 @@ Notes:
   versus `login` is worked out in `isNewAccount` (`AuthContext.tsx`).
   Verifying a code confirms a new person's email, so for a new account the
   confirmation and sign-in times are seconds apart.
+- **Search terms** go through `searchTermForAnalytics`: lowercased, spaces
+  tidied, cut at GA's 100-character limit. A term that looks like an email
+  address, a link or domain, or a phone number is sent as `(not recorded)`,
+  because GA's terms forbid personal data and its values can't be deleted one
+  by one. Searches with `result_count` 0 show what Melodicus fails to find.
 - **`from_page`** is the page shown before the video: `home`, `search`,
   `saved_songs`, `video` (from the sidebar's song list on another video), or
   `direct` for the first page of a visit.
 
 **To do in the GA admin (once):**
 - **Admin → Custom definitions → Create custom dimension** (scope: Event) for
-  `storage`, `from_page`, `from_share_link`, `video_title`, `named` and
+  `search_term`, `storage`, `from_page`, `from_share_link`, `video_title`, `named` and
   `rate`. Parameters can't be used in reports until they're registered, and
   only from then on, so do this the day this ships.
 - **Admin → Key events:** mark `sign_up`, `loop_create` and `share`. Each
@@ -315,6 +320,5 @@ the EEA, UK or Switzerland is ever sent a cookie.
 
 ## Open decisions
 
-- Do we collect search terms (`search_term`) at all?
 - Do we want a `source` column on `saved_sections` now, so imported and synced loops can be told apart from hand-made ones?
 - Looker Studio (recommended), or an in-app admin page?
