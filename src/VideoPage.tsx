@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Button, Flex, HStack, Icon } from '@chakra-ui/react';
-import { BookmarkSimple, Trash } from '@phosphor-icons/react';
+import { MusicNotes, Trash } from '@phosphor-icons/react';
 import { roundSeconds } from './utils/formatTime';
 import { errorCause } from './lib/errors';
 import { useNotify } from './lib/notify';
@@ -246,7 +246,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
             <Button
               variant="loud"
               size="sm"
-              leftIcon={<Icon as={BookmarkSimple} weight="bold" boxSize="16px" />}
+              leftIcon={<Icon as={MusicNotes} boxSize="16px" />}
               isLoading={importLoops.isPending}
               loadingText="Saving"
               onClick={() => void handleSaveSong()}
