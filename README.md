@@ -1,4 +1,4 @@
-[![Melodicus: Learn the songs & licks you love. Any song on YouTube. Unlimited loops. Slow down the hard parts.](public/og-image.png)](https://melodicus.xyz)
+[![Melodicus: Learn the songs & licks you love. Any song on YouTube. Unlimited loops. Slow down the hard parts.](public/readme/banner.png)](https://melodicus.xyz)
 
 Practice any song on YouTube: loop the hard parts and slow them down until they stick. **Try it at [melodicus.xyz](https://melodicus.xyz).**
 
