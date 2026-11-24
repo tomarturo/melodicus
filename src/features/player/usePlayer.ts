@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { env } from '../../lib/env';
 import { fetchVideoDetails } from '../../lib/youtube';
 import { convertDurationToSeconds } from '../../utils/formatTime';
 import { loadYouTubeIframeApi } from './loadYouTubeIframeApi';
@@ -62,7 +61,7 @@ export function usePlayerState(controller: PlayerController): PlayerState {
 export function useVideoDetails(videoId: string, controller: PlayerController) {
   const query = useQuery({
     queryKey: ['videoDetails', videoId],
-    queryFn: () => fetchVideoDetails(videoId, env.VITE_YOUTUBE_API_KEY),
+    queryFn: () => fetchVideoDetails(videoId),
     staleTime: Infinity,
   });
 

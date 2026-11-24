@@ -23,10 +23,12 @@ export interface VideoDetails {
   thumbnailUrl: string | null;
 }
 
-/** Fetches title, duration and thumbnail for one video from the YouTube Data API. */
-export async function fetchVideoDetails(videoId: string, apiKey: string): Promise<VideoDetails> {
-  const params = new URLSearchParams({ id: videoId, part: 'contentDetails,snippet', key: apiKey });
-  const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?${params}`);
+/**
+ * Fetches title, duration and thumbnail for one video, through the app's own
+ * /api/youtube-video, which holds the YouTube API key (api/_youtube.ts).
+ */
+export async function fetchVideoDetails(videoId: string): Promise<VideoDetails> {
+  const response = await fetch(`/api/youtube-video?${new URLSearchParams({ id: videoId })}`);
   if (!response.ok) {
     throw new Error(`YouTube video details request failed with status ${response.status}`);
   }
@@ -87,10 +89,19 @@ const SearchResponseSchema = z.object({
     .default([]),
 });
 
-/** Searches YouTube for videos. Titles and channel names come back decoded. */
-export async function searchVideos(query: string, apiKey: string): Promise<SearchResult[]> {
-  const params = new URLSearchParams({ q: query, type: 'video', part: 'snippet', key: apiKey });
-  const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`);
+/**
+ * The query as sent: trimmed, single-spaced and lowercase, which YouTube treats
+ * the same, so more searches match one already cached at the edge.
+ */
+export const normalizeQuery = (query: string) => query.trim().replace(/\s+/g, ' ').toLowerCase();
+
+/**
+ * Searches YouTube for videos, through the app's own /api/youtube-search,
+ * which holds the API key and caches results (api/_youtube.ts). Titles and
+ * channel names come back decoded.
+ */
+export async function searchVideos(query: string): Promise<SearchResult[]> {
+  const response = await fetch(`/api/youtube-search?${new URLSearchParams({ q: normalizeQuery(query) })}`);
   const data: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const reason = (data as { error?: { errors?: Array<{ reason?: string }> } } | null)?.error?.errors?.[0]?.reason;

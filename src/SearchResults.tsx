@@ -20,7 +20,6 @@ import SearchQuotaError from './SearchQuotaError';
 import HintRow from './components/HintRow';
 import SongListRow, { SongPill } from './features/songs/SongListRow';
 import { useSavedSongsQuery } from './features/sections/queries';
-import { env } from './lib/env';
 import { SearchQuotaExceededError, searchPath, searchVideos } from './lib/youtube';
 
 const countLabel = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
@@ -60,7 +59,7 @@ const SearchResults = () => {
   // Cached for the session: going back to a search costs no quota.
   const search = useQuery({
     queryKey: ['youtube-search', query],
-    queryFn: () => searchVideos(query, env.VITE_YOUTUBE_API_KEY),
+    queryFn: () => searchVideos(query),
     enabled: query.trim().length > 0,
     staleTime: Infinity,
     retry: false,

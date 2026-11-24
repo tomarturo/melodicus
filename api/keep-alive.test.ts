@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { KEEP_ALIVE_PATH, handleKeepAlive } from './keep-alive';
+import { KEEP_ALIVE_PATH, handleKeepAlive } from './keep-alive.js';
 
 const ENV = { VITE_SUPABASE_URL: 'https://example.supabase.co/', VITE_SUPABASE_ANON_KEY: 'anon-key' };
 const request = (headers: Record<string, string> = {}) => new Request('https://melodicus.xyz/api/keep-alive', { headers });
