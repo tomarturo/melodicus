@@ -12,10 +12,14 @@ test('a new visitor sees how it works, the demo and what they get', async ({ pag
   await expect(page.getByRole('heading', { name: 'Built for practice' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Pick up where you left off' })).toHaveCount(0);
 
-  // The demo opens as a share link, so its loops come with it.
+  // The demo opens straight onto its loops: no dialog, and nothing saved, so
+  // the homepage still explains the product afterwards.
   await page.getByRole('link', { name: 'Open the demo' }).click();
   await expect(page).toHaveURL(/\/video\/b00h8iKaklQ$/);
-  await expect(page.getByRole('dialog')).toContainText('8 loops');
+  await expect(page.getByRole('list', { name: 'Saved loops' }).getByRole('listitem')).toHaveCount(8);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Tackle hard songs one part at a time' })).toBeVisible();
 });
 
 test('Find your song goes back up to the song search, ready to type', async ({ page }) => {
