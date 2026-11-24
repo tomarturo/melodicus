@@ -3,9 +3,13 @@
   <head>
     <meta charset="utf-8" />
     
-    <!-- Favicon for browsers -->
+    <!-- Favicons. Browsers that support SVG icons take favicon.svg, which turns
+         ink or off-white with the system's light or dark mode. Safari takes the
+         PNG: the mark on an ink tile, readable on either. The PNGs are drawn
+         by scripts/app-icons/render.mjs. -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
