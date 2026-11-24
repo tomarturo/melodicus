@@ -2,15 +2,15 @@ import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../../lib/contact';
 import { Box, Flex, Icon, Image, Kbd, Link, Text, type FlexProps } from '@chakra-ui/react';
-import { EnvelopeSimple, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
+import { Copyright, EnvelopeSimple, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSavedSongsQuery } from '../sections/queries';
 import { useCommandSearch } from '../search/CommandSearch';
 
 export const RAIL_WIDTH = 64;
 
-// Icon sizes: the app's own navigation, then the smaller Support link at the
-// foot, so it reads as secondary.
+// Icon sizes: the app's own navigation, then the smaller Support and © icons
+// at the foot, so they read as secondary.
 const NAV_ICON = '22px';
 const LINK_ICON = '18px';
 export const EXPANDED_WIDTH = 288;
@@ -44,6 +44,20 @@ const footerLinkStyle = {
   _hover: { color: 'chrome.fg', textDecoration: 'underline' },
   _focusVisible: { outline: '2px solid', outlineColor: 'chrome.fg', outlineOffset: '2px', borderRadius: 'sm' },
 } as const;
+
+// The © row: a row's shape and alignment, without a row's hover, since its
+// links are the things to click.
+const footerRowStyles: FlexProps = {
+  align: 'center',
+  gap: '3',
+  h: '44px',
+  flexShrink: 0,
+  // No right padding: the line of links needs the width; nothing sits after it.
+  pl: '3',
+  mx: '2',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+};
 
 const itemStyles: FlexProps = {
   align: 'center',
@@ -254,40 +268,30 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         aria-label={`Email support: ${SUPPORT_EMAIL}`}
         icon={<Icon as={EnvelopeSimple} boxSize={LINK_ICON} />}
       />
-      {/* Reference links as one quiet line of text, not more rows. Its space is
-          always kept, so nothing above it moves when the rail opens: collapsed,
-          it's only invisible. One line, never wrapping, so the narrow rail
-          doesn't make it taller. Open on hover, and always in the phone drawer. */}
-      <Flex
-        as="nav"
-        aria-label="About Melodicus"
-        visibility={expanded ? 'visible' : 'hidden'}
-        alignItems="center"
-        gap="1.5"
-        h="32px"
-        flexShrink={0}
-        px="5"
-        mt="1"
-        fontSize="xs"
-        whiteSpace="nowrap"
-        overflow="hidden"
-        color="chrome.fgMuted"
-      >
-        <Link as={RouterLink} to="/privacy" onClick={onNavigate} {...footerLinkStyle}>
-          Privacy
-        </Link>
-        <Text as="span" aria-hidden>
-          ·
-        </Text>
-        <Link href="https://github.com/tomarturo/melodicus" isExternal aria-label="View source on GitHub" {...footerLinkStyle}>
-          Source
-        </Link>
-        <Text as="span" aria-hidden>
-          ·
-        </Text>
-        <Link href="https://www.linkedin.com/in/tomkurzeka" isExternal {...footerLinkStyle}>
-          © 2026 Tom Kurzeka
-        </Link>
+      {/* The © row: an icon like the rows above, and in place of a label, the
+          reference links on one line. A fixed-height row like the others, so
+          opening the rail moves nothing; the links show when it's open. */}
+      <Flex as="nav" aria-label="About Melodicus" {...footerRowStyles}>
+        <Flex w="24px" justify="center" flexShrink={0} color="chrome.fgMuted" aria-hidden>
+          <Icon as={Copyright} boxSize={LINK_ICON} />
+        </Flex>
+        <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1" fontSize="xs" color="chrome.fgMuted">
+          <Link href="https://www.linkedin.com/in/tomkurzeka" isExternal aria-label="© 2026 Tom Kurzeka" {...footerLinkStyle}>
+            2026 Tom Kurzeka
+          </Link>
+          <Text as="span" aria-hidden>
+            •
+          </Text>
+          <Link as={RouterLink} to="/privacy" onClick={onNavigate} {...footerLinkStyle}>
+            Privacy
+          </Link>
+          <Text as="span" aria-hidden>
+            •
+          </Text>
+          <Link href="https://github.com/tomarturo/melodicus" isExternal aria-label="View source on GitHub" {...footerLinkStyle}>
+            Source
+          </Link>
+        </Flex>
       </Flex>
     </Flex>
   );

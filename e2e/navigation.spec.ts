@@ -57,7 +57,7 @@ test.describe('sidebar rail', () => {
     await expect(railBehindDialog(page)).toHaveAttribute('data-expanded', 'false');
   });
 
-  test('the foot of the rail: Support as a row, and the rest as one line of text when open', async ({ page }) => {
+  test('the foot of the rail: Support, then a © row whose links show when the rail opens', async ({ page }) => {
     await page.goto('/');
     const support = sidebar(page).getByRole('link', { name: 'Email support: support@melodicus.xyz' });
     await expect(support).toHaveAttribute('href', 'mailto:support@melodicus.xyz');
@@ -69,14 +69,13 @@ test.describe('sidebar rail', () => {
     // Collapsed, the rail ends at Support; open, a line of links follows it,
     // in space kept for it all along, so nothing above moves.
     const footer = page.getByRole('navigation', { name: 'About Melodicus' });
-    await expect(footer).toBeHidden();
+    await expect(footer.getByRole('link')).toHaveCount(0);
     const supportTop = () => support.locator('svg').evaluate((svg) => svg.getBoundingClientRect().top);
     const collapsedTop = await supportTop();
     await page.mouse.move(700, 300);
     await sidebar(page).hover();
-    await expect(footer).toBeVisible();
+    await expect(footer.getByRole('link')).toHaveText(['2026 Tom Kurzeka', 'Privacy', 'Source']);
     expect(await supportTop()).toBe(collapsedTop);
-    await expect(footer.getByRole('link')).toHaveText(['Privacy', 'Source', '© 2026 Tom Kurzeka']);
     await footer.getByRole('link', { name: 'Privacy' }).click();
     await expect(page).toHaveURL(/\/privacy$/);
   });

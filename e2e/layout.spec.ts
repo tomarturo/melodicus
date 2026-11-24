@@ -114,8 +114,8 @@ test.describe('video page', () => {
 test('the copyright and GitHub link sit in the sidebar, not under the page', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
-  // The rail shows only icons; the line of links at its foot appears once it's expanded.
-  await expect(page.getByText('© 2026 Tom Kurzeka')).toBeHidden();
+  // The rail shows only icons; the © row's links appear once it's expanded.
+  await expect(page.getByText('2026 Tom Kurzeka')).toBeHidden();
   await page.mouse.move(700, 300);
   await page.getByRole('navigation', { name: 'Main' }).hover();
   const github = page.getByRole('link', { name: 'View source on GitHub' });
