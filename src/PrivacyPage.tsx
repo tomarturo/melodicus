@@ -43,18 +43,18 @@ const PrivacyPage = () => (
         </Section>
         <Section title="Questions">
           <Text>
-            Questions about your data or your account? Email{' '}
+            A question about your data or your account, a bug to report, or an idea for Melodicus? Email{' '}
             <Link href={SUPPORT_MAILTO} fontWeight="semibold" color="fg.strong" textDecoration="underline">
               {SUPPORT_EMAIL}
             </Link>
             .
           </Text>
           <Text>
-            Found a bug or have an idea? Melodicus’s code is public: you can open an issue on{' '}
+            If you use GitHub, you can open an issue on{' '}
             <Link href="https://github.com/tomarturo/melodicus/issues" isExternal textDecoration="underline">
-              GitHub
-            </Link>
-            .
+              Melodicus’s public code
+            </Link>{' '}
+            instead.
           </Text>
         </Section>
       </Stack>
