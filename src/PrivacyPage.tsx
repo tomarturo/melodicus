@@ -38,7 +38,11 @@ const PrivacyPage = () => (
             If you sign up, your email address, saved songs and loops are stored with Supabase so they follow you
             between devices. Without an account, your loops stay in this browser and are never sent anywhere.
           </Text>
-          <Text>You can delete your account and everything in it from the Account page.</Text>
+          <Text>
+            You can delete your account and everything in it from the Account page. Melodicus keeps counts of what
+            happened, like how many loops were made on a given day, but they no longer point to you once your account
+            is gone.
+          </Text>
         </Section>
         <Section title="Questions">
           <Text>

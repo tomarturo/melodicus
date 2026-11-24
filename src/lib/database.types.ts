@@ -37,6 +37,7 @@ export type Database = {
           end_time: number;
           name: string | null;
           created_at: string;
+          updated_at: string | null;
         };
         Insert: {
           id?: string;
@@ -46,6 +47,7 @@ export type Database = {
           end_time: number;
           name?: string | null;
           created_at?: string;
+          updated_at?: string | null;
         };
         Update: {
           id?: string;
@@ -55,6 +57,7 @@ export type Database = {
           end_time?: number;
           name?: string | null;
           created_at?: string;
+          updated_at?: string | null;
         };
         Relationships: [
           {
