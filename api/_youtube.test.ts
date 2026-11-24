@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { MAX_QUERY_LENGTH, youtubeSearch, youtubeVideo } from './_youtube';
+import { MAX_QUERY_LENGTH, youtubeSearch, youtubeVideo } from './_youtube.js';
 
 const ENV = { YOUTUBE_API_KEY: 'server-key' };
 const get = (path: string) => new Request(`https://melodicus.xyz${path}`);
