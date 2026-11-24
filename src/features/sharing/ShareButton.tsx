@@ -20,6 +20,7 @@ import { ShareFat } from '@phosphor-icons/react';
 import type { Section } from '../sections/types';
 import { buildShareUrl } from './shareFormat';
 import { useNotify } from '../../lib/notify';
+import { track } from '../../lib/analytics';
 
 interface ShareButtonProps {
   videoId: string;
@@ -42,7 +43,10 @@ const ShareButton = ({ videoId, savedSections }: ShareButtonProps) => {
 
   const copy = () =>
     navigator.clipboard.writeText(link).then(
-      () => notify({ tone: 'success', title: 'Link copied' }),
+      () => {
+        track('share', { method: 'link', content_type: 'song', loop_count: count });
+        notify({ tone: 'success', title: 'Link copied' });
+      },
       () => notify({ tone: 'error', title: 'Couldn’t copy the link', description: 'Select it and copy it instead.' }),
     );
 

@@ -8,6 +8,7 @@ import { selectionStatus } from '../selection';
 import { ZOOM_LEVELS, drawableSections } from './timelineLogic';
 import { usePlayerState } from '../usePlayer';
 import type { PlayerController } from '../playerController';
+import { track } from '../../../lib/analytics';
 import type { Section } from '../../sections/types';
 
 interface WaveformTimelineProps {
@@ -75,7 +76,10 @@ const WaveformTimeline = ({
           <LoopPills
             sections={savedSections}
             activeSectionId={activeSectionId}
-            onSelectSection={(section) => controller.jumpToLoop(section.start_time, section.end_time, section.id)}
+            onSelectSection={(section) => {
+              track('loop_play');
+              controller.jumpToLoop(section.start_time, section.end_time, section.id);
+            }}
             onEditSection={onEditSection}
             onDeleteSection={onDeleteSection}
             onHighlight={setHighlightedId}

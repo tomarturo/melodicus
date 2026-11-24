@@ -5,6 +5,7 @@ import { MusicNotes, Trash } from '@phosphor-icons/react';
 import { roundSeconds } from './utils/formatTime';
 import { errorCause } from './lib/errors';
 import { useNotify } from './lib/notify';
+import { pageBefore, storageOf, track } from './lib/analytics';
 import { isSaveableLoop } from './features/player/loopLogic';
 import { usePlayerController, usePlayerState, useVideoDetails } from './features/player/usePlayer';
 import WaveformTimeline from './features/player/timeline/WaveformTimeline';
@@ -52,6 +53,22 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   // button as disabled is still ignored rather than saving the loop twice.
   const isSavingRef = useRef(false);
   const incomingShare = useIncomingShare();
+  const storage = storageOf(repo.kind);
+
+  // Once the title is known, so reports can show songs by name. The page
+  // remounts for each video (it's keyed), so this runs once per video opened.
+  const openTracked = useRef(false);
+  const cameFromShareLink = useRef(incomingShare.loops !== null);
+  useEffect(() => {
+    if (!videoTitle || openTracked.current) return;
+    openTracked.current = true;
+    track('video_open', {
+      video_id: videoId,
+      video_title: videoTitle,
+      from_page: pageBefore(),
+      from_share_link: cameFromShareLink.current,
+    });
+  }, [videoTitle, videoId]);
 
   const showError = (title: string, error: unknown, retry?: () => void) =>
     notify({
@@ -91,6 +108,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
     // Supabase stores the song's title; until it has loaded there's nothing to save it under.
     if (repo.kind !== 'local' && !videoTitle) throw new Error('The video is still loading. Try again in a moment.');
     await importLoops.mutateAsync({ video, loops });
+    track('share_import', { storage, loop_count: loops.length });
     incomingShare.dismiss();
   };
 
@@ -136,13 +154,19 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
     if (linkIndex >= 0) {
       // A change to the link's loops: save the song with the rest of them.
       saveSongWith(linkLoops.filter((_, index) => index !== linkIndex)).then(
-        () => section && notifyDeleted(section),
+        () => {
+          track('loop_delete', { storage });
+          if (section) notifyDeleted(section);
+        },
         (error) => showError('Couldn’t delete the loop', error, () => handleDeleteSection(sectionId)),
       );
       return;
     }
     remove.mutate(sectionId, {
-      onSuccess: () => section && notifyDeleted(section),
+      onSuccess: () => {
+        track('loop_delete', { storage });
+        if (section) notifyDeleted(section);
+      },
       onError: (error) => showError('Couldn’t delete the loop', error, () => handleDeleteSection(sectionId)),
     });
   };
@@ -158,7 +182,10 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
   const restoreSection = (section: Section) => {
     create.mutate(
       { video, loop: { name: section.name, start_time: section.start_time, end_time: section.end_time } },
-      { onError: (error) => showError('Couldn’t bring the loop back', error, () => restoreSection(section)) },
+      {
+        onSuccess: () => track('loop_delete_undo', { storage }),
+        onError: (error) => showError('Couldn’t bring the loop back', error, () => restoreSection(section)),
+      },
     );
   };
 
@@ -191,6 +218,8 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
           controller.setLoopOrigin(created.id);
         }
       }
+      if (nameDialog.mode === 'edit') track('loop_rename', { storage });
+      else track('loop_create', { storage, duration_s: Math.round(loop.end - loop.start), named: name !== null });
       // A new loop shows up as its pill; a rename only changes a label, so say so.
       if (nameDialog.mode === 'edit') notify({ tone: 'success', title: 'Loop renamed' });
       closeNameDialog();
@@ -215,6 +244,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
       } else {
         await retime.mutateAsync({ sectionId: section.id, times });
       }
+      track('loop_retime', { storage });
       notify({ tone: 'success', title: `“${section.name || 'Unnamed'}” updated` });
     } catch (error) {
       showError('Couldn’t update the loop', error, () => void handleUpdateLoop(section));
@@ -275,7 +305,10 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
           playbackRate={playbackRate}
           onPlayPause={() => controller.togglePlay()}
           onRestartLoop={() => controller.restartLoop()}
-          onPlaybackRateChange={(rate) => controller.setPlaybackRate(rate)}
+          onPlaybackRateChange={(rate) => {
+            track('playback_rate_change', { rate });
+            controller.setPlaybackRate(rate);
+          }}
         />
       </Box>
       <SectionNameModal

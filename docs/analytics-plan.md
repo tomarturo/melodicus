@@ -63,8 +63,8 @@ calls `useLocation()` and runs `trackPageView` whenever `pathname` changes.
   (`shareFormat.ts`). Send `page_location` as `origin + pathname` only.
 - **Remove the query string.** Legacy share links (`decodeLegacyShare`) put loops in `?…`.
 - `/search/:query` puts what the user typed in the path. Send it as
-  `/search/:query` and put the term in a `search` event (1.4), or leave it out
-  completely if you'd rather not collect search terms.
+  `/search/:query`, and send the term in the `search` event instead (1.4),
+  where it's filtered first.
 - `/video/:videoId` is fine to send as is: it's a public YouTube ID and is
   how you'll see which songs people learn.
 
@@ -73,40 +73,62 @@ Also set `page_title` from a route-name map (`home`, `video`, `search`,
 
 ### 1.4 Events
 
-GA4 recommended event names are marked ★. Everything else is a custom event.
-Every loop event has `storage: 'guest' | 'account'`, from `repo.kind` in
-`useSectionsRepository`.
+**Built.** The list lives in the `AnalyticsEvent` type in `src/lib/analytics.ts`,
+so an unknown event name or a wrong parameter fails `npm run typecheck`. GA4
+recommended event names are marked ★. Loop and song events carry
+`storage: 'guest' | 'account'`.
 
-| Event | Fired from | Parameters |
+| Event | Sent when | Parameters |
 | --- | --- | --- |
-| `sign_up` ★ | `AuthModal.tsx` after `signup()` succeeds | `method: 'email'` |
-| `login` ★ | `AuthModal.tsx` after `login()` succeeds | `method: 'email'` |
-| `logout` | `AuthContext.logout` | — |
-| `search` ★ | `SearchResults.tsx` / `CommandSearch.tsx` | `search_term` (optional, see 1.3) |
-| `video_open` | `VideoPage.tsx` once the player is ready | `video_id`, `source: 'link' \| 'search' \| 'saved' \| 'recent' \| 'share'` |
-| `loop_create` | `useSectionMutations().create` `onSuccess` | `storage`, `duration_s` (rounded), `named: boolean` |
-| `loop_rename` | `rename` `onSuccess` | `storage` |
-| `loop_retime` | `retime` `onSuccess` | `storage` |
-| `loop_delete` | `remove` `onSuccess` | `storage` |
-| `loop_play` | wherever a loop pill is selected | `storage` (sample if noisy) |
-| `playback_rate_change` | `VideoPage.tsx` `onPlaybackRateChange` | `rate` |
-| `share` ★ | `ShareButton.tsx` after the clipboard write succeeds | `method: 'link'`, `loop_count` |
-| `share_import` | `VideoPage.tsx` after `importLoops` | `added` |
-| `song_delete` | `useDeleteSavedSong` `onSuccess` | — |
-| `guest_loops_synced` | `GuestLoopsSync.tsx` | `added`, `failed` |
+| `sign_up` ★ | A login code is verified for a new account | `method: 'email_code'` |
+| `login` ★ | A login code is verified for an existing account | `method: 'email_code'` |
+| `logout` | Logging out succeeds | — |
+| `account_delete` | An account is deleted | — |
+| `search` ★ | Search results show (once per query) | `search_term` (filtered, see below), `result_count` |
+| `video_open` | A video page has loaded the video's title | `video_id`, `video_title`, `from_page`, `from_share_link` |
+| `loop_create` | A new loop is saved | `storage`, `duration_s`, `named` |
+| `loop_rename` | A loop is renamed | `storage` |
+| `loop_retime` | A loop's start and end are updated | `storage` |
+| `loop_delete` | A loop is deleted | `storage` |
+| `loop_delete_undo` | Undo brings a deleted loop back | `storage` |
+| `loop_play` | A loop pill is tapped | — |
+| `playback_rate_change` | The speed is changed | `rate` |
+| `share` ★ | A share link is copied | `method: 'link'`, `content_type: 'song'`, `loop_count` |
+| `share_import` | Loops from a share link are saved to My songs | `storage`, `loop_count` |
+| `song_delete` | A song is removed from My songs | `storage` |
+| `guest_loops_synced` | Guest loops are copied into an account at login | `added`, `failed` |
 
-Put the loop and song events in the `onSuccess` callbacks in
-`src/features/sections/queries.ts`, not in the components. That way every place
-that triggers a mutation is counted once, and failed writes aren't counted.
+Notes:
+- **Events are sent where the person acts** (mostly `VideoPage.tsx`), not from
+  the save functions in `queries.ts`. A song from a share link is saved in one
+  write that holds all its loops, even when someone only added, renamed or
+  deleted one of them. Counting writes would mislabel those actions.
+- **New or returning account.** One login code works for both, so `sign_up`
+  versus `login` is worked out in `isNewAccount` (`AuthContext.tsx`).
+  Verifying a code confirms a new person's email, so for a new account the
+  confirmation and sign-in times are seconds apart.
+- **Search terms** go through `searchTermForAnalytics`: lowercased, spaces
+  tidied, cut at GA's 100-character limit. A term that looks like an email
+  address, a link or domain, or a phone number is sent as `(not recorded)`,
+  because GA's terms forbid personal data and its values can't be deleted one
+  by one. Searches with `result_count` 0 show what Melodicus fails to find.
+- **`from_page`** is the page shown before the video: `home`, `search`,
+  `saved_songs`, `video` (from the sidebar's song list on another video), or
+  `direct` for the first page of a visit.
 
-In the GA admin, register `storage`, `source` and `rate` as custom dimensions,
-and mark `sign_up`, `loop_create` and `share` as **key events**.
+**To do in the GA admin (once):**
+- **Admin → Custom definitions → Create custom dimension** (scope: Event) for
+  `search_term`, `storage`, `from_page`, `from_share_link`, `video_title`, `named` and
+  `rate`. Parameters can't be used in reports until they're registered, and
+  only from then on, so do this the day this ships.
+- **Admin → Key events:** mark `sign_up`, `loop_create` and `share`. Each
+  event only appears in that list after it has been received once.
 
 ### 1.5 Funnels to build in GA Explore
 
 1. **Activation:** `page_view (home)` → `video_open` → `loop_create` → `sign_up`
 2. **Guest to account:** users with a `loop_create` where `storage=guest` who later have a `sign_up`
-3. **Sharing:** `share` → `video_open (source=share)` → `share_import`
+3. **Sharing:** `share` → `video_open (from_share_link=true)` → `share_import`
 
 ### 1.6 Consent and privacy
 
@@ -288,7 +310,7 @@ it to prevent that. A scheduled Looker Studio refresh also keeps it awake.
 ## Rollout order
 
 1. **PR 1: GA foundation.** `analytics.ts`, env var, `RouteTracker`, URL privacy rules, tests. Deploy and check in GA **Realtime / DebugView**.
-2. **PR 2: GA events.** The event table in 1.4, custom dimensions, key events.
+2. **PR 2: GA events.** The event table in 1.4. Then register the custom dimensions and key events in the GA admin.
 3. **PR 3: Supabase activity log.** Migration 2.2 (+ `updated_at`), regenerated types. Run in the SQL Editor.
 4. **PR 4: Analytics views.** Migration 2.3, plus saved SQL Editor charts (option A).
 5. **Looker Studio dashboard** (option B), once there are ~2 weeks of data.
@@ -298,6 +320,5 @@ the EEA, UK or Switzerland is ever sent a cookie.
 
 ## Open decisions
 
-- Do we collect search terms (`search_term`) at all?
 - Do we want a `source` column on `saved_sections` now, so imported and synced loops can be told apart from hand-made ones?
 - Looker Studio (recommended), or an in-app admin page?

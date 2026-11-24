@@ -6,6 +6,7 @@ import { copyGuestLoopsToAccount } from './copyGuestLoops';
 import { SupabaseSectionsRepo } from './supabaseSectionsRepo';
 import { getLocalSectionsRepo } from './useSectionsRepository';
 import { useNotify } from '../../lib/notify';
+import { track } from '../../lib/analytics';
 
 /**
  * When someone is signed in and this browser still holds loops they saved as a
@@ -31,6 +32,7 @@ const GuestLoopsSync = () => {
       if ((await local.listSavedSongs()).length === 0) return;
       const { added, failed } = await copyGuestLoopsToAccount(local, new SupabaseSectionsRepo(supabase, user.id));
       await queryClient.invalidateQueries();
+      if (added > 0 || failed > 0) track('guest_loops_synced', { added, failed });
       if (added > 0) {
         notify({
           tone: 'success',

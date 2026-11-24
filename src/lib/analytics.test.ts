@@ -4,7 +4,12 @@ import {
   analyticsPath,
   identify,
   initAnalytics,
+  pageBefore,
   pageName,
+  SEARCH_TERM_NOT_RECORDED,
+  searchTermForAnalytics,
+  storageOf,
+  track,
   resetAnalyticsForTests,
   trackPageView,
 } from './analytics';
@@ -106,6 +111,78 @@ describe('with a measurement ID', () => {
       ['set', { user_id: null }],
       ['set', 'user_properties', { signed_in: 'no' }],
     ]);
+  });
+});
+
+describe('track', () => {
+  it('sends nothing before GA is set up', () => {
+    track('loop_play');
+    expect(window.dataLayer).toBeUndefined();
+  });
+
+  it('sends the event with its parameters', () => {
+    initAnalytics('G-TEST123');
+    track('loop_create', { storage: 'guest', duration_s: 12, named: true });
+    expect(commands().at(-1)).toEqual(['event', 'loop_create', { storage: 'guest', duration_s: 12, named: true }]);
+  });
+
+  it('sends an event that has no parameters', () => {
+    initAnalytics('G-TEST123');
+    track('logout');
+    expect(commands().at(-1)).toEqual(['event', 'logout', {}]);
+  });
+
+  it('only accepts known events with the right parameters', () => {
+    // Compile-time checks: npm run typecheck fails if any of these are allowed.
+    // @ts-expect-error not an event the app sends
+    track('loop_explode');
+    // @ts-expect-error loop_create needs its parameters
+    track('loop_create');
+    // @ts-expect-error storage is 'guest' or 'account'
+    track('loop_delete', { storage: 'cloud' });
+    expect(true).toBe(true);
+  });
+});
+
+describe('searchTermForAnalytics', () => {
+  it.each([
+    ['Little Wing', 'little wing'],
+    ['  Stairway   to  Heaven ', 'stairway to heaven'],
+    ['AC/DC back in black', 'ac/dc back in black'],
+    ['blink-182 all the small things', 'blink-182 all the small things'],
+    ['Prince 1999', 'prince 1999'],
+    ['Mr. Brightside', 'mr. brightside'],
+  ])('keeps the song search %j', (query, sent) => expect(searchTermForAnalytics(query)).toBe(sent));
+
+  it.each([
+    ['an email address', 'tab for me@example.com'],
+    ['a link', 'https://youtu.be/abc123'],
+    ['a www address', 'www.songsterr'],
+    ['a bare domain', 'look at mysite.com please'],
+    ['a phone number', 'call 555 123 4567'],
+    ['a phone number with symbols', '+1 (555) 123-4567'],
+    ['nothing', '   '],
+  ])('leaves out %s', (_what, query) => expect(searchTermForAnalytics(query)).toBe(SEARCH_TERM_NOT_RECORDED));
+
+  it('cuts long searches off at GA’s 100 characters', () => {
+    expect(searchTermForAnalytics('a'.repeat(150))).toHaveLength(100);
+  });
+});
+
+describe('pageBefore', () => {
+  it('is direct on the first page, then the page before this one', () => {
+    trackPageView('/video/abc');
+    expect(pageBefore()).toBe('direct');
+    trackPageView('/search/x');
+    trackPageView('/video/abc');
+    expect(pageBefore()).toBe('search');
+  });
+});
+
+describe('storageOf', () => {
+  it('names where loops live', () => {
+    expect(storageOf('local')).toBe('guest');
+    expect(storageOf('remote')).toBe('account');
   });
 });
 

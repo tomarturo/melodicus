@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSectionsRepository } from './useSectionsRepository';
+import { storageOf, track } from '../../lib/analytics';
 import type { LoopTimes, NewSection, VideoRef } from './types';
 
 export const sectionKeys = {
@@ -65,6 +66,7 @@ export function useDeleteSavedSong() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (videoId: string) => repo.deleteSavedSong(videoId),
+    onSuccess: () => track('song_delete', { storage: storageOf(repo.kind) }),
     onSettled: (_data, _error, videoId) =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: sectionKeys.savedSongs(scope) }),
