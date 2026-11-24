@@ -1,12 +1,18 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../../lib/contact';
 import { Box, Flex, Icon, Image, Kbd, Text, type FlexProps } from '@chakra-ui/react';
-import { ArrowUpRight, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, ShieldCheck, SignIn, UserCircle } from '@phosphor-icons/react';
+import { ArrowUpRight, Copyright, EnvelopeSimple, GithubLogo, MagnifyingGlass, MusicNotes, ShieldCheck, SignIn, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSavedSongsQuery } from '../sections/queries';
 import { useCommandSearch } from '../search/CommandSearch';
 
 export const RAIL_WIDTH = 64;
+
+// Icon sizes: the app's own navigation, then the smaller links at the foot
+// (support, privacy, source, copyright), so they read as secondary.
+const NAV_ICON = '22px';
+const LINK_ICON = '18px';
 export const EXPANDED_WIDTH = 288;
 
 interface SidebarProps {
@@ -180,7 +186,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         as="button"
         expanded={expanded}
         label="Search"
-        icon={<Icon as={MagnifyingGlass} boxSize="22px" />}
+        icon={<Icon as={MagnifyingGlass} boxSize={NAV_ICON} />}
         trailing={
           showShortcut ? (
             <Kbd bg="chrome.hover" color="chrome.fgMuted" borderColor="chrome.border" fontSize="xs">
@@ -199,7 +205,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         onClick={onNavigate}
         expanded={expanded}
         label="My songs"
-        icon={<Icon as={MusicNotes} boxSize="22px" />}
+        icon={<Icon as={MusicNotes} boxSize={NAV_ICON} />}
       />
 
       <Box flex="1" overflowY="auto" mt="2" minH="0">
@@ -215,7 +221,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
           expanded={expanded}
           label={user.email ?? 'Account'}
           aria-label={expanded ? `Account: ${user.email ?? ''}` : 'Account'}
-          icon={<Icon as={UserCircle} boxSize="22px" />}
+          icon={<Icon as={UserCircle} boxSize={NAV_ICON} />}
         />
       ) : (
         <SidebarItem
@@ -223,7 +229,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
           expanded={expanded}
           label="Log in"
           labelWeight="bold"
-          icon={<Icon as={SignIn} weight="bold" boxSize="22px" />}
+          icon={<Icon as={SignIn} weight="bold" boxSize={NAV_ICON} />}
           // The sidebar closes first, so the dialog opens on its own.
           onClick={() => {
             onNavigate?.();
@@ -235,14 +241,11 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
       <Box h="1px" bg="chrome.border" mx="5" my="2" flexShrink={0} aria-hidden />
       <SidebarItem
         as="a"
-        href="https://github.com/tomarturo/melodicus"
-        target="_blank"
-        rel="noopener noreferrer"
+        href={SUPPORT_MAILTO}
         expanded={expanded}
-        label="View source"
-        aria-label="View source on GitHub"
-        icon={<Icon as={GithubLogo} boxSize="22px" />}
-        trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
+        label="Support"
+        aria-label={`Email support: ${SUPPORT_EMAIL}`}
+        icon={<Icon as={EnvelopeSimple} boxSize={LINK_ICON} />}
       />
       <SidebarItem
         as={RouterLink}
@@ -250,7 +253,18 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         onClick={onNavigate}
         expanded={expanded}
         label="Privacy"
-        icon={<Icon as={ShieldCheck} boxSize="22px" />}
+        icon={<Icon as={ShieldCheck} boxSize={LINK_ICON} />}
+      />
+      <SidebarItem
+        as="a"
+        href="https://github.com/tomarturo/melodicus"
+        target="_blank"
+        rel="noopener noreferrer"
+        expanded={expanded}
+        label="View source"
+        aria-label="View source on GitHub"
+        icon={<Icon as={GithubLogo} boxSize={LINK_ICON} />}
+        trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
       />
       <SidebarItem
         as="a"
@@ -261,7 +275,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         label="2026 Tom Kurzeka"
         // The © is the icon, so the name spells it out.
         aria-label="© 2026 Tom Kurzeka"
-        icon={<Icon as={Copyright} boxSize="22px" />}
+        icon={<Icon as={Copyright} boxSize={LINK_ICON} />}
         trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
       />
     </Flex>

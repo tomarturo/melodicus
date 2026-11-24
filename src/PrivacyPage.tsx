@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Box, Container, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react';
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from './lib/contact';
 
 const Section = ({ title, children }: { title: string; children: ReactNode }) => (
   <Box p={{ base: 5, md: 6 }} bg="bg.surface" border="1px" borderColor="border.subtle" borderRadius="xl">
@@ -42,7 +43,14 @@ const PrivacyPage = () => (
         </Section>
         <Section title="Questions">
           <Text>
-            Melodicus is open source. Ask anything on{' '}
+            Questions about your data or your account? Email{' '}
+            <Link href={SUPPORT_MAILTO} fontWeight="semibold" color="fg.strong" textDecoration="underline">
+              {SUPPORT_EMAIL}
+            </Link>
+            .
+          </Text>
+          <Text>
+            Found a bug or have an idea? Melodicus’s code is public: you can open an issue on{' '}
             <Link href="https://github.com/tomarturo/melodicus/issues" isExternal textDecoration="underline">
               GitHub
             </Link>

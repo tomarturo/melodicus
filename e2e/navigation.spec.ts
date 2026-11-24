@@ -57,6 +57,17 @@ test.describe('sidebar rail', () => {
     await expect(railBehindDialog(page)).toHaveAttribute('data-expanded', 'false');
   });
 
+  test('the foot of the rail has Support, an email link, with smaller icons than the navigation', async ({ page }) => {
+    await page.goto('/');
+    const support = sidebar(page).getByRole('link', { name: 'Email support: support@melodicus.xyz' });
+    await expect(support).toHaveAttribute('href', 'mailto:support@melodicus.xyz');
+    const iconSize = (name: string | RegExp) =>
+      sidebar(page).getByRole('link', { name }).locator('svg').first().evaluate((svg) => svg.getBoundingClientRect().width);
+    expect(await iconSize('My songs')).toBe(22);
+    expect(await iconSize(/Email support/)).toBe(18);
+    expect(await iconSize('Privacy')).toBe(18);
+  });
+
   test('My songs leads to the saved songs page', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: 'My songs' }).click();
