@@ -1,6 +1,7 @@
 // Renders the PNG icons from the logomark: the off-white mark on an ink tile,
-// which reads on light and dark backgrounds alike. For browsers that don't use
-// public/favicon.svg (Safari), the iPhone home screen and the app manifest.
+// which reads on light and dark backgrounds alike. public/favicon.svg is the
+// same tile (rounded at 22%); these are for browsers that don't take an SVG
+// icon (Safari), the iPhone home screen and the app manifest.
 // Usage: node scripts/app-icons/render.mjs
 import { writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
