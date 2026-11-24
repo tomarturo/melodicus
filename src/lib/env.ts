@@ -24,3 +24,19 @@ export const env: Env = result.success
       VITE_SUPABASE_URL: 'http://invalid.localhost',
       VITE_SUPABASE_ANON_KEY: 'missing',
     };
+
+const MeasurementIdSchema = z.string().trim().regex(/^G-[A-Z0-9]+$/);
+
+/**
+ * Google Analytics' measurement ID, or null to send nothing. It's optional, so
+ * it isn't in EnvSchema: local dev, tests and preview deploys leave it unset,
+ * and a malformed one turns analytics off rather than taking the app down.
+ */
+export const gaMeasurementId: string | null = (() => {
+  const raw: unknown = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  if (raw === undefined || raw === '') return null;
+  const parsed = MeasurementIdSchema.safeParse(raw);
+  if (parsed.success) return parsed.data;
+  console.warn('VITE_GA_MEASUREMENT_ID should look like G-XXXXXXXXXX. Analytics is off.');
+  return null;
+})();

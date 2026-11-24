@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import { envError } from './lib/env';
+import { initAnalytics } from './lib/analytics';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('index.html is missing the #root element');
@@ -18,6 +19,7 @@ if (envError) {
     </pre>
   );
 } else {
+  initAnalytics();
   root.render(
     <React.StrictMode>
       <BrowserRouter>

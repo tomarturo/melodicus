@@ -8,6 +8,7 @@ import { createQueryClient } from './lib/queryClient';
 import { theme } from './theme';
 import { AuthProvider } from './contexts/AuthContext';
 import GuestLoopsSync from './features/sections/GuestLoopsSync';
+import AnalyticsTracker from './features/analytics/AnalyticsTracker';
 import { AppShell } from './features/layout/AppShell';
 import { CommandSearchProvider } from './features/search/CommandSearch';
 import HomePage from './HomePage';
@@ -16,6 +17,7 @@ import VideoPage from './VideoPage';
 import SearchResults from './SearchResults';
 import NullVideoPage from './NullVideoPage';
 import SavedSongs from './SavedSongs';
+import PrivacyPage from './PrivacyPage';
 
 function App() {
   const [queryClient] = useState(createQueryClient);
@@ -24,6 +26,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <GuestLoopsSync />
+          <AnalyticsTracker />
           <CommandSearchProvider>
             <AppShell>
               <Routes>
@@ -33,6 +36,7 @@ function App() {
                 <Route path="/search/:query" element={<SearchResults />} />
                 <Route path="/saved-songs" element={<SavedSongs />} />
                 <Route path="/account" element={<AccountPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
               </Routes>
             </AppShell>
           </CommandSearchProvider>
