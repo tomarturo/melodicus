@@ -279,8 +279,8 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         <Flex w="24px" justify="center" flexShrink={0} color="chrome.fg" aria-hidden>
           <Icon as={Copyright} boxSize={LINK_ICON} />
         </Flex>
-        {/* The same size and color as the labels above, such as Support. */}
-        <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1.5" fontSize="sm" color="chrome.fg">
+        {/* The same size, weight and color as the labels above, such as Support. */}
+        <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1.5" fontSize="sm" fontWeight="medium" color="chrome.fg">
           {/* Plain text: the year beside the © icon (named for screen readers). */}
           <Text as="span">
             <VisuallyHidden>Copyright </VisuallyHidden>2026
