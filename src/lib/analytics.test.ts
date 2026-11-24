@@ -4,7 +4,10 @@ import {
   analyticsPath,
   identify,
   initAnalytics,
+  pageBefore,
   pageName,
+  storageOf,
+  track,
   resetAnalyticsForTests,
   trackPageView,
 } from './analytics';
@@ -106,6 +109,53 @@ describe('with a measurement ID', () => {
       ['set', { user_id: null }],
       ['set', 'user_properties', { signed_in: 'no' }],
     ]);
+  });
+});
+
+describe('track', () => {
+  it('sends nothing before GA is set up', () => {
+    track('loop_play');
+    expect(window.dataLayer).toBeUndefined();
+  });
+
+  it('sends the event with its parameters', () => {
+    initAnalytics('G-TEST123');
+    track('loop_create', { storage: 'guest', duration_s: 12, named: true });
+    expect(commands().at(-1)).toEqual(['event', 'loop_create', { storage: 'guest', duration_s: 12, named: true }]);
+  });
+
+  it('sends an event that has no parameters', () => {
+    initAnalytics('G-TEST123');
+    track('logout');
+    expect(commands().at(-1)).toEqual(['event', 'logout', {}]);
+  });
+
+  it('only accepts known events with the right parameters', () => {
+    // Compile-time checks: npm run typecheck fails if any of these are allowed.
+    // @ts-expect-error not an event the app sends
+    track('loop_explode');
+    // @ts-expect-error loop_create needs its parameters
+    track('loop_create');
+    // @ts-expect-error storage is 'guest' or 'account'
+    track('loop_delete', { storage: 'cloud' });
+    expect(true).toBe(true);
+  });
+});
+
+describe('pageBefore', () => {
+  it('is direct on the first page, then the page before this one', () => {
+    trackPageView('/video/abc');
+    expect(pageBefore()).toBe('direct');
+    trackPageView('/search/x');
+    trackPageView('/video/abc');
+    expect(pageBefore()).toBe('search');
+  });
+});
+
+describe('storageOf', () => {
+  it('names where loops live', () => {
+    expect(storageOf('local')).toBe('guest');
+    expect(storageOf('remote')).toBe('account');
   });
 });
 

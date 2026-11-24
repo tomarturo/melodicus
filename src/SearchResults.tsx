@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -21,6 +21,7 @@ import HintRow from './components/HintRow';
 import SongListRow, { SongPill } from './features/songs/SongListRow';
 import { useSavedSongsQuery } from './features/sections/queries';
 import { SearchQuotaExceededError, searchPath, searchVideos } from './lib/youtube';
+import { track } from './lib/analytics';
 
 const countLabel = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
@@ -64,6 +65,15 @@ const SearchResults = () => {
     staleTime: Infinity,
     retry: false,
   });
+
+  // Once per search shown, including one answered from the cache. The query
+  // itself stays out of GA.
+  const trackedQuery = useRef<string | null>(null);
+  useEffect(() => {
+    if (!search.isSuccess || trackedQuery.current === query) return;
+    trackedQuery.current = query;
+    track('search', { result_count: search.data.length });
+  }, [search.isSuccess, search.data, query]);
 
   const savedSongs = useSavedSongsQuery();
   const loopsByVideo = useMemo(

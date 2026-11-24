@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../supabaseClient';
+import { track } from '../../lib/analytics';
 import { getLocalSectionsRepo } from '../sections/useSectionsRepository';
 
 /**
@@ -19,6 +20,9 @@ export function useDeleteAccount() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteAccount,
-    onSuccess: () => queryClient.clear(),
+    onSuccess: () => {
+      track('account_delete');
+      queryClient.clear();
+    },
   });
 }

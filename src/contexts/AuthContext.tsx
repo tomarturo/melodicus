@@ -3,6 +3,16 @@ import type { Subscription, User } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
 import { useNotify } from '../lib/notify';
 import { errorCause } from '../lib/errors';
+import { track } from '../lib/analytics';
+
+// One code signs in new and returning people alike. Verifying it confirms a
+// new person's email, so for them the two times are seconds apart; a returning
+// person confirmed long before.
+const NEW_ACCOUNT_WINDOW_MS = 60_000;
+export const isNewAccount = (user: Pick<User, 'email_confirmed_at' | 'last_sign_in_at'> | null | undefined): boolean => {
+    if (!user?.email_confirmed_at || !user.last_sign_in_at) return false;
+    return Math.abs(Date.parse(user.last_sign_in_at) - Date.parse(user.email_confirmed_at)) < NEW_ACCOUNT_WINDOW_MS;
+};
 
 type AuthResult = { error: unknown };
 
@@ -68,8 +78,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const verifyCode = async (email: string, code: string): Promise<AuthResult> => {
         try {
-            const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
+            const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
             if (error) throw error;
+            track(isNewAccount(data.user) ? 'sign_up' : 'login', { method: 'email_code' });
             // No toast: the dialog closes and the sidebar shows the account.
             return { error: null };
         } catch (error) {
@@ -81,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
+            track('logout');
             notify({ tone: 'success', title: 'Logged out' });
         } catch (error) {
             notify({ tone: 'error', title: 'Couldn’t log out', description: errorCause(error) });
