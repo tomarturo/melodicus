@@ -1,24 +1,47 @@
-name: Keep Supabase Alive
+name: Keep Supabase awake
+
+# The backup to the daily Vercel Cron call of /api/keep-alive (see
+# api/keep-alive.ts). Supabase pauses free projects after about a week without
+# activity; between the two, a missed day or two doesn't matter.
+#
+# Reads one row of saved_songs through Supabase's REST API, so the request
+# reaches the database. Row-level security means the public key gets back an
+# empty list.
+#
+# Needs one repository secret (Settings → Secrets and variables → Actions →
+# Repository secrets): SUPABASE_ANON_KEY, the project's public anon key, the
+# same value as VITE_SUPABASE_ANON_KEY in Vercel.
 
 on:
   schedule:
-    # Runs every 4 days at midnight UTC
-    - cron: '0 0 */4 * *'
-  workflow_dispatch: # Allow manual trigger
+    # Daily, off the hour: GitHub delays and drops scheduled runs most at the
+    # top of the hour.
+    - cron: '41 14 * * *'
+  workflow_dispatch: # Run it by hand from the Actions tab.
 
 jobs:
   ping:
     runs-on: ubuntu-latest
-    environment: Production
+    timeout-minutes: 5
     steps:
-      - name: Ping Supabase
+      - name: Read one row from Supabase
         env:
-          SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+          # The project's API address: public, like the anon key, but not secret.
+          SUPABASE_URL: https://upmoxmamwbtfaqdoltfs.supabase.co
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${SUPABASE_URL}/auth/v1/health" \
-            -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
-          echo "Status: $STATUS"
-          if [ "$STATUS" != "200" ] && [ "$STATUS" != "204" ]; then exit 1; fi
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::The SUPABASE_ANON_KEY repository secret isn't set."
+            exit 1
+          fi
+          # Retries a few times, so one network blip doesn't fail the run.
+          STATUS=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --retry 3 --retry-all-errors --max-time 30 \
+            "$SUPABASE_URL/rest/v1/saved_songs?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "Supabase answered $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Supabase answered $STATUS instead of 200."
+            exit 1
+          fi

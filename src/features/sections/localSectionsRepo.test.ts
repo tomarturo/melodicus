@@ -8,6 +8,20 @@ beforeEach(() => {
 });
 
 describe('LocalSectionsRepo', () => {
+  it('clears every song and loop it keeps, and nothing else', async () => {
+    const repo = new LocalSectionsRepo();
+    await repo.createSection(video, { name: 'Solo', start_time: 30, end_time: 45 });
+    localStorage.setItem('video_sections_old1234567', '[]');
+    localStorage.setItem('chakra-ui-color-mode', 'light');
+
+    repo.clearAll();
+
+    expect(await repo.listSavedSongs()).toEqual([]);
+    expect(await repo.listSections(video.videoId)).toEqual([]);
+    expect(localStorage.getItem('video_sections_old1234567')).toBeNull();
+    expect(localStorage.getItem('chakra-ui-color-mode')).toBe('light');
+  });
+
   it('creates, renames and deletes loops', async () => {
     const repo = new LocalSectionsRepo();
     const created = await repo.createSection(video, { name: 'Solo', start_time: 30, end_time: 45.5 });

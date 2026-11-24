@@ -3,7 +3,6 @@ import { z } from 'zod';
 const EnvSchema = z.object({
   VITE_SUPABASE_URL: z.url(),
   VITE_SUPABASE_ANON_KEY: z.string().min(1),
-  VITE_YOUTUBE_API_KEY: z.string().min(1),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -24,5 +23,4 @@ export const env: Env = result.success
   : {
       VITE_SUPABASE_URL: 'http://invalid.localhost',
       VITE_SUPABASE_ANON_KEY: 'missing',
-      VITE_YOUTUBE_API_KEY: 'missing',
     };

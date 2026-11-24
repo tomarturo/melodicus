@@ -11,6 +11,7 @@ import GuestLoopsSync from './features/sections/GuestLoopsSync';
 import { AppShell } from './features/layout/AppShell';
 import { CommandSearchProvider } from './features/search/CommandSearch';
 import HomePage from './HomePage';
+import AccountPage from './AccountPage';
 import VideoPage from './VideoPage';
 import SearchResults from './SearchResults';
 import NullVideoPage from './NullVideoPage';
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/video/null" element={<NullVideoPage />} />
                 <Route path="/search/:query" element={<SearchResults />} />
                 <Route path="/saved-songs" element={<SavedSongs />} />
+                <Route path="/account" element={<AccountPage />} />
               </Routes>
             </AppShell>
           </CommandSearchProvider>

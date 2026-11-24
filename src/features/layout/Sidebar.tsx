@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Flex, Icon, Image, Kbd, Text, type FlexProps } from '@chakra-ui/react';
-import { ArrowUpRight, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
+import { ArrowUpRight, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSavedSongsQuery } from '../sections/queries';
 import { useCommandSearch } from '../search/CommandSearch';
@@ -152,7 +152,7 @@ function SavedSongsList({ onNavigate }: { onNavigate?: () => void }) {
  * toggle, or as the phone drawer) it adds labels and the list of saved songs.
  */
 export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }: SidebarProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const commandSearch = useCommandSearch();
 
   return (
@@ -207,24 +207,16 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
       </Box>
 
       {user ? (
-        <>
-          {expanded && (
-            <Flex align="center" gap="3" px="5" py="2" color="chrome.fgMuted" fontSize="xs">
-              <Icon as={UserCircle} boxSize="22px" flexShrink={0} />
-              <Text noOfLines={1}>{user.email}</Text>
-            </Flex>
-          )}
-          <SidebarItem
-            as="button"
-            expanded={expanded}
-            label="Log out"
-            icon={<Icon as={SignOut} boxSize="22px" />}
-            onClick={() => {
-              onNavigate?.();
-              void logout();
-            }}
-          />
-        </>
+        // Who's signed in, and the way to their account page (where Log out is).
+        <SidebarItem
+          as={RouterLink}
+          to="/account"
+          onClick={onNavigate}
+          expanded={expanded}
+          label={user.email ?? 'Account'}
+          aria-label={expanded ? `Account: ${user.email ?? ''}` : 'Account'}
+          icon={<Icon as={UserCircle} boxSize="22px" />}
+        />
       ) : (
         <SidebarItem
           as="button"

@@ -28,7 +28,6 @@ export default defineConfig({
     env: {
       VITE_SUPABASE_URL: 'https://e2e.supabase.co',
       VITE_SUPABASE_ANON_KEY: 'e2e-anon-key',
-      VITE_YOUTUBE_API_KEY: 'e2e-youtube-key',
     },
   },
 });

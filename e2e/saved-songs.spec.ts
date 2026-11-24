@@ -87,19 +87,19 @@ test('a removed song is deleted once its Undo runs out', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Little Wing' })).toHaveCount(0);
 });
 
-test('guests see the repertoire banner: Create account opens sign-up, Log in opens login', async ({ page }) => {
+test('guests see the repertoire banner: Create account and Log in both open the code login', async ({ page }) => {
   await mockSupabase(page);
   await seedGuest(page);
   await page.goto('/saved-songs');
   await expect(page.getByRole('heading', { name: 'Build your repertoire.' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Create account' }).click();
-  await expect(page.getByRole('dialog', { name: 'Create an account' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Log in or sign up' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Log in' }).last().click();
-  await expect(page.getByRole('dialog', { name: 'Log in' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Log in or sign up' })).toBeVisible();
 });
 
 test('signed in, there is no banner and the loops come from the account', async ({ page }) => {
@@ -116,28 +116,4 @@ test('signed in, there is no banner and the loops come from the account', async 
     'Solo',
   ]);
   await expect(page.getByRole('heading', { name: 'Build your repertoire.' })).toHaveCount(0);
-});
-
-test('a failed login keeps the dialog open, with the reason under the fields', async ({ page }) => {
-  await mockSupabase(page);
-  await page.route('https://e2e.supabase.co/auth/v1/token**', (route) =>
-    route.fulfill({
-      status: 400,
-      contentType: 'application/json',
-      body: JSON.stringify({ error: 'invalid_grant', error_description: 'Invalid login credentials', msg: 'Invalid login credentials' }),
-    }),
-  );
-  await page.goto('/saved-songs');
-  await page.getByRole('button', { name: 'Log in' }).last().click();
-  const dialog = page.getByRole('dialog', { name: 'Log in' });
-  await dialog.getByLabel('Email').fill('someone@example.com');
-  await dialog.getByLabel('Password').fill('wrong-password');
-  await dialog.getByLabel('Password').press('Enter');
-
-  await expect(dialog.getByRole('alert')).toContainText('Couldn’t log in. Invalid login credentials');
-  await expect(dialog.getByLabel('Email')).toHaveValue('someone@example.com');
-
-  await dialog.getByRole('button', { name: 'Create an account' }).click();
-  await expect(page.getByRole('dialog', { name: 'Create an account' })).toBeVisible();
-  await expect(page.getByText('At least 6 characters')).toBeVisible();
 });
