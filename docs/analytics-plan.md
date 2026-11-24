@@ -194,70 +194,86 @@ gtag('config', id, { send_page_view: false });
 | Songs saved, loops created (per day) | ✅ `created_at` on both tables, **net of deletions** |
 | Loops / songs per user, named vs unnamed loops | ✅ |
 | Most-saved videos | ✅ `saved_songs.video_id` |
-| **Loops edited** (renamed or retimed) | ❌ no `updated_at`, and updates leave no trace |
-| **Deletions** | ❌ hard deletes, and the cascade removes loops with their song |
+| **Loops edited** (renamed or retimed) | ❌ before 2.2: no `updated_at`, and updates left no trace. ✅ now |
+| **Deletions** | ❌ before 2.2: hard deletes, and the cascade removes loops with their song. ✅ now |
 | Guest activity | ❌ never reaches the database (use GA) |
 
 ### 2.2 Migration: an activity log written by triggers
 
-New migration `supabase/migrations/2026112xxxxxxx_activity_events.sql`:
+**Built** in `supabase/migrations/20261125000000_activity_log.sql`.
+
+- **`analytics.activity_events`** gets one row for each account, song or loop
+  created, loop renamed or retimed, and anything deleted. Columns:
+  `occurred_at`, `user_id`, `entity` (`account`, `song` or `loop`), `action`
+  (`create`, `rename`, `retime` or `delete`), `entity_id`, `cascaded` and
+  `backfilled`.
+- **It's in a private `analytics` schema, not `public`.** Supabase's API only
+  serves `public`, and `anon` and `authenticated` have no access to the
+  schema. Only the SQL Editor, and roles granted access later, can read it.
+- **Database triggers write the rows** on `auth.users`, `saved_songs` and
+  `saved_sections`, so every write counts, whichever part of the app made it.
+  The trigger function runs as its owner, because the signed-in user whose
+  write fires it can't touch the log.
+- **Renames and retimes are logged only when the value actually changes.**
+  Saving a loop with the same name writes nothing.
+- **`cascaded`** marks deletes that came with another delete: a song's loops
+  going with it, or everything going with an account. Leave these rows out to
+  count what people deleted themselves.
+- **Deleting an account anonymizes its rows.** `user_id` is a foreign key with
+  `on delete set null`, so the deleted person's earlier rows stop pointing at
+  them. The `account delete` row and the cascaded deletes are written with no
+  user. Account rows never store the account's ID as `entity_id`. The Privacy
+  page says that counts stay after an account is deleted.
+- **Backfill.** Existing accounts, songs and loops get `create` rows dated
+  from `created_at`, marked `backfilled`. Edits and deletions from before the
+  log left no trace and can't be recovered.
+- **`saved_sections.updated_at`** is a new column, set by the database on every update.
+
+Things to know:
+- Guest loops copied in at login and loops saved from a share link count as
+  `create`. GA's `guest_loops_synced` and `share_import` tell those apart. A
+  `source` column on `saved_sections` could do it in the database later.
+- It takes very little space: one short row per write.
+
+**Applying it:**
+1. In the Supabase dashboard, open the **SQL Editor**, paste in the whole
+   migration file and run it once. It runs as `postgres`, which can add
+   triggers to `auth.users`.
+2. Check it worked: `select entity, action, count(*) from analytics.activity_events group by 1, 2;`
+   should list a `create` count for accounts, songs and loops.
+
+`npm run db:types` only generates types for `public`, so the log won't appear
+in `database.types.ts`. That's intended: the app never reads it.
+
+**Queries to save in the SQL Editor** (switch the result to **Chart**):
 
 ```sql
-create table public.activity_events (
-  id          bigint generated always as identity primary key,
-  occurred_at timestamptz not null default now(),
-  user_id     uuid,
-  entity      text not null check (entity in ('song', 'loop')),
-  action      text not null check (action in ('create', 'rename', 'retime', 'delete')),
-  entity_id   uuid not null
-);
-create index on public.activity_events (occurred_at);
+-- Activity per day, last 30 days, without cascaded deletes.
+select date_trunc('day', occurred_at)::date as day, entity, action, count(*)
+from analytics.activity_events
+where occurred_at > now() - interval '30 days' and not cascaded
+group by 1, 2, 3 order by 1, 2, 3;
 
--- RLS on, no policies: the app's anon and authenticated roles can't read or
--- write it. Only the dashboard (service role / SQL editor) can.
-alter table public.activity_events enable row level security;
+-- Active accounts: anyone who created, edited or deleted something.
+select
+  count(distinct user_id) filter (where occurred_at > now() - interval '1 day')   as today,
+  count(distinct user_id) filter (where occurred_at > now() - interval '7 days')  as last_7_days,
+  count(distinct user_id) filter (where occurred_at > now() - interval '30 days') as last_30_days
+from analytics.activity_events
+where not backfilled and entity <> 'account';
 
-create function public.log_activity() returns trigger
-language plpgsql security definer set search_path = public as $$
-declare
-  ent text := case tg_table_name when 'saved_songs' then 'song' else 'loop' end;
-begin
-  if tg_op = 'INSERT' then
-    insert into activity_events (user_id, entity, action, entity_id) values (new.user_id, ent, 'create', new.id);
-  elsif tg_op = 'DELETE' then
-    insert into activity_events (user_id, entity, action, entity_id) values (old.user_id, ent, 'delete', old.id);
-  elsif tg_op = 'UPDATE' and ent = 'loop' then
-    if new.name is distinct from old.name then
-      insert into activity_events (user_id, entity, action, entity_id) values (new.user_id, ent, 'rename', new.id);
-    end if;
-    if (new.start_time, new.end_time) is distinct from (old.start_time, old.end_time) then
-      insert into activity_events (user_id, entity, action, entity_id) values (new.user_id, ent, 'retime', new.id);
-    end if;
-  end if;
-  return null;
-end $$;
-
-create trigger saved_songs_activity    after insert or delete            on saved_songs    for each row execute function log_activity();
-create trigger saved_sections_activity after insert or update or delete on saved_sections for each row execute function log_activity();
+-- Totals right now.
+select
+  (select count(*) from auth.users)                 as accounts,
+  (select count(*) from public.saved_songs)         as songs,
+  (select count(*) from public.saved_sections)      as loops,
+  (select round(100.0 * count(name) / nullif(count(*), 0)) from public.saved_sections) as pct_loops_named;
 ```
-
-Also worth adding in the same migration: `updated_at timestamptz` on
-`saved_sections`, with a trigger that sets it on update.
-
-Notes:
-- The triggers record every write, including cascaded loop deletions and
-  loops copied over by `GuestLoopsSync` / `importSections`. To tell imported
-  loops apart, add a `source` column to `saved_sections` (`'manual' | 'import' | 'guest_sync'`)
-  later. Until then, GA's `share_import` and `guest_loops_synced` cover it.
-- History starts on the day the migration runs. Earlier creates can be
-  backfilled from `created_at`; earlier edits and deletions are gone.
-- As with the other migrations, run it in the Supabase SQL Editor, then run `npm run db:types`.
-- Space use is tiny: one short row per write.
 
 ### 2.3 Reporting views
 
-A second migration adds a private `analytics` schema with views, so the
-queries live in the repo and not just in someone's saved snippets:
+A second migration adds views to the `analytics` schema (created in 2.2), so
+the queries live in the repo and not just in someone's saved snippets:
 
 - `analytics.daily_signups`: per day, accounts created and accounts confirmed
 - `analytics.daily_activity`: per day and per `entity`/`action`, from `activity_events`
@@ -311,7 +327,7 @@ it to prevent that. A scheduled Looker Studio refresh also keeps it awake.
 
 1. **PR 1: GA foundation.** `analytics.ts`, env var, `RouteTracker`, URL privacy rules, tests. Deploy and check in GA **Realtime / DebugView**.
 2. **PR 2: GA events.** The event table in 1.4. Then register the custom dimensions and key events in the GA admin.
-3. **PR 3: Supabase activity log.** Migration 2.2 (+ `updated_at`), regenerated types. Run in the SQL Editor.
+3. **PR 3: Supabase activity log.** Migration 2.2 (+ `updated_at`). Run it in the SQL Editor.
 4. **PR 4: Analytics views.** Migration 2.3, plus saved SQL Editor charts (option A).
 5. **Looker Studio dashboard** (option B), once there are ~2 weeks of data.
 
