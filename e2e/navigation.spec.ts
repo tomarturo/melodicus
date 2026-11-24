@@ -66,12 +66,16 @@ test.describe('sidebar rail', () => {
     expect(await iconSize('My songs')).toBe(22);
     expect(await iconSize(/Email support/)).toBe(18);
 
-    // Collapsed, the rail ends at Support; open, a line of links follows it.
+    // Collapsed, the rail ends at Support; open, a line of links follows it,
+    // in space kept for it all along, so nothing above moves.
     const footer = page.getByRole('navigation', { name: 'About Melodicus' });
     await expect(footer).toBeHidden();
+    const supportTop = () => support.locator('svg').evaluate((svg) => svg.getBoundingClientRect().top);
+    const collapsedTop = await supportTop();
     await page.mouse.move(700, 300);
     await sidebar(page).hover();
     await expect(footer).toBeVisible();
+    expect(await supportTop()).toBe(collapsedTop);
     await expect(footer.getByRole('link')).toHaveText(['Privacy', 'Source', '© 2026 Tom Kurzeka']);
     await footer.getByRole('link', { name: 'Privacy' }).click();
     await expect(page).toHaveURL(/\/privacy$/);

@@ -254,21 +254,23 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         aria-label={`Email support: ${SUPPORT_EMAIL}`}
         icon={<Icon as={EnvelopeSimple} boxSize={LINK_ICON} />}
       />
-      {/* Reference links as one quiet line of text, not more rows. Hidden while
-          the rail is collapsed (still in the page, so it stays linkable); the
-          rail opens on hover, and the phone drawer is always open. */}
+      {/* Reference links as one quiet line of text, not more rows. Its space is
+          always kept, so nothing above it moves when the rail opens: collapsed,
+          it's only invisible. One line, never wrapping, so the narrow rail
+          doesn't make it taller. Open on hover, and always in the phone drawer. */}
       <Flex
         as="nav"
         aria-label="About Melodicus"
-        display={expanded ? 'flex' : 'none'}
-        flexWrap="wrap"
+        visibility={expanded ? 'visible' : 'hidden'}
         alignItems="center"
-        columnGap="1.5"
-        rowGap="1"
+        gap="1.5"
+        h="32px"
+        flexShrink={0}
         px="5"
-        pt="3"
-        pb="1"
+        mt="1"
         fontSize="xs"
+        whiteSpace="nowrap"
+        overflow="hidden"
         color="chrome.fgMuted"
       >
         <Link as={RouterLink} to="/privacy" onClick={onNavigate} {...footerLinkStyle}>
