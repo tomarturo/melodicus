@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../../lib/contact';
-import { Box, Flex, Icon, Image, Kbd, Link, Text, type FlexProps } from '@chakra-ui/react';
+import { Box, Flex, Icon, Image, Kbd, Link, Text, VisuallyHidden, type FlexProps } from '@chakra-ui/react';
 import { Copyright, EnvelopeSimple, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSavedSongsQuery } from '../sections/queries';
@@ -38,9 +38,12 @@ const LOGOMARK_CLIP = '22px';
 // Where an item's label starts: its margin and padding, the icon, the gap.
 const LABEL_INSET = '56px'; // mx 8 + px 12 + icon 24 + gap 12
 
-// The footer's text links: muted, brightening on hover like the rows above.
+// The footer's text links: muted and underlined, so they read as links beside
+// the plain year; brightening on hover like the rows above.
 const footerLinkStyle = {
   color: 'chrome.fgMuted',
+  textDecoration: 'underline',
+  textUnderlineOffset: '3px',
   _hover: { color: 'chrome.fg', textDecoration: 'underline' },
   _focusVisible: { outline: '2px solid', outlineColor: 'chrome.fg', outlineOffset: '2px', borderRadius: 'sm' },
 } as const;
@@ -269,7 +272,7 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         icon={<Icon as={EnvelopeSimple} boxSize={LINK_ICON} />}
       />
       {/* The © row: an icon like the rows above, and in place of a label, the
-          reference links on one line. A fixed-height row like the others, so
+          year and the reference links on one line. A fixed-height row like the others, so
           opening the rail moves nothing; the links show when it's open. */}
       <Flex as="nav" aria-label="About Melodicus" {...footerRowStyles}>
         {/* The same size and color as the Support icon above it. */}
@@ -277,9 +280,10 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
           <Icon as={Copyright} boxSize={LINK_ICON} />
         </Flex>
         <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1" fontSize="xs" color="chrome.fgMuted">
-          <Link href="https://www.linkedin.com/in/tomkurzeka" isExternal aria-label="© 2026 Kurzeka" {...footerLinkStyle}>
-            2026 Kurzeka
-          </Link>
+          {/* Plain text: the year beside the © icon (named for screen readers). */}
+          <Text as="span">
+            <VisuallyHidden>Copyright </VisuallyHidden>2026
+          </Text>
           <Text as="span" aria-hidden>
             •
           </Text>

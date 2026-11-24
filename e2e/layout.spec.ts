@@ -115,14 +115,13 @@ test('the copyright and GitHub link sit in the sidebar, not under the page', asy
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
   // The rail shows only icons; the © row's links appear once it's expanded.
-  await expect(page.getByText('2026 Kurzeka')).toBeHidden();
+  const footer = page.getByRole('navigation', { name: 'About Melodicus' });
+  await expect(footer.getByText('2026')).toBeHidden();
   await page.mouse.move(700, 300);
   await page.getByRole('navigation', { name: 'Main' }).hover();
   const github = page.getByRole('link', { name: 'View source on GitHub' });
   await expect(github).toHaveAttribute('href', 'https://github.com/tomarturo/melodicus');
-  const copyright = page.getByRole('link', { name: '© 2026 Kurzeka' });
-  await expect(copyright).toHaveAttribute('href', 'https://www.linkedin.com/in/tomkurzeka');
-  await expect(copyright).toBeVisible();
+  await expect(footer.getByText('2026')).toBeVisible();
   // With no footer, the panel runs down to the window's 20px frame.
   const metrics = await panelMetrics(page);
   expect(metrics.viewportHeight - metrics.bottom).toBe(20);
@@ -133,7 +132,7 @@ test('on a phone, the drawer holds the copyright and GitHub link', async ({ page
   await page.goto('/');
   await page.getByRole('button', { name: 'Open menu' }).click();
   await expect(page.getByRole('dialog').getByRole('link', { name: 'View source on GitHub' })).toBeVisible();
-  await expect(page.getByRole('dialog').getByRole('link', { name: '© 2026 Kurzeka' })).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('2026')).toBeVisible();
 });
 
 test('past 1600px the app, rail included, stays together and centers in the window', async ({ page }) => {
