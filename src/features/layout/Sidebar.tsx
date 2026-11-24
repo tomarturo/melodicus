@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Flex, Icon, Image, Kbd, Text, type FlexProps } from '@chakra-ui/react';
-import { ArrowUpRight, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
+import { ArrowUpRight, Copyright, GithubLogo, MagnifyingGlass, MusicNotes, ShieldCheck, SignIn, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSavedSongsQuery } from '../sections/queries';
 import { useCommandSearch } from '../search/CommandSearch';
@@ -243,6 +243,14 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         aria-label="View source on GitHub"
         icon={<Icon as={GithubLogo} boxSize="22px" />}
         trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
+      />
+      <SidebarItem
+        as={RouterLink}
+        to="/privacy"
+        onClick={onNavigate}
+        expanded={expanded}
+        label="Privacy"
+        icon={<Icon as={ShieldCheck} boxSize="22px" />}
       />
       <SidebarItem
         as="a"

@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_ANON_KEY: string;
+  /** Optional. Set in Vercel's Production environment only. */
+  readonly VITE_GA_MEASUREMENT_ID?: string;
 }
 
 interface ImportMeta {
@@ -13,6 +15,9 @@ interface ImportMeta {
 interface Window {
   YT?: typeof YT;
   onYouTubeIframeAPIReady?: (() => void) | null;
+  // Google Analytics' command queue, and the function that adds to it.
+  dataLayer?: unknown[];
+  gtag?: (...args: unknown[]) => void;
 }
 
 // Font packages are imported only for their CSS side effects.
