@@ -36,7 +36,7 @@ Supabase for exact totals, and don't expect the two to match.
 
 Every call site goes through this module, never through `gtag` directly:
 
-- `initAnalytics()`: if the ID is set, injects
+- `initAnalytics()`: if the ID is set, sets the consent defaults (1.6), injects
   `https://www.googletagmanager.com/gtag/js?id=…`, defines `gtag`, and calls
   `gtag('config', id, { send_page_view: false })`. Otherwise it does nothing.
   Called once from `src/index.tsx`, and only when `envError` is null.
@@ -110,19 +110,51 @@ and mark `sign_up`, `loop_create` and `share` as **key events**.
 
 ### 1.6 Consent and privacy
 
-- Use **Consent Mode v2**. Start with `analytics_storage: 'denied'` for visitors
-  from the EEA, UK and Switzerland (gtag `region` option) and `'granted'`
-  everywhere else. Add a small Chakra consent bar for those regions, which calls
-  `gtag('consent', 'update', …)` and remembers the choice in `localStorage`.
-  If you only expect US users at first, you can ship without the bar, but
-  note that as a known gap.
-- Add a short privacy note (a footer link) that says GA is used.
+**Decision: no consent banner.** GA sets no cookies for visitors in the EEA,
+UK and Switzerland, so there's nothing to ask their consent for. Everyone else
+is tracked normally.
+
+`initAnalytics()` sets the Consent Mode v2 defaults **before** the `config`
+call. The defaults for a specific region override the global ones, and gtag
+works out each visitor's region from their IP address:
+
+```ts
+const COOKIE_FREE_REGIONS = [
+  // EU
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE',
+  'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
+  // rest of the EEA, then the UK and Switzerland
+  'IS', 'LI', 'NO', 'GB', 'CH',
+];
+const ADS_OFF = { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' };
+
+gtag('consent', 'default', { ...ADS_OFF, analytics_storage: 'denied', region: COOKIE_FREE_REGIONS });
+gtag('consent', 'default', { ...ADS_OFF, analytics_storage: 'granted' });
+gtag('config', id, { send_page_view: false });
+```
+
+- **What this costs:** for visitors in those regions, GA sends only cookieless
+  pings with no client ID. They count toward totals, but they don't show up as
+  users, sessions or funnels. GA can estimate the missing data, but only above
+  about 1,000 daily users, which Melodicus won't reach. So in practice those
+  visitors are left out of GA reports. Supabase still counts the ones who sign up.
+- `identify()` sets `user_id` the same way everywhere. When cookies are off,
+  GA doesn't use it to link sessions.
+- Ads stay off for everyone. Melodicus shows no ads, and this keeps GA from
+  using ad features without anyone deciding to.
+- Add a short privacy note (a footer link) that says GA is used and that
+  visitors in the EEA, UK and Switzerland aren't sent cookies.
+- **Add a consent banner later if:** EU visitors become a meaningful share of
+  your users and you want their data, or someone complains. Then add a small
+  Chakra bar for those regions, which calls `gtag('consent', 'update', { analytics_storage: 'granted' })`
+  and remembers the choice in `localStorage`. Nothing else needs to change.
 - Turn on IP-based location only at country level and leave Google Signals off
   (the default), so no extra consent rules apply.
 
 ### 1.7 Tests
 
-- Vitest: `analytics.ts` with and without an ID; `RouteTracker` sends paths
+- Vitest: `analytics.ts` with and without an ID, and that both `consent default`
+  calls happen before `config`; `RouteTracker` sends paths
   with the hash and query removed.
 - Playwright: one test that stubs `window.gtag`, creates a loop as a guest, and
   checks that `loop_create` was sent with `storage: 'guest'`.
@@ -259,12 +291,13 @@ it to prevent that. A scheduled Looker Studio refresh also keeps it awake.
 2. **PR 2: GA events.** The event table in 1.4, custom dimensions, key events.
 3. **PR 3: Supabase activity log.** Migration 2.2 (+ `updated_at`), regenerated types. Run in the SQL Editor.
 4. **PR 4: Analytics views.** Migration 2.3, plus saved SQL Editor charts (option A).
-5. **Consent bar** (1.6), before promoting the app outside the US.
-6. **Looker Studio dashboard** (option B), once there are ~2 weeks of data.
+5. **Looker Studio dashboard** (option B), once there are ~2 weeks of data.
+
+The consent defaults (1.6) and the privacy note go in PR 1, so no visitor in
+the EEA, UK or Switzerland is ever sent a cookie.
 
 ## Open decisions
 
 - Do we collect search terms (`search_term`) at all?
-- Do we need the EU consent bar on day one?
 - Do we want a `source` column on `saved_sections` now, so imported and synced loops can be told apart from hand-made ones?
 - Looker Studio (recommended), or an in-app admin page?
