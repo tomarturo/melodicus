@@ -38,9 +38,9 @@ const LOGOMARK_CLIP = '22px';
 // Where an item's label starts: its margin and padding, the icon, the gap.
 const LABEL_INSET = '56px'; // mx 8 + px 12 + icon 24 + gap 12
 
-// The foot of the rail (Support and the © row) is secondary: the lighter grey,
-// brightening to the labels' color on hover. Set through sx, so a row's own
-// hover background is added to, not replaced.
+// The Support row is secondary: the lighter grey, brightening to the labels'
+// color on hover, since the whole row is its link. Set through sx, so the row's
+// own hover background is added to, not replaced.
 const FOOT_COLOR: FlexProps = {
   color: 'chrome.fgMuted',
   sx: { transition: 'color 0.15s', '&:hover': { color: 'chrome.fg' } },
@@ -48,18 +48,20 @@ const FOOT_COLOR: FlexProps = {
 
 // The footer's text links: underlined so they read as links beside the plain year.
 const footerLinkStyle = {
-  // The row's color: muted, brightening with the row on hover.
-  color: 'inherit',
+  // Muted like the rest of the row; only the link under the pointer brightens.
+  color: 'chrome.fgMuted',
   textDecoration: 'underline',
   textUnderlineOffset: '3px',
-  _hover: { textDecoration: 'underline' },
+  transition: 'color 0.15s',
+  _hover: { color: 'chrome.fg', textDecoration: 'underline' },
   _focusVisible: { outline: '2px solid', outlineColor: 'chrome.fg', outlineOffset: '2px', borderRadius: 'sm' },
 } as const;
 
 // The © row: a row's shape and alignment, without a row's hover, since its
 // links are the things to click.
 const footerRowStyles: FlexProps = {
-  ...FOOT_COLOR,
+  // Muted, and not brightened as a whole: only its links are clickable.
+  color: 'chrome.fgMuted',
   align: 'center',
   gap: '3',
   h: '44px',
