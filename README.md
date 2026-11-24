@@ -1,6 +1,8 @@
 [![Melodicus: Learn the songs & licks you love. Any song on YouTube. Unlimited loops. Slow down the hard parts.](public/readme/banner.png)](https://melodicus.xyz)
 
-Practice any song on YouTube: loop the hard parts and slow them down until they stick. **Try it at [melodicus.xyz](https://melodicus.xyz).**
+# Slow down and loop any part of any song on YouTube.
+Tackle challenging parts piece by piece, slow enough to dial it in. Then play the whole thing at tempo.
+**Try it at [melodicus.xyz](https://melodicus.xyz).**
 
 ![The Melodicus player: a song from YouTube, its timeline split into named loops, and the playback controls](public/readme/player.webp)
 
