@@ -1,5 +1,3 @@
-# Melodicus: Learn the licks and songs you love
-
 [![Melodicus: Learn the songs & licks you love. Any song on YouTube. Unlimited loops. Slow down the hard parts.](public/og-image.png)](https://melodicus.xyz)
 
 This application allows you view any YouTube video in a custom player designed to optimize the experience of learning melodies, solos, and licks from your favorite songs. 
