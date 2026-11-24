@@ -1,16 +1,16 @@
 import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../../lib/contact';
-import { Box, Flex, Icon, Image, Kbd, Text, type FlexProps } from '@chakra-ui/react';
-import { ArrowUpRight, Copyright, EnvelopeSimple, GithubLogo, MagnifyingGlass, MusicNotes, ShieldCheck, SignIn, UserCircle } from '@phosphor-icons/react';
+import { Box, Flex, Icon, Image, Kbd, Link, Text, type FlexProps } from '@chakra-ui/react';
+import { EnvelopeSimple, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSavedSongsQuery } from '../sections/queries';
 import { useCommandSearch } from '../search/CommandSearch';
 
 export const RAIL_WIDTH = 64;
 
-// Icon sizes: the app's own navigation, then the smaller links at the foot
-// (support, privacy, source, copyright), so they read as secondary.
+// Icon sizes: the app's own navigation, then the smaller Support link at the
+// foot, so it reads as secondary.
 const NAV_ICON = '22px';
 const LINK_ICON = '18px';
 export const EXPANDED_WIDTH = 288;
@@ -37,6 +37,13 @@ const LOGOMARK_CLIP = '22px';
 
 // Where an item's label starts: its margin and padding, the icon, the gap.
 const LABEL_INSET = '56px'; // mx 8 + px 12 + icon 24 + gap 12
+
+// The footer's text links: muted, brightening on hover like the rows above.
+const footerLinkStyle = {
+  color: 'chrome.fgMuted',
+  _hover: { color: 'chrome.fg', textDecoration: 'underline' },
+  _focusVisible: { outline: '2px solid', outlineColor: 'chrome.fg', outlineOffset: '2px', borderRadius: 'sm' },
+} as const;
 
 const itemStyles: FlexProps = {
   align: 'center',
@@ -247,37 +254,39 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         aria-label={`Email support: ${SUPPORT_EMAIL}`}
         icon={<Icon as={EnvelopeSimple} boxSize={LINK_ICON} />}
       />
-      <SidebarItem
-        as={RouterLink}
-        to="/privacy"
-        onClick={onNavigate}
-        expanded={expanded}
-        label="Privacy"
-        icon={<Icon as={ShieldCheck} boxSize={LINK_ICON} />}
-      />
-      <SidebarItem
-        as="a"
-        href="https://github.com/tomarturo/melodicus"
-        target="_blank"
-        rel="noopener noreferrer"
-        expanded={expanded}
-        label="View source"
-        aria-label="View source on GitHub"
-        icon={<Icon as={GithubLogo} boxSize={LINK_ICON} />}
-        trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
-      />
-      <SidebarItem
-        as="a"
-        href="https://www.linkedin.com/in/tomkurzeka"
-        target="_blank"
-        rel="noopener noreferrer"
-        expanded={expanded}
-        label="2026 Tom Kurzeka"
-        // The © is the icon, so the name spells it out.
-        aria-label="© 2026 Tom Kurzeka"
-        icon={<Icon as={Copyright} boxSize={LINK_ICON} />}
-        trailing={<Icon as={ArrowUpRight} boxSize="14px" color="chrome.fgMuted" />}
-      />
+      {/* Reference links as one quiet line of text, not more rows. Hidden while
+          the rail is collapsed (still in the page, so it stays linkable); the
+          rail opens on hover, and the phone drawer is always open. */}
+      <Flex
+        as="nav"
+        aria-label="About Melodicus"
+        display={expanded ? 'flex' : 'none'}
+        flexWrap="wrap"
+        alignItems="center"
+        columnGap="1.5"
+        rowGap="1"
+        px="5"
+        pt="3"
+        pb="1"
+        fontSize="xs"
+        color="chrome.fgMuted"
+      >
+        <Link as={RouterLink} to="/privacy" onClick={onNavigate} {...footerLinkStyle}>
+          Privacy
+        </Link>
+        <Text as="span" aria-hidden>
+          ·
+        </Text>
+        <Link href="https://github.com/tomarturo/melodicus" isExternal aria-label="View source on GitHub" {...footerLinkStyle}>
+          Source
+        </Link>
+        <Text as="span" aria-hidden>
+          ·
+        </Text>
+        <Link href="https://www.linkedin.com/in/tomkurzeka" isExternal {...footerLinkStyle}>
+          © 2026 Tom Kurzeka
+        </Link>
+      </Flex>
     </Flex>
   );
 }
