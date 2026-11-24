@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '../../lib/contact';
 import { Box, Flex, Icon, Image, Kbd, Link, Text, VisuallyHidden, type FlexProps } from '@chakra-ui/react';
-import { Copyright, EnvelopeSimple, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
+import { ArrowUpRight, Copyright, EnvelopeSimple, MagnifyingGlass, MusicNotes, SignIn, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSavedSongsQuery } from '../sections/queries';
 import { useCommandSearch } from '../search/CommandSearch';
@@ -38,13 +38,13 @@ const LOGOMARK_CLIP = '22px';
 // Where an item's label starts: its margin and padding, the icon, the gap.
 const LABEL_INSET = '56px'; // mx 8 + px 12 + icon 24 + gap 12
 
-// The footer's text links: muted and underlined, so they read as links beside
-// the plain year; brightening on hover like the rows above.
+// The footer's text links: the labels' color, underlined so they read as links
+// beside the plain year.
 const footerLinkStyle = {
-  color: 'chrome.fgMuted',
+  color: 'chrome.fg',
   textDecoration: 'underline',
   textUnderlineOffset: '3px',
-  _hover: { color: 'chrome.fg', textDecoration: 'underline' },
+  _hover: { color: 'white', textDecoration: 'underline' },
   _focusVisible: { outline: '2px solid', outlineColor: 'chrome.fg', outlineOffset: '2px', borderRadius: 'sm' },
 } as const;
 
@@ -279,7 +279,8 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
         <Flex w="24px" justify="center" flexShrink={0} color="chrome.fg" aria-hidden>
           <Icon as={Copyright} boxSize={LINK_ICON} />
         </Flex>
-        <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1" fontSize="xs" color="chrome.fgMuted">
+        {/* The same size and color as the labels above, such as Support. */}
+        <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1.5" fontSize="sm" color="chrome.fg">
           {/* Plain text: the year beside the © icon (named for screen readers). */}
           <Text as="span">
             <VisuallyHidden>Copyright </VisuallyHidden>2026
@@ -293,8 +294,18 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
           <Text as="span" aria-hidden>
             •
           </Text>
-          <Link href="https://github.com/tomarturo/melodicus" isExternal aria-label="View source on GitHub" {...footerLinkStyle}>
+          {/* The arrow says it leaves the app. */}
+          <Link
+            href="https://github.com/tomarturo/melodicus"
+            isExternal
+            aria-label="View source on GitHub"
+            display="inline-flex"
+            alignItems="center"
+            gap="0.5"
+            {...footerLinkStyle}
+          >
             Source
+            <Icon as={ArrowUpRight} boxSize="14px" aria-hidden />
           </Link>
         </Flex>
       </Flex>
