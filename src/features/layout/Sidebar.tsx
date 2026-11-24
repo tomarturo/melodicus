@@ -272,12 +272,13 @@ export function Sidebar({ expanded, onNavigate, showShortcut = false, onLogIn }:
           reference links on one line. A fixed-height row like the others, so
           opening the rail moves nothing; the links show when it's open. */}
       <Flex as="nav" aria-label="About Melodicus" {...footerRowStyles}>
-        <Flex w="24px" justify="center" flexShrink={0} color="chrome.fgMuted" aria-hidden>
+        {/* The same size and color as the Support icon above it. */}
+        <Flex w="24px" justify="center" flexShrink={0} color="chrome.fg" aria-hidden>
           <Icon as={Copyright} boxSize={LINK_ICON} />
         </Flex>
         <Flex display={expanded ? 'flex' : 'none'} align="center" gap="1" fontSize="xs" color="chrome.fgMuted">
-          <Link href="https://www.linkedin.com/in/tomkurzeka" isExternal aria-label="© 2026 Tom Kurzeka" {...footerLinkStyle}>
-            2026 Tom Kurzeka
+          <Link href="https://www.linkedin.com/in/tomkurzeka" isExternal aria-label="© 2026 Kurzeka" {...footerLinkStyle}>
+            2026 Kurzeka
           </Link>
           <Text as="span" aria-hidden>
             •

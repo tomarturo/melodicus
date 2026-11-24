@@ -74,7 +74,7 @@ test.describe('sidebar rail', () => {
     const collapsedTop = await supportTop();
     await page.mouse.move(700, 300);
     await sidebar(page).hover();
-    await expect(footer.getByRole('link')).toHaveText(['2026 Tom Kurzeka', 'Privacy', 'Source']);
+    await expect(footer.getByRole('link')).toHaveText(['2026 Kurzeka', 'Privacy', 'Source']);
     expect(await supportTop()).toBe(collapsedTop);
     await footer.getByRole('link', { name: 'Privacy' }).click();
     await expect(page).toHaveURL(/\/privacy$/);
