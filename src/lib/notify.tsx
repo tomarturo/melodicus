@@ -83,7 +83,7 @@ const NoticeView = ({ tone = 'neutral', title, description, action, icon, onClos
         icon={<Icon as={X} boxSize="14px" />}
         size="xs"
         variant="ghost"
-        color="whiteAlpha.700"
+        color="whiteAlpha.800"
         borderRadius="md"
         _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
         onClick={onClose}
