@@ -48,6 +48,9 @@ const NoticeView = ({ tone = 'neutral', title, description, action, icon, onClos
       py={3}
       borderRadius="lg"
       boxShadow="lg"
+      // A faint edge, so the ink toast stands apart from the ink sidebar and top bar.
+      border="1px solid"
+      borderColor="whiteAlpha.200"
       // One width for every toast, so a stack lines up.
       w={{ base: 'calc(100vw - 32px)', sm: '400px' }}
     >
@@ -95,7 +98,7 @@ const NoticeView = ({ tone = 'neutral', title, description, action, icon, onClos
   );
 };
 
-/** Shows a notice. Errors stay until closed; everything else fades after 4s. */
+/** Shows a notice at the top of the screen. Errors stay until closed; everything else fades after 4s. */
 export function useNotify() {
   const toast = useToast();
   return useCallback(
@@ -103,6 +106,10 @@ export function useNotify() {
       const duration =
         notice.duration !== undefined ? notice.duration : notice.tone === 'error' ? null : DEFAULT_DURATION_MS;
       return toast({
+        // At the top, out of the way of the playback controls along the bottom.
+        position: 'top',
+        // Clear of the screen's top edge, so it floats instead of hanging from it.
+        containerStyle: { marginTop: '12px' },
         duration,
         render: ({ onClose }) => <NoticeView {...notice} onClose={onClose} isClosable={duration === null} />,
       });
