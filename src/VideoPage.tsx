@@ -220,8 +220,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
       }
       if (nameDialog.mode === 'edit') track('loop_rename', { storage });
       else track('loop_create', { storage, duration_s: Math.round(loop.end - loop.start), named: name !== null });
-      // A new loop shows up as its pill; a rename only changes a label, so say so.
-      if (nameDialog.mode === 'edit') notify({ tone: 'success', title: 'Loop renamed' });
+      // No toast: a new loop shows up as its pill, and a rename on its label.
       closeNameDialog();
     } catch (error) {
       // The dialog stays open, so its button is the way to try again.
@@ -245,7 +244,7 @@ const VideoPageContent = ({ videoId }: { videoId: string }) => {
         await retime.mutateAsync({ sectionId: section.id, times });
       }
       track('loop_retime', { storage });
-      notify({ tone: 'success', title: `“${section.name || 'Unnamed'}” updated` });
+      // No toast: the loop moves on the timeline, and the Update button goes.
     } catch (error) {
       showError('Couldn’t update the loop', error, () => void handleUpdateLoop(section));
     } finally {

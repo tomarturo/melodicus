@@ -117,14 +117,14 @@ test('dragging a saved loop’s edge offers Update, which moves that loop', asyn
   // The pill stays selected while its loop is edited.
   await expect(activePill(page)).toHaveText('Solo');
   await page.getByRole('button', { name: 'Update loop' }).click();
-  await expect(page.getByText('“Solo” updated')).toBeVisible();
+  // Saved: the Update button goes, with no toast.
+  await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);
 
   const [loop] = await storedLoops(page);
   expect(await storedLoops(page)).toHaveLength(1);
   expect(loop!.name).toBe('Solo');
   expect(loop!.start_time).toBe(30);
   expect(loop!.end_time).toBeGreaterThan(45);
-  await expect(page.getByRole('button', { name: /Update/ })).toHaveCount(0);
   await expect(activePill(page)).toHaveText('Solo');
 });
 

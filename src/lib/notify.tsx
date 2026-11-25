@@ -30,10 +30,9 @@ const TONE_ICON = {
 
 interface NoticeViewProps extends Notice {
   onClose: () => void;
-  isClosable: boolean;
 }
 
-const NoticeView = ({ tone = 'neutral', title, description, action, icon, onClose, isClosable }: NoticeViewProps) => {
+const NoticeView = ({ tone = 'neutral', title, description, action, icon, onClose }: NoticeViewProps) => {
   const toneIcon = icon ? { icon: icon.as, color: icon.color } : tone === 'neutral' ? null : TONE_ICON[tone];
   return (
     <Flex
@@ -44,7 +43,7 @@ const NoticeView = ({ tone = 'neutral', title, description, action, icon, onClos
       bg="ink"
       color="white"
       pl={4}
-      pr={isClosable ? 2 : 4}
+      pr={2}
       py={3}
       borderRadius="lg"
       boxShadow="lg"
@@ -78,19 +77,18 @@ const NoticeView = ({ tone = 'neutral', title, description, action, icon, onClos
           {action.label}
         </Button>
       )}
-      {isClosable && (
-        <IconButton
-          aria-label="Close"
-          icon={<Icon as={X} boxSize="14px" />}
-          size="xs"
-          variant="ghost"
-          color="whiteAlpha.700"
-          borderRadius="md"
-          _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
-          onClick={onClose}
-          flexShrink={0}
-        />
-      )}
+      {/* Every toast can be closed, so none has to be waited out. */}
+      <IconButton
+        aria-label="Close"
+        icon={<Icon as={X} boxSize="14px" />}
+        size="xs"
+        variant="ghost"
+        color="whiteAlpha.800"
+        borderRadius="md"
+        _hover={{ bg: 'whiteAlpha.200', color: 'white' }}
+        onClick={onClose}
+        flexShrink={0}
+      />
     </Flex>
   );
 };
@@ -104,7 +102,7 @@ export function useNotify() {
         notice.duration !== undefined ? notice.duration : notice.tone === 'error' ? null : DEFAULT_DURATION_MS;
       return toast({
         duration,
-        render: ({ onClose }) => <NoticeView {...notice} onClose={onClose} isClosable={duration === null} />,
+        render: ({ onClose }) => <NoticeView {...notice} onClose={onClose} />,
       });
     },
     [toast],
