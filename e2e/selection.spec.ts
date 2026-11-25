@@ -73,6 +73,8 @@ test('with no saved loops, the Add a loop pill selects the first ten seconds to 
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Intro');
   await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+  // Closed first: the dialog's own suggestions include an "Intro" button too.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 
   // Its place goes to the saved loop's pill.
   await expect(page.getByRole('button', { name: 'Intro', exact: true })).toBeVisible();

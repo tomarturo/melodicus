@@ -11,6 +11,8 @@ test('a guest saves, renames and deletes a loop, and the song shows under My son
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Chorus');
   await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+  // Closed first: the dialog's own suggestions include a "Chorus" button too.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   // No toast: the new loop's pill is the confirmation.
   await expect(page.getByText('Chorus', { exact: true })).toBeVisible();
 

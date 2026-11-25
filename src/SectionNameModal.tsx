@@ -24,6 +24,13 @@ const scrollRow = {
   WebkitMaskImage: `linear-gradient(to right, black calc(100% - ${FADE_WIDTH}), transparent)`,
 } as const;
 
+// Quick-add words, capitalized as they'd start a name ("Solo"). Added after a
+// word they're lowercase, in the app's sentence case: "Verse riff". The parts
+// people learn by ear come first, then a song's sections in the order they play.
+const MUSIC_TERMS = ['Melody', 'Solo', 'Intro', 'Verse', 'Chorus', 'Bridge', 'Outro', 'Riff', 'Lick'];
+// Numbers, and letters for sections (A, B), which stay uppercase: "Solo A".
+const NUMBERS_AND_LETTERS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
 interface SectionNameModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -44,13 +51,10 @@ const SectionNameModal = ({
   onSave,
   isSaving,
 }: SectionNameModalProps) => {
-  const musicTerms = ['lick', 'riff', 'solo', 'melody', 'chorus', 'verse', 'bridge', 'refrain', 'intro', 'outro', ];
-  const numbersAndLetters = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g'];
-
-  const handleQuickSelect = (text: string) => {
-    const currentValue = sectionName || '';
-    const newValue = currentValue ? `${currentValue} ${text}` : text;
-    onSectionNameChange(newValue);
+  /** Adds a suggestion to the name; a word after the first is lowercased, unless keepCase. */
+  const addToName = (text: string, keepCase = false) => {
+    const current = sectionName.trimEnd();
+    onSectionNameChange(current ? `${current} ${keepCase ? text : text.toLowerCase()}` : text);
   };
 
   return (
@@ -81,7 +85,7 @@ const SectionNameModal = ({
             {/* <Text fontSize="md" color="fg.muted" mb="1">Quick add</Text> */}
             <Box overflowX="auto" pb="1" sx={scrollRow}>
               <HStack spacing="1" minW="max-content" pr={FADE_WIDTH}>
-                {musicTerms.map((term) => (
+                {MUSIC_TERMS.map((term) => (
                   <Button
                     key={term}
                     size="sm"
@@ -92,7 +96,7 @@ const SectionNameModal = ({
                     borderColor="border.default"
                     _hover={{ bg: "bg.muted", borderColor: "border.strongHover" }}
                     _active={{ bg: "bg.mutedHover" }}
-                    onClick={() => handleQuickSelect(term)}
+                    onClick={() => addToName(term)}
                     flexShrink={0}
                   >
                     {term}
@@ -102,7 +106,7 @@ const SectionNameModal = ({
             </Box>
             <Box overflowX="auto" pb="2" sx={scrollRow}>
               <HStack spacing="1" minW="max-content" pr={FADE_WIDTH}>
-                {numbersAndLetters.map((item) => (
+                {NUMBERS_AND_LETTERS.map((item) => (
                   <Button
                     key={item}
                     size="sm"
@@ -113,7 +117,7 @@ const SectionNameModal = ({
                     borderColor="border.default"
                     _hover={{ bg: "bg.muted", borderColor: "border.strongHover" }}
                     _active={{ bg: "bg.mutedHover" }}
-                    onClick={() => handleQuickSelect(item)}
+                    onClick={() => addToName(item, true)}
                     flexShrink={0}
                     minW="40px"
                   >
