@@ -51,7 +51,7 @@ test('the row under the track hints, then offers Save loop for a new selection',
   await dragSelection(page, 0.5, 0.6);
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Bridge');
-  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Save loop', exact: true }).click();
 
   // Once saved, the selection is that loop: its pill is selected, and the row says how to change it.
   await expect(activePill(page)).toHaveText('Bridge');
@@ -72,7 +72,9 @@ test('with no saved loops, the Add a loop pill selects the first ten seconds to 
 
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Intro');
-  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Save loop', exact: true }).click();
+  // Closed first: the dialog's own suggestions include an "Intro" button too.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 
   // Its place goes to the saved loop's pill.
   await expect(page.getByRole('button', { name: 'Intro', exact: true })).toBeVisible();
@@ -146,7 +148,7 @@ test('Save as new keeps the original loop and adds another', async ({ page }) =>
 
   await page.getByRole('button', { name: 'Save as new loop' }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Solo, longer');
-  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Save loop', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Solo, longer', exact: true })).toBeVisible();
 
   const loops = await storedLoops(page);

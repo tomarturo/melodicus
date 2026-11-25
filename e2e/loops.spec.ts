@@ -10,7 +10,9 @@ test('a guest saves, renames and deletes a loop, and the song shows under My son
   await dragSelection(page, 0.3, 0.5);
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Chorus');
-  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Save loop', exact: true }).click();
+  // Closed first: the dialog's own suggestions include a "Chorus" button too.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   // No toast: the new loop's pill is the confirmation.
   await expect(page.getByText('Chorus', { exact: true })).toBeVisible();
 
@@ -41,7 +43,7 @@ test('tapping Save twice while a slow save is in flight saves the loop once', as
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Once');
   // Both clicks land before React can re-render the button as busy.
-  await page.getByRole('button', { name: 'Save Loop', exact: true }).evaluate((button: HTMLButtonElement) => {
+  await page.getByRole('dialog').getByRole('button', { name: 'Save loop', exact: true }).evaluate((button: HTMLButtonElement) => {
     button.click();
     button.click();
   });
@@ -136,7 +138,7 @@ test('a failed save shows an error that stays until it is closed', async ({ page
   await expect(page.locator('[part~="canvases"]')).toBeVisible();
   await dragSelection(page, 0.3, 0.5);
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
-  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Save loop', exact: true }).click();
 
   const alert = page.getByRole('alert').filter({ hasText: 'Couldn’t save the loop' });
   await expect(alert).toBeVisible();
