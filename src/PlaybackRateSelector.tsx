@@ -68,7 +68,9 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
         variant="unstyled"
         size="md"
         h="100%"
-        w="76px"
+        // Wide enough for the longest label ("0.25x") beside the chevron, so
+        // no speed is clipped, and the control doesn't change width with it.
+        w="96px"
         pl="3.5"
         fontWeight="semibold"
         sx={segment}
