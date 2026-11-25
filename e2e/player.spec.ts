@@ -163,7 +163,7 @@ test.describe('on a touch screen', () => {
 
     await page.getByRole('button', { name: 'Save loop', exact: true }).tap();
     await page.getByPlaceholder('Loop name (optional)').fill('Touch loop');
-    await page.getByRole('button', { name: 'Save Loop', exact: true }).tap();
+    await page.getByRole('dialog').getByRole('button', { name: 'Save loop', exact: true }).tap();
     await expect(page.getByText('Touch loop', { exact: true })).toBeVisible();
 
     const [saved] = await page.evaluate(

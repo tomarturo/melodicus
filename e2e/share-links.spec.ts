@@ -105,7 +105,7 @@ test('a new loop on a song from a link saves the song: the link’s loops and th
   await dragSelection(page, 0.6, 0.8);
   await page.getByRole('button', { name: 'Save loop', exact: true }).click();
   await page.getByPlaceholder('Loop name (optional)').fill('Outro');
-  await page.getByRole('button', { name: 'Save Loop', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Save loop', exact: true }).click();
 
   await expect(pills(page)).toHaveText(['Intro', 'Solo, part 2', 'Outro']);
   await expect(page.getByRole('button', { name: 'Save song' })).toHaveCount(0);
