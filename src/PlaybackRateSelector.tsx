@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { Box, Flex, IconButton, Select, type SystemStyleObject } from '@chakra-ui/react';
-import { Plus, Minus } from '@phosphor-icons/react';
+import { CaretDown, Plus, Minus } from '@phosphor-icons/react';
 import { HOVER_EDGE, HOVER_RING } from './theme';
 
 /**
@@ -28,6 +28,12 @@ const segment: SystemStyleObject = {
   // Drawn inside, since the rounded outline clips anything outside.
   _focusVisible: { boxShadow: 'inset 0 0 0 2px var(--chakra-colors-border-focus)' },
 };
+
+// The speed menu: 12px of padding, the longest label (0.25x, 45px), a few
+// pixels to spare, and the chevron's space (CHEVRON_SPACE).
+const SELECT_WIDTH = '86px';
+// The chevron (16px, 8px from the edge) and a 2px gap before it.
+const CHEVRON_SPACE = '26px';
 
 // Full height, meeting the outline top and bottom, in the outline's color.
 const Divider = () => <Box w="1px" alignSelf="stretch" bg="border.default" flexShrink={0} aria-hidden />;
@@ -68,10 +74,17 @@ function PlaybackRateSelector({ rate, onRateChange }: PlaybackRateSelectorProps)
         variant="unstyled"
         size="md"
         h="100%"
-        w="76px"
-        pl="3.5"
+        // Wide enough for the longest label ("0.25x") beside the chevron, so
+        // no speed is clipped, and the control doesn't change width with it.
+        w={SELECT_WIDTH}
+        pl="12px"
         fontWeight="semibold"
-        sx={segment}
+        sx={{ ...segment, paddingInlineEnd: CHEVRON_SPACE }}
+        // Phosphor's caret, like the − and + beside it, in a 16px box 8px from
+        // the edge: Chakra's own is 20px in a 24px box, with room to spare.
+        icon={<CaretDown weight="bold" />}
+        iconSize="14px"
+        rootProps={{ sx: { '.chakra-select__icon-wrapper': { width: '16px', insetEnd: '8px' } } }}
         aria-label="Playback rate"
         value={rate.toString()}
         onChange={handleChange}
