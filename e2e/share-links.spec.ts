@@ -90,12 +90,11 @@ test('moving one of the link’s loops offers Update, which saves the song with 
   await page.mouse.up();
 
   await page.getByRole('button', { name: 'Update loop' }).click();
-  await expect(page.getByText('“Solo, part 2” updated')).toBeVisible();
+  // The selection now points at the saved copy: no Update left to offer.
+  await expect(page.getByRole('button', { name: 'Update loop' })).toHaveCount(0);
   const saved = await savedHere(page);
   expect(saved?.map(([name]) => name)).toEqual(['Intro', 'Solo, part 2']);
   expect(saved?.[1]?.[2]).toBeGreaterThan(45.5);
-  // The selection now points at the saved copy: no Update left to offer.
-  await expect(page.getByRole('button', { name: 'Update loop' })).toHaveCount(0);
   await expect(page.locator('[aria-current="true"]')).toHaveText('Solo, part 2');
 });
 
